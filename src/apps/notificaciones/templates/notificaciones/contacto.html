@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block titulo %}Contacto con autoridades{% endblock %}
+{% block contenido %}
+<div class="migas">P11 / Administración</div>
+<div class="titulo-pagina"><div><h1>Registrar contacto con autoridades</h1><div class="suave">Solo el administrador registra este contacto. Se permiten varios registros por vencimiento.</div></div></div>
+{% if error %}<div class="alerta error">{% include "core/icono.html" with nombre="alerta" %}<div>{{ error }}</div></div>{% endif %}
+<div class="tarjeta" style="max-width:720px">
+  <dl class="datos">
+    <div><dt>Vehículo</dt><dd>{{ fila.vehiculo.placa }} ({{ fila.vehiculo.get_tipo_display }}) · {{ fila.vehiculo.propietario.nombre_completo }}</dd></div>
+    <div><dt>Mensualidad vencida desde</dt><dd>{{ fila.pago.periodo_fin|date:"d/m/Y" }} (hace {{ fila.dias_vencido }} días)</dd></div>
+    <div><dt>Contactos anteriores</dt><dd>{{ contactos|length }}</dd></div>
+    <div><dt>Teléfono del propietario</dt><dd>{{ fila.vehiculo.propietario.telefono }}</dd></div>
+  </dl>
+  {% for c in contactos %}<div class="novedad"><div class="icono-caja">{% include "core/icono.html" with nombre="escudo" %}</div><div class="cuerpo">{{ c.observacion }}<div class="meta">{{ c.registrado_por.nombre_completo }} · {{ c.fecha_hora|date:"d/m/Y H:i" }}</div></div></div>{% endfor %}
+  <form method="post" style="margin-top:16px">
+    {% csrf_token %}
+    <div class="campo"><label for="observacion">Observación *</label><textarea id="observacion" name="observacion" placeholder="Ej. Se llamó a la Secretaría de Movilidad, radicado 2026-4581.">{{ observacion }}</textarea></div>
+    <div class="pie-acciones"><span></span><div class="grupo"><a class="boton secundario" href="{% url 'notificaciones:vencidos' %}">Cancelar</a><button class="boton" type="submit">Registrar contacto</button></div></div>
+  </form>
+</div>
+{% endblock %}

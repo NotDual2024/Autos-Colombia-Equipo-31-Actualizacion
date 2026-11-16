@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% block titulo %}Historial{% endblock %}
+{% block contenido %}
+<div class="migas">P6 / Operación diaria</div>
+<div class="titulo-pagina">
+  <div><h1>Historial</h1><div class="suave">Consulta los ingresos y salidas, sus responsables y las novedades asociadas.</div></div>
+  <div class="estado-sede">Parqueadero operativo</div>
+</div>
+
+<div class="tarjeta">
+  <form method="get" class="filtros">
+    <div class="campo"><label for="id_placa">Placa</label>{{ form.placa }}</div>
+    <div class="campo"><label for="id_desde">Desde</label>{{ form.desde }}</div>
+    <div class="campo"><label for="id_hasta">Hasta</label>{{ form.hasta }}</div>
+    <div class="acciones-filtro"><button class="boton" type="submit">{% include "core/icono.html" with nombre="buscar" %} Buscar</button><a class="boton secundario" href="{% url 'entradas_salidas:historial' %}">Limpiar</a></div>
+  </form>
+  {% if form.non_field_errors %}<div class="error-campo">{{ form.non_field_errors.0 }}</div>{% endif %}
+  <div class="diminuto" style="margin-top:10px">{% include "core/icono.html" with nombre="info" %} El rango de fechas se aplica a la fecha de entrada del vehículo.</div>
+</div>
+
+<div class="tarjeta">
+  <div class="tarjeta-cabeza"><h2>Registros {% if form.cleaned_data.placa %}del vehículo{% endif %} <span class="contador">{{ total }} resultado{{ total|pluralize }}</span></h2>
+    <span class="diminuto">{{ form.cleaned_data.desde|date:"d M Y" }} — {{ form.cleaned_data.hasta|date:"d M Y" }}</span></div>
+  <table class="tabla">
+    <thead><tr><th>Placa</th><th>Entrada</th><th>Salida</th><th>Celda</th><th>Operador entrada</th><th>Operador salida</th><th># novedades</th></tr></thead>
+    <tbody>
+    {% for e in pagina %}
+      <tr class="{% if seleccion and seleccion.pk == e.pk %}seleccionada{% endif %}">
+        <td><strong>{{ e.vehiculo.placa }}</strong></td>
+        <td class="mono">{{ e.fecha_hora_entrada|date:"d/m/Y · H:i" }}</td>
+        <td class="mono">{% if e.fecha_hora_salida %}{{ e.fecha_hora_salida|date:"d/m/Y · H:i" }}{% else %}<span class="etiqueta-estado">Dentro</span>{% endif %}</td>
+        <td>{{ e.celda.codigo }}</td>
+        <td>{{ e.usuario_entrada.nombre_completo }}</td>
+        <td>{{ e.usuario_salida.nombre_completo|default:"—" }}</td>
+        <td><a class="contador" href="?{{ parametros }}&sel={{ e.pk }}&pagina={{ pagina.number }}" title="Ver novedades">{{ e.num_novedades }} ›</a></td>
+      </tr>
+    {% empty %}
+      <tr><td colspan="7"><div class="vacio"><div class="icono-caja">{% include "core/icono.html" with nombre="novedad" %}</div><strong>No se encontraron resultados</strong>No hay registros{% if form.cleaned_data.placa %} para {{ form.cleaned_data.placa|upper }}{% endif %} en el rango seleccionado. Verifica la placa o amplía las fechas de búsqueda.</div></td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  {% if pagina.paginator.count %}
+  <div class="paginacion">
+    <span>Selecciona un registro para ver sus novedades.</span>
+    <div class="grupo">
+      <span>Mostrando {{ pagina.start_index }}-{{ pagina.end_index }} de {{ pagina.paginator.count }}</span>
+      {% if pagina.has_previous %}<a class="boton secundario pequeno" href="?{{ parametros }}&pagina={{ pagina.previous_page_number }}">Anterior</a>{% endif %}
+      {% if pagina.has_next %}<a class="boton secundario pequeno" href="?{{ parametros }}&pagina={{ pagina.next_page_number }}">Siguiente</a>{% endif %}
+    </div>
+  </div>
+  {% endif %}
+</div>
+
+{% if seleccion %}
+<div class="tarjeta">
+  <div class="tarjeta-cabeza"><div><h2>Novedades del ingreso</h2><div class="diminuto">{{ seleccion.vehiculo.placa }} · {{ seleccion.fecha_hora_entrada|date:"d/m/Y, H:i" }} · Celda {{ seleccion.celda.codigo }}</div></div>
+    <span class="contador">{{ novedades_seleccion|length }} novedad{{ novedades_seleccion|length|pluralize:"es" }}</span></div>
+  {% for n in novedades_seleccion %}
+    <div class="novedad"><div class="icono-caja">{% include "core/icono.html" with nombre="novedad" %}</div>
+      <div class="cuerpo"><strong>{{ n.get_tipo_display }}</strong> <span class="diminuto">{{ n.codigo }}</span><div>{{ n.descripcion }}</div></div>
+      <div class="meta" style="text-align:right"><strong style="color:var(--texto)">{{ n.registrado_por.nombre_completo }}</strong><br>{{ n.fecha_hora_ocurrencia|date:"d/m/Y · H:i" }}</div></div>
+  {% empty %}<p class="suave">Este ingreso no tiene novedades.</p>{% endfor %}
+</div>
+{% endif %}
+{% endblock %}

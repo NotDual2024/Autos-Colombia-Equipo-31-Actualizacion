@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block titulo %}Iniciar sesión{% endblock %}
+{% block cuerpo %}
+<div class="login">
+  <section class="login-marca">
+    <div class="marca">
+      <div class="marca-logo">P</div>
+      <div><div class="marca-nombre">{{ nombre_sistema }}</div><div class="marca-sub">Control de estacionamiento</div></div>
+    </div>
+    <div class="eslogan">Control que da tranquilidad</div>
+    <h1>Cada vehículo,<br>en su lugar.</h1>
+    <p>Gestiona entradas, salidas y novedades desde un solo lugar. Tu operación, siempre bajo control.</p>
+    <div class="demo-celdas">
+      <div class="diminuto" style="color:#b9cbc2">Un espacio para cada llegada</div>
+      <div class="celdas">
+        {% for c in "12345678" %}<div class="bloque {% if forloop.counter == 3 %}activa{% endif %}">A-0{{ c }}</div>{% endfor %}
+      </div>
+    </div>
+    <div class="pie"><span>{{ nombre_sistema }} © {% now "Y" %}</span><span>Operación segura, todos los días.</span></div>
+  </section>
+  <section class="login-formulario">
+    <div class="portal">Portal de operarios</div>
+    <div class="login-caja">
+      <div class="llave">{% include "core/icono.html" with nombre="llave" %}</div>
+      <h1 style="font-size:1.45rem">Bienvenido de nuevo</h1>
+      <p class="suave" style="margin-top:0">Ingresa tus credenciales para iniciar tu turno.</p>
+      {% if form.non_field_errors %}
+        <div class="alerta error">{% include "core/icono.html" with nombre="alerta" %}<div><strong>No pudimos iniciar sesión</strong>{{ form.non_field_errors.0 }}</div></div>
+      {% endif %}
+      <form method="post" novalidate>
+        {% csrf_token %}
+        <input type="hidden" name="next" value="{{ next }}">
+        <div class="campo"><label for="id_username">Usuario</label>{{ form.username }}</div>
+        <div class="campo {% if form.non_field_errors %}con-error{% endif %}"><label for="id_password">Contraseña</label>{{ form.password }}</div>
+        <button type="submit" class="boton">Ingresar {% include "core/icono.html" with nombre="flecha" %}</button>
+      </form>
+      <p class="login-ayuda" style="margin-top:14px">{% include "core/icono.html" with nombre="escudo" %} Acceso exclusivo para personal autorizado</p>
+    </div>
+    <p class="login-ayuda">¿Necesitas ayuda con tu acceso?<br><strong style="color:var(--verde)">Contacta al administrador del parqueadero</strong></p>
+  </section>
+</div>
+{% endblock %}

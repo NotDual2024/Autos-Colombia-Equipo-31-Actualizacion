@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block titulo %}Correos del vencimiento{% endblock %}
+{% block contenido %}
+<div class="migas">P10 / Correo de retiro</div>
+<div class="titulo-pagina"><div><h1>Correos de {{ vehiculo.placa }}</h1><div class="suave">Envíos simulados del vencimiento actual.</div></div>
+  <a class="boton secundario" href="{% url 'notificaciones:vencidos' %}">Volver</a></div>
+<div class="tarjeta">
+  <table class="tabla">
+    <thead><tr><th>Fecha</th><th>Envío</th><th>Origen</th><th>Usuario</th><th>Resultado</th><th></th></tr></thead>
+    <tbody>{% for a in avisos %}
+      <tr><td class="mono">{{ a.fecha_hora|date:"d/m/Y H:i" }}</td><td>{{ a.numero_envio|default:"—" }}</td><td>{{ a.get_origen_display }}</td>
+        <td>{{ a.enviado_por.nombre_completo|default:"Sistema" }}</td>
+        <td>{% if a.numero_envio %}<span class="etiqueta-estado">{{ a.get_resultado_display }}</span>{% else %}<span class="etiqueta-estado rojo">Fallido</span>{% endif %}</td>
+        <td><a class="boton enlace pequeno" href="{% url 'notificaciones:correo' a.pk %}">Ver mensaje</a></td></tr>
+    {% endfor %}</tbody>
+  </table>
+</div>
+{% endblock %}

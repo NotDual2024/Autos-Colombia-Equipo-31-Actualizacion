@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block titulo %}Registrar novedad{% endblock %}
+{% block contenido %}
+<div class="migas">P4 / Novedades</div>
+<div class="titulo-pagina">
+  <div><h1>Registrar novedad</h1><div class="suave">Documenta un hecho ocurrido dentro de las instalaciones. Puede involucrar uno o varios vehículos.</div></div>
+  <a class="boton secundario" href="{% url 'novedades:lista' %}">Ver novedades</a>
+</div>
+{% if error %}<div class="alerta error" role="alert">{% include "core/icono.html" with nombre="alerta" %}<div><strong>No se pudo registrar la novedad</strong>{{ error }}</div></div>{% endif %}
+<div class="tarjeta" style="max-width:720px">
+  <form method="post">
+    {% csrf_token %}
+    <div class="campo"><label for="placas">Vehículos involucrados</label>
+      <input id="placas" type="text" name="placas" value="{{ datos.placas }}" placeholder="Ej. ABC123, DEF456" autofocus>
+      <div class="diminuto" style="margin-top:4px">Separa las placas con comas. Todos deben haber estado dentro del parqueadero a la hora del hecho.</div></div>
+    <div class="rejilla-mitades">
+      <div class="campo"><label for="tipo">Tipo de novedad</label>
+        <select id="tipo" name="tipo">{% for v, n in tipos %}<option value="{{ v }}" {% if v == datos.tipo %}selected{% endif %}>{{ n }}</option>{% endfor %}</select></div>
+      <div class="campo"><label for="ocurrencia">Fecha y hora del hecho</label><input id="ocurrencia" type="datetime-local" name="ocurrencia" value="{{ datos.ocurrencia }}" max="{{ ahora_local }}"></div>
+    </div>
+    <div class="campo {% if error and not datos.descripcion %}con-error{% endif %}"><label for="descripcion">Descripción *</label>
+      <textarea id="descripcion" name="descripcion" placeholder="Describe la novedad del vehículo…">{{ datos.descripcion }}</textarea>
+      {% if error and not datos.descripcion %}<div class="error-campo">La descripción es obligatoria. Completa este campo para guardar.</div>{% endif %}</div>
+    <div class="diminuto">{% include "core/icono.html" with nombre="usuarios" %} {{ request.user.nombre_completo }} · {{ ahora|date:"d/m/Y, H:i" }} · Sin adjuntos (RN-18)</div>
+    <div class="pie-acciones"><span></span><div class="grupo"><a class="boton secundario" href="{% url 'novedades:lista' %}">Cancelar</a><button class="boton" type="submit">{% include "core/icono.html" with nombre="check" %} Guardar</button></div></div>
+  </form>
+</div>
+{% endblock %}

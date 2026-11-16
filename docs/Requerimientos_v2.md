@@ -1,7 +1,7 @@
 # Requerimientos — Iteración 1: Gestión de la entrada y salida de vehículos
 
 **Proyecto:** Parqueadero "Autos Colombia"
-**Versión:** 2.10. Reemplaza a `Requerimientos_v1.md`, que se conserva como historial.
+**Versión:** 2.11. Reemplaza a `Requerimientos_v1.md`, que se conserva como historial.
 **Fecha:** 2026-11-15
 **Estado:** **Aprobado** por el equipo del proyecto el 2026-11-15. Abarca las secciones 1 a 4 de la iteración 1. El anexo A sigue siendo solo una referencia y se detallará y aprobará en su iteración.
 
@@ -23,6 +23,7 @@
 | 2.8 | 2026-11-15 | **P-20 resuelta por el equipo:** se agrega RN-22 (reenvío con confirmación, máximo 2 reenvíos) y se completan los criterios de RF-012. |
 | 2.9 | 2026-11-15 | Aclaración del equipo sobre RN-22: un solo reenvío (2 correos en total), no 2 reenvíos. |
 | 2.10 | 2026-11-15 | Respuestas P-22 a P-25 (revisión del modelo de datos): nueva RN-23 (formato de placa); RN-22 aclara que los envíos fallidos no cuentan; RF-011 permite varios contactos por vencimiento; RF-101 y RF-102 detallan sus datos. |
+| 2.11 | 2026-11-15 | **CHG-002 (aprobado):** nueva RN-24 (no se registra la entrada si el propietario o el vehículo están inactivos); se agrega el tipo de novedad "Observación". |
 
 ## 0. Convenciones
 
@@ -86,6 +87,7 @@ Must, Should, Could, Won't (por ahora).
 | RN-21 | Si el servidor estuvo apagado el día del vencimiento, el correo pendiente se envía al encenderlo, siempre que el vehículo siga dentro y sin pagar. El plazo de RN-12 se sigue contando desde el vencimiento. | [U] (P-19) |
 | RN-22 | Después del primer correo de un vencimiento (automático o manual), el botón "Enviar correo" sigue disponible, pero pide confirmación para reenviar. Se permite **un solo reenvío** por vencimiento, es decir, **2 correos en total**: el primero y un reenvío. Solo cuentan los envíos exitosos; un intento fallido se registra y se puede reintentar. | [U] (P-20, aclarado por el equipo el 2026-11-15) |
 | RN-23 | La placa se guarda en mayúsculas y sin espacios. Formatos válidos: carro o camioneta `ABC123`; moto `ABC12D` o `ABC12` (antigua). El formato debe corresponder al tipo de vehículo. | [U] (P-22). La correspondencia entre formato y tipo es [I]. |
+| RN-24 | No se registra la entrada de un vehículo si el vehículo o su propietario están **inactivos**. | [U] CHG-002 |
 | RN-14 | Una novedad tiene un identificador propio y puede involucrar **uno o varios vehículos**. Un rayón entre dos vehículos es una sola novedad vinculada a los dos. | [U] (P-10 resuelta) |
 | RN-15 | Una novedad es solo un registro documental. No tiene estado (abierta o cerrada) ni seguimiento. | [U] (P-07 resuelta en parte) |
 | RN-16 | Una novedad se puede registrar mientras el vehículo está dentro o después de su salida. Siempre debe referirse a un hecho ocurrido dentro de las instalaciones. | [U] (P-11 resuelta) |
@@ -105,7 +107,7 @@ Must, Should, Could, Won't (por ahora).
 | Entradas | Placa y celda elegida (RF-003). |
 | Proceso | 1. Busca el vehículo por placa. 2. Verifica la mensualidad (RF-002). 3. Verifica que no tenga una entrada abierta. 4. Asigna la celda (RF-003). 5. Guarda la entrada con la fecha y hora del servidor y el usuario. 6. Marca la celda como ocupada. |
 | Salidas | Confirmación con placa, tipo, celda y hora de ingreso. |
-| Reglas | RN-03, RN-04, RN-05, RN-08, RN-09 |
+| Reglas | RN-03, RN-04, RN-05, RN-08, RN-09, RN-24 |
 | Prioridad | Must |
 | Dependencias | RF-002, RF-003. Necesita datos de RF-102 (vehículos) y RF-103 (celdas). |
 | Origen | [E] |
@@ -200,7 +202,7 @@ Must, Should, Could, Won't (por ahora).
 |---|---|
 | Descripción | El sistema registra, como documentación, un hecho ocurrido dentro de las instalaciones que involucra a uno o más vehículos. Ejemplos: una moto que se cayó, un vehículo que rayó a otro. |
 | Actor | Operador, Administrador |
-| Entradas | Una o varias placas involucradas, tipo de novedad (accidente, rayón, caída, daño, otro), fecha y hora en que ocurrió, y descripción. |
+| Entradas | Una o varias placas involucradas, tipo de novedad (accidente, rayón, caída, daño, observación, otro), fecha y hora en que ocurrió, y descripción. |
 | Proceso | 1. Asigna un identificador único a la novedad. 2. Para **cada** placa, comprueba que el vehículo estaba dentro en la fecha y hora indicadas, es decir, que esa fecha cae dentro de una de sus estadías. Si alguno de los vehículos no estaba dentro, rechaza la novedad completa. 3. Vincula la novedad con cada vehículo y su estadía. 4. Guarda la fecha y hora de registro (del servidor) y el usuario. |
 | Salidas | Confirmación con el identificador de la novedad y los vehículos vinculados. |
 | Reglas | RN-06, RN-07, RN-14, RN-15, RN-16, RN-18 |

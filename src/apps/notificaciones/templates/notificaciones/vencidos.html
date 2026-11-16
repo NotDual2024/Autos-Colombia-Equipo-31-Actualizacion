@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% block titulo %}Mensualidades vencidas{% endblock %}
+{% block contenido %}
+<div class="migas">P8 / Seguimiento</div>
+<div class="titulo-pagina">
+  <div><h1>Vehículos dentro con mensualidad vencida</h1><div class="suave">El correo de aviso se envía automáticamente el día del vencimiento (simulado). A los {{ plazo }} días se debe contactar a las autoridades.</div></div>
+  <div class="estado-sede">Avisos automáticos activos</div>
+</div>
+<div class="tarjeta">
+  <table class="tabla">
+    <thead><tr><th>Placa</th><th>Propietario</th><th>Venció</th><th>Días</th><th>Correos</th><th>Estado</th><th>Acciones</th></tr></thead>
+    <tbody>
+    {% for f in filas %}
+      <tr>
+        <td><strong>{{ f.vehiculo.placa }}</strong><div class="diminuto">Celda {{ f.estadia.celda.codigo }}</div></td>
+        <td>{{ f.vehiculo.propietario.nombre_completo }}<div class="diminuto">{{ f.vehiculo.propietario.correo }}</div></td>
+        <td class="mono">{{ f.pago.periodo_fin|date:"d/m/Y" }}</td>
+        <td class="mono">{{ f.dias_vencido }}</td>
+        <td>{% if f.envios == 0 %}<span class="etiqueta-estado gris">Sin enviar</span>{% else %}{{ f.envios }} de 2{% if f.envios == 2 %} (máximo){% endif %}{% endif %}</td>
+        <td>{% if f.plazo_vencido %}<span class="etiqueta-estado rojo">Plazo vencido - contactar autoridades</span>{% if f.contactos %}<div class="diminuto">{{ f.contactos }} contacto{{ f.contactos|pluralize }} registrado{{ f.contactos|pluralize }}</div>{% endif %}{% else %}<span class="etiqueta-estado amarillo">En plazo · hasta {{ f.fecha_limite|date:"d/m" }}</span>{% endif %}</td>
+        <td><div class="acciones">
+          {% if f.puede_enviar %}<form method="post" action="{% url 'notificaciones:enviar' f.pago.pk %}">{% csrf_token %}<button class="boton secundario pequeno" type="submit">{% include "core/icono.html" with nombre="correo" %} Enviar correo</button></form>{% endif %}
+          {% if f.envios %}<a class="boton secundario pequeno" href="{% url 'notificaciones:correos' f.pago.pk %}">Ver correos</a>{% endif %}
+          {% if f.plazo_vencido and request.user.es_administrador %}<a class="boton pequeno" href="{% url 'notificaciones:contacto' f.pago.pk %}">Registrar contacto</a>{% endif %}
+        </div></td>
+      </tr>
+    {% empty %}
+      <tr><td colspan="7"><div class="vacio"><div class="icono-caja">{% include "core/icono.html" with nombre="check" %}</div><strong>No hay mensualidades vencidas</strong>Todos los vehículos dentro tienen la mensualidad al día.</div></td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  {% if not request.user.es_administrador %}<p class="diminuto" style="margin-top:12px">El registro del contacto con autoridades solo lo realiza el administrador.</p>{% endif %}
+</div>
+{% endblock %}

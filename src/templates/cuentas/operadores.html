@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block titulo %}Operadores{% endblock %}
+{% block contenido %}
+<div class="migas">P12 / Administración</div>
+<div class="titulo-pagina"><div><h1>Gestión de operadores</h1><div class="suave">Crea cuentas de operador y desactívalas cuando ya no trabajen. Las cuentas no se borran.</div></div></div>
+{% if error %}<div class="alerta error" role="alert">{% include "core/icono.html" with nombre="alerta" %}<div>{{ error }}</div></div>{% endif %}
+<div class="rejilla-2">
+  <div class="tarjeta">
+    <h2>Nuevo operador</h2>
+    <form method="post" style="margin-top:14px">
+      {% csrf_token %}
+      <div class="campo"><label for="nombre">Nombre completo</label><input id="nombre" type="text" name="nombre" value="{{ datos.nombre }}" placeholder="Ej. Pedro Rojas"></div>
+      <div class="campo"><label for="usuario">Usuario</label><input id="usuario" type="text" name="usuario" value="{{ datos.usuario }}" placeholder="Ej. operador3"></div>
+      <div class="campo"><label for="clave">Contraseña inicial</label><input id="clave" type="password" name="clave" autocomplete="new-password"><div class="diminuto" style="margin-top:4px">Mínimo 8 caracteres, no solo números.</div></div>
+      <button class="boton" type="submit">{% include "core/icono.html" with nombre="mas" %} Crear operador</button>
+    </form>
+  </div>
+  <div class="tarjeta" style="margin-top:0">
+    <h2>Operadores <span class="contador">{{ operadores|length }}</span></h2>
+    <table class="tabla" style="margin-top:12px">
+      <thead><tr><th>Usuario</th><th>Nombre</th><th>Estado</th><th>Acción</th></tr></thead>
+      <tbody>{% for o in operadores %}
+        <tr><td><strong>{{ o.username }}</strong></td><td>{{ o.nombre_completo }}</td>
+          <td>{% if o.is_active %}<span class="etiqueta-estado">Activo</span>{% else %}<span class="etiqueta-estado gris">Inactivo</span>{% endif %}</td>
+          <td><form method="post" action="{% url 'cuentas:estado_operador' o.pk %}">{% csrf_token %}
+            {% if o.is_active %}<input type="hidden" name="activar" value="0"><button class="boton peligro pequeno" type="submit">Desactivar</button>
+            {% else %}<input type="hidden" name="activar" value="1"><button class="boton secundario pequeno" type="submit">Reactivar</button>{% endif %}
+          </form></td></tr>
+      {% empty %}<tr><td colspan="4"><div class="vacio"><strong>No hay operadores</strong>Crea el primero con el formulario.</div></td></tr>{% endfor %}</tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

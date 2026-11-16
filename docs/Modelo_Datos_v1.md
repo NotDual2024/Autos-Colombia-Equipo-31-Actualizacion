@@ -8,6 +8,7 @@
 | Versión | Cambios |
 |---|---|
 | 1 | Borrador inicial. |
+| 1.2 | CHG-002 (aprobado 2026-11-15): el tipo de novedad admite OBSERVACION; por eso la columna `tipo` de la novedad pasa de VARCHAR(10) a VARCHAR(12). |
 | 1.1 | Respuestas del equipo a P-22 a P-25: formato de placa, datos del propietario (nombre completo, cédula, teléfono, correo, dirección) y del vehículo (marca, nombre, modelo, color); los envíos fallidos no cuentan para el límite; se permiten varios contactos con autoridades por vencimiento. |
 
 **Alcance:** por **DEC-001**, este modelo cubre el **sistema completo** (las tres iteraciones), aunque en la iteración 1 solo se implementen las pantallas de entradas y salidas, novedades, avisos y operadores.

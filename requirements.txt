@@ -1,0 +1,6 @@
+# Dependencias del sistema (versiones fijadas; DEC-005, DEC-008, DEC-010, DEC-012)
+Django==5.2.19
+APScheduler==3.11.3
+argon2-cffi==25.1.0
+# Zona horaria America/Bogota en Windows (requerida por Django para zoneinfo)
+tzdata==2026.6

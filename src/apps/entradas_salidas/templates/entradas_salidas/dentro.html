@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+{% load formato %}
+{% block titulo %}Vehículos dentro{% endblock %}
+{% block contenido %}
+<div class="migas">P5 / Operación diaria</div>
+<div class="titulo-pagina">
+  <div><h1>Vehículos dentro</h1><div class="suave">Supervisa la ocupación y registra novedades de los vehículos en el parqueadero.</div></div>
+  <div class="estado-sede">Parqueadero operativo</div>
+</div>
+
+<div class="rejilla-mitades" style="margin-bottom:14px">
+  {% with o=ocupacion.CARRO_CAMIONETA %}
+  <div class="tarjeta ocupacion">
+    <div class="tarjeta-cabeza" style="margin-bottom:6px"><h3>Estacionamiento de carros y camionetas</h3><div class="icono-caja" style="width:28px;height:28px;background:var(--verde-claro);color:var(--verde)">{% include "core/icono.html" with nombre="auto" %}</div></div>
+    <span class="numero">{{ o.ocupadas }}</span> <span class="suave">/ {{ o.total }} celdas ocupadas</span>
+    <div class="progreso"><span style="width:{{ o.porcentaje }}%"></span></div>
+    <div class="paginacion" style="margin:0"><span>{{ o.disponibles }} disponibles</span><strong style="color:var(--verde)">{{ o.porcentaje }}% de ocupación</strong></div>
+  </div>
+  {% endwith %}
+  {% with o=ocupacion.MOTO %}
+  <div class="tarjeta ocupacion" style="margin-top:0">
+    <div class="tarjeta-cabeza" style="margin-bottom:6px"><h3>Estacionamiento de motos</h3><div class="icono-caja" style="width:28px;height:28px;background:var(--verde-claro);color:var(--verde)">{% include "core/icono.html" with nombre="moto" %}</div></div>
+    <span class="numero">{{ o.ocupadas }}</span> <span class="suave">/ {{ o.total }} celdas ocupadas</span>
+    <div class="progreso"><span style="width:{{ o.porcentaje }}%"></span></div>
+    <div class="paginacion" style="margin:0"><span>{{ o.disponibles }} disponibles</span><strong style="color:var(--verde)">{{ o.porcentaje }}% de ocupación</strong></div>
+  </div>
+  {% endwith %}
+</div>
+
+<div class="tarjeta">
+  <div class="rejilla-mitades" style="grid-template-columns:2fr 1fr;align-items:end">
+    <form method="get" class="filtros">
+      <div class="campo"><label for="placa">Placa</label><input id="placa" type="text" name="placa" value="{{ placa }}" placeholder="Ej. KLM482"></div>
+      <div class="campo"><label for="tipo">Tipo de vehículo</label><select id="tipo" name="tipo"><option value="">Todos los tipos</option>{% for v, n in tipos %}<option value="{{ v }}" {% if v == tipo %}selected{% endif %}>{{ n }}</option>{% endfor %}</select></div>
+      <div class="acciones-filtro"><button class="boton" type="submit">{% include "core/icono.html" with nombre="buscar" %} Buscar</button></div>
+    </form>
+    <form method="get" class="filtros">
+      <div class="campo"><label for="celda">Consultar celda</label><input id="celda" type="text" name="celda" value="{{ codigo_celda }}" placeholder="Ej. A-010"></div>
+      <div class="acciones-filtro"><button class="boton secundario" type="submit">Consultar</button></div>
+    </form>
+  </div>
+  {% if consulta_celda %}
+    {% if not consulta_celda.celda %}
+      <div class="alerta error" style="margin:14px 0 0">{% include "core/icono.html" with nombre="alerta" %}<div>La celda {{ codigo_celda }} no existe.</div></div>
+    {% elif consulta_celda.estadia %}
+      <div class="alerta aviso" style="margin:14px 0 0">{% include "core/icono.html" with nombre="celda" %}<div><strong>Celda {{ consulta_celda.celda.codigo }} ocupada</strong>Ocupada por {{ consulta_celda.estadia.vehiculo.placa }} desde {{ consulta_celda.estadia.fecha_hora_entrada|date:"d/m/Y H:i" }}.</div></div>
+    {% else %}
+      <div class="alerta exito" style="margin:14px 0 0">{% include "core/icono.html" with nombre="check" %}<div><strong>Celda {{ consulta_celda.celda.codigo }} disponible</strong>No hay ningún vehículo en esta celda.</div></div>
+    {% endif %}
+  {% endif %}
+
+  <div class="tarjeta-cabeza" style="margin:20px 0 10px"><h2>Ingresos abiertos <span class="contador">{{ total }} vehículo{{ total|pluralize }}</span></h2><span class="diminuto">Actualizado a las {{ ahora|date:"H:i" }}</span></div>
+  <table class="tabla">
+    <thead><tr><th>Placa</th><th>Tipo</th><th>Celda</th><th>Hora de entrada</th><th>Tiempo transcurrido</th><th>Acción</th></tr></thead>
+    <tbody>
+    {% for e in pagina %}
+      <tr><td><strong>{{ e.vehiculo.placa }}</strong></td><td><span class="etiqueta-estado gris">{{ e.vehiculo.get_tipo_display }}</span></td><td>{{ e.celda.codigo }}</td>
+        <td class="mono">{{ e.fecha_hora_entrada|date:"d/m H:i" }}</td><td>{{ e.fecha_hora_entrada|duracion }}</td>
+        <td><a class="boton enlace pequeno" href="{% url 'novedades:registrar' %}?placa={{ e.vehiculo.placa }}">{% include "core/icono.html" with nombre="mas" %} Novedad</a></td></tr>
+    {% empty %}
+      <tr><td colspan="6"><div class="vacio"><div class="icono-caja">{% include "core/icono.html" with nombre="parqueo" %}</div><strong>No hay vehículos dentro</strong>Cuando registres una entrada, el vehículo aparecerá aquí con su celda y tiempo de permanencia.</div></td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  {% if pagina.paginator.count %}
+  <div class="paginacion">
+    <span>Mostrando {{ pagina.start_index }}-{{ pagina.end_index }} de {{ pagina.paginator.count }} vehículos</span>
+    <div class="grupo">
+      {% if pagina.has_previous %}<a class="boton secundario pequeno" href="?{{ parametros }}&pagina={{ pagina.previous_page_number }}">Anterior</a>{% else %}<span class="boton pequeno deshabilitado">Anterior</span>{% endif %}
+      <span class="contador">{{ pagina.number }}</span>
+      {% if pagina.has_next %}<a class="boton secundario pequeno" href="?{{ parametros }}&pagina={{ pagina.next_page_number }}">Siguiente</a>{% else %}<span class="boton pequeno deshabilitado">Siguiente</span>{% endif %}
+    </div>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{% block titulo %}Acceso denegado{% endblock %}
+{% block contenido %}
+<div class="tarjeta" style="max-width:560px"><div class="vacio">
+  <div class="icono-caja">{% include "core/icono.html" with nombre="escudo" %}</div>
+  <strong>Acceso denegado</strong>Esta función solo está disponible para el administrador.
+  <p><a class="boton secundario" href="{% url 'entradas_salidas:entrada' %}">Volver al inicio</a></p>
+</div></div>
+{% endblock %}

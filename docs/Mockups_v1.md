@@ -6,6 +6,8 @@
 **Base:** HU-001 a HU-011 y casos de uso UC-01 a UC-15.
 **Estado:** **Aprobado** por el equipo del proyecto el 2026-11-15.
 
+> **CHG-002 (aprobado 2026-11-15):** el estilo visual final sigue los diseños de referencia del equipo (`docs/referencias_ui/`), con las adaptaciones de `docs/Analisis_Referencias_UI.md`.
+
 Los mockups son bocetos de baja fidelidad hechos con PlantUML Salt. Muestran **qué información y qué acciones** tiene cada pantalla, no el diseño visual final. Las fuentes están en `docs/latex/diagrams/mockups/`.
 
 **Menú superior (todas las pantallas):** Ocupación · Entrada · Salida · Novedades · Vencidos · Historial · Operadores · Salir. La opción **Operadores** solo aparece para el administrador (RNF-002).

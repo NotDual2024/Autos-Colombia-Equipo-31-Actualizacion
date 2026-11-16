@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block titulo %}Correo enviado{% endblock %}
+{% block contenido %}
+<div class="migas">P10 / Correo de retiro</div>
+<div class="titulo-pagina"><div><h1>Correo enviado (simulación)</h1><div class="suave">No se envió ningún correo real (DEC-007). Este es el contenido que recibiría el propietario.</div></div></div>
+<div class="alerta exito">{% include "core/icono.html" with nombre="check" %}<div><strong>Correo enviado (simulación)</strong>Quedó registrado en el historial de avisos del vencimiento.</div></div>
+<div class="tarjeta" style="max-width:720px">
+  <dl class="datos">
+    <div><dt>Para</dt><dd>{{ aviso.destinatario }}</dd></div>
+    <div><dt>Asunto</dt><dd>{{ aviso.asunto }}</dd></div>
+    <div><dt>Origen</dt><dd>{{ aviso.get_origen_display }} ({{ aviso.fecha_hora|date:"d/m/Y H:i" }}){% if aviso.enviado_por %} · {{ aviso.enviado_por.nombre_completo }}{% endif %}</dd></div>
+    <div><dt>Envío</dt><dd>{% if aviso.numero_envio %}{{ aviso.numero_envio }} de 2{% else %}Fallido{% endif %}</dd></div>
+  </dl>
+  <h3 style="margin:18px 0 8px">Mensaje</h3>
+  <div class="correo">{{ aviso.cuerpo }}</div>
+  <div class="pie-acciones"><span></span><a class="boton secundario" href="{% url 'notificaciones:vencidos' %}">Volver</a></div>
+</div>
+{% endblock %}

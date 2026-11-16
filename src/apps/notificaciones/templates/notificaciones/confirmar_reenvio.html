@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block titulo %}Reenviar correo{% endblock %}
+{% block contenido %}
+<div class="modal abierto" role="dialog" aria-labelledby="titulo-reenvio">
+  <div class="modal-caja">
+    <div class="migas">P9 / Correo de retiro</div>
+    <h2 id="titulo-reenvio" style="font-size:1.2rem">Reenviar correo</h2>
+    <div class="suave">{{ fila.vehiculo.placa }} · {{ fila.vehiculo.propietario.nombre_completo }}</div>
+    <hr>
+    <div class="alerta aviso">{% include "core/icono.html" with nombre="alerta" %}<div>{{ pregunta }}</div></div>
+    <form method="post" action="{% url 'notificaciones:enviar' fila.pago.pk %}" style="display:flex;justify-content:flex-end;gap:8px">
+      {% csrf_token %}<input type="hidden" name="confirmar" value="1">
+      <a class="boton secundario" href="{% url 'notificaciones:vencidos' %}">Cancelar</a>
+      <button class="boton" type="submit">Sí, reenviar</button>
+    </form>
+  </div>
+</div>
+{% endblock %}

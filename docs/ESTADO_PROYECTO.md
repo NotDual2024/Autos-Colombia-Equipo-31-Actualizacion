@@ -14,7 +14,7 @@ Se avanza paso a paso, por iteraciones:
 En cada iteración: documentación y diagramas (Arquitecto) → código (Ingeniero) → commit a GitHub.
 
 ## Fase actual
-Iteración 1. **Diseño completo y aprobado**; PDF de 81 páginas con todos los capítulos salvo conclusiones. Siguiente: implementación con el Ingeniero.
+Iteración 1. **Implementación completa y verificada**: 100/100 pruebas y verificación manual en el navegador. Pendiente: conclusiones del PDF (cap. 12) y commit.
 
 ## Artefactos
 | Artefacto | Archivo | Estado |
@@ -29,6 +29,10 @@ Iteración 1. **Diseño completo y aprobado**; PDF de 81 páginas con todos los 
 | Modelo de datos v1.1 | docs/Modelo_Datos_v1.md + diagrams/datos (MER-01, MR-01) + docs/sql/ddl_sqlite_v1.sql + validar_ddl.py (42/42) | **Aprobado** (2026-11-15) |
 | Diseño UML v1 | docs/Diseno_UML_v1.md + diagrams/uml (UC-01, CL-01, CL-02, PK-01) | **Aprobado** (2026-11-15) |
 | Mockups v1 | docs/Mockups_v1.md + diagrams/mockups (M-01 a M-12) | **Aprobado** (2026-11-15) |
+| Plan de implementación (iteración 1) | docs/Plan_Implementacion_Iteracion1.md | **Aprobado** (2026-11-15) |
+| Código de la iteración 1 (pasos 1-8) | src/ + requirements.txt + README.md | Implementado y probado: 100/100 pruebas |
+| Informe de implementación | docs/Informe_Implementacion_Iteracion1.md | Hecho |
+| Referencias de interfaz | docs/referencias_ui/ + docs/Analisis_Referencias_UI.md | CHG-002 **aprobado** (2026-11-15) |
 | Documento LaTeX | docs/latex/main.tex → main.pdf (capítulos 03, 05 y 11 generados con scripts/generar_capitulos.py) | Compilado (81 páginas); solo falta el capítulo 12 (conclusiones), que se escribe al cerrar la iteración |
 
 ## Decisiones
@@ -74,7 +78,7 @@ Iteración 1. **Diseño completo y aprobado**; PDF de 81 páginas con todos los 
 - Fecha: la actual. Semestre: sexto.
 
 ## Pendientes
-- Ninguna decisión abierta. Siguiente: plan de implementación del Ingeniero para la iteración 1.
+- Revisión de la aplicación por el equipo; conclusiones (capítulo 12 del PDF); commit del código.
 - Revisión del primer PDF LaTeX.
 
 ## Próximas actividades
@@ -84,5 +88,5 @@ Iteración 1. **Diseño completo y aprobado**; PDF de 81 páginas con todos los 
 4. ~~Crear el documento LaTeX inicial~~ (hecho 2026-11-15; pendiente la revisión del equipo).
 5. ~~Aprobar el modelo de datos e incorporarlo al capítulo 7~~ (hecho 2026-11-15).
 6. ~~Aprobar UML y mockups e incorporarlos al PDF~~ (hecho 2026-11-15).
-7. Implementación (Ingeniero): plan, código, pruebas, README y datos de demostración.
+7. ~~Implementación (Ingeniero)~~ (hecho 2026-11-15: 100/100 pruebas).
 8. Conclusiones (capítulo 12) y cierre de la iteración 1 con commit.

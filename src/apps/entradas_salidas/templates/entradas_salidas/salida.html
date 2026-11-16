@@ -1,0 +1,102 @@
+{% extends "base.html" %}
+{% load formato %}
+{% block titulo %}Registrar salida{% endblock %}
+{% block contenido %}
+<div class="migas">P3 / Operación diaria</div>
+<div class="titulo-pagina">
+  <div><h1>Registrar salida</h1><div class="suave">Consulta el ingreso, revisa las novedades y libera la celda.</div></div>
+  <div class="estado-sede">Parqueadero operativo</div>
+</div>
+
+{% if exito %}
+  <div class="alerta exito">{% include "core/icono.html" with nombre="check" %}<div><strong>Salida registrada correctamente</strong>{{ exito.vehiculo.placa }} salió el {{ exito.fecha_hora_salida|date:"d/m/Y" }} a las {{ exito.fecha_hora_salida|date:"H:i" }}. La celda {{ exito.celda.codigo }} está disponible nuevamente.</div></div>
+{% elif estadia and not vigente %}
+  <div class="alerta aviso">{% include "core/icono.html" with nombre="alerta" %}<div><strong>Mensualidad vencida</strong>La salida se permite (RN-13), pero el vehículo no podrá volver a entrar mientras no pague.</div></div>
+{% endif %}
+
+<div class="rejilla-2">
+  <div class="pila">
+    <div class="tarjeta">
+      <h2>01 · Buscar entrada</h2>
+      <div class="suave" style="margin-bottom:14px">Consulta el ingreso abierto del vehículo.</div>
+      <form method="get">
+        <label for="placa">Placa del vehículo</label>
+        <div class="fila-busqueda"><input id="placa" type="text" name="placa" value="{{ placa }}" placeholder="Ej. KLM482" maxlength="8" {% if not estadia %}autofocus{% endif %}>
+        <button class="boton" type="submit">{% include "core/icono.html" with nombre="buscar" %} Buscar</button></div>
+      </form>
+    </div>
+    <div class="tarjeta">
+      <h2>Antes de registrar la salida</h2>
+      <div class="suave" style="margin-top:10px;display:grid;gap:10px">
+        <div>{% include "core/icono.html" with nombre="auto" %} Verifica la placa del vehículo.</div>
+        <div>{% include "core/icono.html" with nombre="novedad" %} Registra cualquier novedad antes de cerrar el ingreso.</div>
+        <div>{% include "core/icono.html" with nombre="celda" %} La celda se libera automáticamente al confirmar.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="pila">
+    {% if estadia %}
+      <div class="tarjeta">
+        <div class="tarjeta-cabeza">
+          <div class="vehiculo-cabeza" style="margin:0">
+            <div class="icono-caja">{% if estadia.vehiculo.tipo == "MOTO" %}{% include "core/icono.html" with nombre="moto" %}{% else %}{% include "core/icono.html" with nombre="auto" %}{% endif %}</div>
+            <div><div class="placa-grande">{{ estadia.vehiculo.placa }}</div><div class="diminuto">{{ estadia.vehiculo.get_tipo_display }} · {{ estadia.vehiculo.marca }} {{ estadia.vehiculo.nombre }} · {{ estadia.vehiculo.color }}</div></div>
+          </div>
+          {% if exito %}<span class="etiqueta-estado">Salida registrada</span>{% else %}<span class="etiqueta-estado">Entrada encontrada</span>{% endif %}
+        </div>
+        <div class="metricas">
+          <div class="metrica"><div class="diminuto">{% include "core/icono.html" with nombre="celda" %} Celda asignada</div><div class="valor">{{ estadia.celda.codigo }}</div></div>
+          <div class="metrica"><div class="diminuto">{% include "core/icono.html" with nombre="entrada" %} Hora de entrada</div><div class="valor mono">{{ estadia.fecha_hora_entrada|date:"H:i" }}</div></div>
+          <div class="metrica"><div class="diminuto">{% include "core/icono.html" with nombre="reloj" %} Tiempo de permanencia</div><div class="valor">{{ estadia.fecha_hora_entrada|duracion:estadia.fecha_hora_salida }}</div></div>
+        </div>
+        <dl class="datos" style="grid-template-columns:repeat(3,1fr)">
+          <div><dt>Fecha de entrada</dt><dd>{{ estadia.fecha_hora_entrada|date:"d/m/Y" }}</dd></div>
+          <div><dt>Cliente</dt><dd>{{ estadia.vehiculo.propietario.nombre_completo }}</dd></div>
+          <div><dt>Operador de entrada</dt><dd>{{ estadia.usuario_entrada.nombre_completo }}</dd></div>
+          {% if exito %}
+          <div><dt>Fecha de salida</dt><dd>{{ estadia.fecha_hora_salida|date:"d/m/Y" }}</dd></div>
+          <div><dt>Hora de salida</dt><dd>{{ estadia.fecha_hora_salida|date:"H:i" }}</dd></div>
+          <div><dt>Operador de salida</dt><dd>{{ estadia.usuario_salida.nombre_completo }}</dd></div>
+          {% endif %}
+        </dl>
+      </div>
+      <div class="tarjeta">
+        <h2>Novedades del ingreso</h2>
+        {% for n in novedades %}
+          <div class="novedad">
+            <div class="icono-caja">{% include "core/icono.html" with nombre="novedad" %}</div>
+            <div class="cuerpo"><strong>{{ n.get_tipo_display }}</strong> <span class="diminuto">{{ n.codigo }}</span><div>{{ n.descripcion }}</div><div class="meta">{{ n.registrado_por.nombre_completo }}</div></div>
+            <div class="meta mono">{{ n.fecha_hora_ocurrencia|date:"d/m/Y · H:i" }}</div>
+          </div>
+        {% empty %}
+          <p class="suave">Este ingreso no tiene novedades registradas.</p>
+        {% endfor %}
+      </div>
+      <div class="pie-acciones">
+        <span class="diminuto">{% if exito %}Ingreso cerrado · Celda liberada{% else %}Revisa las novedades antes de confirmar.{% endif %}</span>
+        <div class="grupo">
+          {% if exito %}
+            <a class="boton" href="{% url 'entradas_salidas:salida' %}">{% include "core/icono.html" with nombre="mas" %} Registrar otra salida</a>
+          {% else %}
+            <a class="boton secundario" href="#nueva-novedad">{% include "core/icono.html" with nombre="mas" %} Agregar novedad</a>
+            <form method="post">{% csrf_token %}<input type="hidden" name="placa" value="{{ estadia.vehiculo.placa }}"><button class="boton" type="submit">{% include "core/icono.html" with nombre="salida" %} Registrar salida</button></form>
+          {% endif %}
+        </div>
+      </div>
+      {% if not exito %}
+        {% url 'entradas_salidas:salida' as url_salida %}
+        {% include "novedades/_modal_novedad.html" with placa_fija=estadia.vehiculo.placa estadia_info=estadia siguiente=url_salida|add:"?placa="|add:estadia.vehiculo.placa %}
+      {% endif %}
+    {% elif error %}
+      <div class="tarjeta">
+        <div class="alerta aviso" style="margin:0">{% include "core/icono.html" with nombre="alerta" %}<div><strong>{% if error == "El vehículo no se encuentra dentro" %}Sin entrada abierta{% else %}{{ error }}{% endif %}</strong>{% if error == "El vehículo no se encuentra dentro" %}No se encontró un ingreso activo para la placa {{ placa }}.{% endif %}</div></div>
+        <div class="vacio"><div class="icono-caja">{% include "core/icono.html" with nombre="auto" %}</div><strong>{% if error == "Vehículo no registrado" %}Vehículo no registrado{% else %}Este vehículo no está dentro{% endif %}</strong>Verifica la placa o consulta el historial para revisar sus ingresos anteriores.</div>
+        <div style="text-align:right"><a class="boton secundario" href="{% url 'entradas_salidas:historial' %}?placa={{ placa }}">{% include "core/icono.html" with nombre="historial" %} Consultar historial</a></div>
+      </div>
+    {% else %}
+      <div class="tarjeta"><div class="vacio"><div class="icono-caja">{% include "core/icono.html" with nombre="salida" %}</div><strong>Busca un vehículo</strong>Escribe la placa para ver su ingreso abierto.</div></div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

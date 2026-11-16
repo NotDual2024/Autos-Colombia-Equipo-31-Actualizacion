@@ -1,6 +1,6 @@
 -- =====================================================================
 -- Parqueadero "Autos Colombia" - Modelo físico v1 (SQLite 3)
--- Estado: v1.1 APROBADO el 2026-11-15 (docs/Modelo_Datos_v1.md)
+-- Estado: v1.2 APROBADO el 2026-11-15 (v1.1 + CHG-002: tipo de novedad OBSERVACION)
 --
 -- Este script documenta y valida el diseño. En la implementación, las
 -- tablas las crean las migraciones de Django a partir de los modelos, que
@@ -120,8 +120,8 @@ CREATE INDEX idx_estadia_entrada ON entradas_salidas_estadia (fecha_hora_entrada
 -- -------------------------------------------------------------- novedades
 CREATE TABLE novedades_novedad (
     id                    INTEGER      PRIMARY KEY AUTOINCREMENT,
-    tipo                  VARCHAR(10)  NOT NULL
-                          CHECK (tipo IN ('ACCIDENTE', 'RAYON', 'CAIDA', 'DANO', 'OTRO')),
+    tipo                  VARCHAR(12)  NOT NULL
+                          CHECK (tipo IN ('ACCIDENTE', 'RAYON', 'CAIDA', 'DANO', 'OBSERVACION', 'OTRO')),
     descripcion           TEXT         NOT NULL CHECK (length(trim(descripcion)) > 0),
     fecha_hora_ocurrencia DATETIME     NOT NULL,
     fecha_hora_registro   DATETIME     NOT NULL,

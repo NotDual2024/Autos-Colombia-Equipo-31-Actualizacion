@@ -1,0 +1,30 @@
+{# Modal "Registrar novedad" (referencia P4 + CHG-002: hora del hecho y otras placas) #}
+<div class="modal" id="nueva-novedad" role="dialog" aria-labelledby="titulo-modal-novedad">
+  <div class="modal-caja">
+    <a href="#" class="cerrar" aria-label="Cerrar">×</a>
+    <div class="migas">P4 / Novedades</div>
+    <h2 id="titulo-modal-novedad" style="font-size:1.2rem">Registrar novedad</h2>
+    <div class="suave">Documenta lo ocurrido durante este ingreso.</div>
+    <hr>
+    <form method="post" action="{% url 'novedades:registrar' %}">
+      {% csrf_token %}
+      <input type="hidden" name="siguiente" value="{{ siguiente }}">
+      <div class="campo">
+        <label>Placa del vehículo</label>
+        <input type="text" name="placa_principal" value="{{ placa_fija }}" readonly>
+        {% if estadia_info %}<div class="diminuto" style="margin-top:4px">Ingreso del {{ estadia_info.fecha_hora_entrada|date:"d/m/Y · H:i" }} · Celda {{ estadia_info.celda.codigo }}</div>{% endif %}
+      </div>
+      <div class="campo"><label for="m-otras">Otras placas involucradas (opcional)</label><input id="m-otras" type="text" name="otras_placas" placeholder="Ej. DEF456, GHI789"></div>
+      <div class="rejilla-mitades">
+        <div class="campo"><label for="m-tipo">Tipo de novedad</label>
+          <select id="m-tipo" name="tipo">{% for valor, nombre in tipos_novedad %}<option value="{{ valor }}" {% if valor == "OBSERVACION" %}selected{% endif %}>{{ nombre }}</option>{% endfor %}</select></div>
+        <div class="campo"><label for="m-fecha">Fecha y hora del hecho</label><input id="m-fecha" type="datetime-local" name="ocurrencia" value="{{ ahora_local }}" max="{{ ahora_local }}"></div>
+      </div>
+      <div class="campo"><label for="m-desc">Descripción *</label><textarea id="m-desc" name="descripcion" placeholder="Describe la novedad del vehículo…" required></textarea>
+        <div class="diminuto">Sé claro y específico. Este registro quedará asociado al ingreso.</div></div>
+      <div class="diminuto">{% include "core/icono.html" with nombre="usuarios" %} {{ request.user.nombre_completo }} · {{ ahora|date:"d/m/Y, H:i" }}</div>
+      <hr>
+      <div style="display:flex;justify-content:flex-end;gap:8px"><a class="boton secundario" href="#">Cancelar</a><button class="boton" type="submit">{% include "core/icono.html" with nombre="check" %} Guardar</button></div>
+    </form>
+  </div>
+</div>
