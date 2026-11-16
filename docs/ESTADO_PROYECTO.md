@@ -14,7 +14,7 @@ Se avanza paso a paso, por iteraciones:
 En cada iteración: documentación y diagramas (Arquitecto) → código (Ingeniero) → commit a GitHub.
 
 ## Fase actual
-Iteración 1. **Implementación completa y verificada**: 100/100 pruebas y verificación manual en el navegador. Pendiente: conclusiones del PDF (cap. 12) y commit.
+**Iteración 1 cerrada** (2026-11-15): diseño aprobado, implementación verificada (100/100 pruebas) y PDF completo de 83 páginas con conclusiones. Siguiente: iteración 2 (gestión de usuarios y celdas).
 
 ## Artefactos
 | Artefacto | Archivo | Estado |
@@ -33,7 +33,7 @@ Iteración 1. **Implementación completa y verificada**: 100/100 pruebas y verif
 | Código de la iteración 1 (pasos 1-8) | src/ + requirements.txt + README.md | Implementado y probado: 100/100 pruebas |
 | Informe de implementación | docs/Informe_Implementacion_Iteracion1.md | Hecho |
 | Referencias de interfaz | docs/referencias_ui/ + docs/Analisis_Referencias_UI.md | CHG-002 **aprobado** (2026-11-15) |
-| Documento LaTeX | docs/latex/main.tex → main.pdf (capítulos 03, 05 y 11 generados con scripts/generar_capitulos.py) | Compilado (81 páginas); solo falta el capítulo 12 (conclusiones), que se escribe al cerrar la iteración |
+| Documento LaTeX | docs/latex/main.tex → main.pdf (capítulos 03, 05 y 11 generados con scripts/generar_capitulos.py) | **Completo** para la iteración 1 (83 páginas, incluye conclusiones) |
 
 ## Decisiones
 | ID | Decisión | Estado |
@@ -78,7 +78,8 @@ Iteración 1. **Implementación completa y verificada**: 100/100 pruebas y verif
 - Fecha: la actual. Semestre: sexto.
 
 ## Pendientes
-- Revisión de la aplicación por el equipo; conclusiones (capítulo 12 del PDF); commit del código.
+- Commit y push del cierre de la iteración 1 (comandos entregados al equipo).
+- Al iniciar la iteración 2: detallar RF-101 a RF-107 y confirmar la entidad provisional HorarioOperador.
 - Revisión del primer PDF LaTeX.
 
 ## Próximas actividades
@@ -89,4 +90,6 @@ Iteración 1. **Implementación completa y verificada**: 100/100 pruebas y verif
 5. ~~Aprobar el modelo de datos e incorporarlo al capítulo 7~~ (hecho 2026-11-15).
 6. ~~Aprobar UML y mockups e incorporarlos al PDF~~ (hecho 2026-11-15).
 7. ~~Implementación (Ingeniero)~~ (hecho 2026-11-15: 100/100 pruebas).
-8. Conclusiones (capítulo 12) y cierre de la iteración 1 con commit.
+8. ~~Conclusiones (capítulo 12)~~ (hecho 2026-11-15).
+9. Iteración 2: gestión de usuarios y celdas (mismo proceso: diseño → código → commit).
+10. Iteración 3: gestión de pagos.

@@ -1,3 +1,41 @@
 \chapter{Conclusiones}\label{cap:conclusiones}
 
-\pendiente{Las conclusiones se redactan al cerrar la iteración.}
+\section{Resultados de la iteración 1}
+La iteración 1 cumplió su objetivo: el parqueadero ``Autos Colombia'' cuenta con un sistema web local que gestiona la entrada y salida de vehículos, la asignación de celdas, el registro de novedades, el seguimiento de las mensualidades vencidas con el vehículo dentro y la creación de operadores.
+
+\begin{longtable}{>{\raggedright\arraybackslash}p{4.6cm}>{\raggedright\arraybackslash}p{9.8cm}}
+\toprule
+\textbf{Aspecto} & \textbf{Resultado}\\
+\midrule\endhead
+Requerimientos & 13 requerimientos funcionales de la iteración (RF-001 a RF-012 y RF-106) implementados, junto con 24 reglas de negocio y 14 requerimientos no funcionales.\\
+Historias de usuario & HU-001 a HU-011 implementadas; cada escenario Dado/Cuando/Entonces tiene una prueba automatizada.\\
+Pruebas & 100 pruebas automatizadas, todas aprobadas (unitarias, de integración y funcionales), más una verificación manual en el navegador.\\
+Modelo de datos & Diseñado completo desde el inicio (DEC-001). Las reglas clave se aplican en la propia base de datos y el script DDL pasa sus 42 comprobaciones.\\
+Interfaz & 12 pantallas con el estilo de los diseños de referencia del equipo (CHG-002), coherentes con los mockups aprobados.\\
+Demostración & Un comando carga usuarios de prueba, 200 celdas y casos de uso listos para probar en cualquier computador (RNF-014).\\
+\bottomrule
+\end{longtable}
+
+\section{Aprendizajes del proceso}
+\begin{description}[style=nextline]
+  \item[Las preguntas tempranas evitaron rehacer trabajo] Durante el análisis y el diseño se resolvieron más de veinte preguntas (P-01 a P-25): por ejemplo, la celda libre o fija, si se cuentan los 8 días desde el vencimiento o desde el aviso, y si una novedad puede incluir varios vehículos. Cada respuesta cambió el modelo de datos o las reglas, y resolverlas antes de programar fue mucho más barato que corregir el código después.
+  \item[Separar recomendación y decisión] Cada decisión (DEC-001 a DEC-012) se presentó con alternativas y una recomendación, y solo se registró después de la aprobación explícita del equipo. En DEC-002 el equipo eligió una opción distinta de la recomendada (correo automático) y luego la ajustó a un correo simulado (DEC-007). El registro de decisiones conserva ese recorrido.
+  \item[Los cambios se gestionan, no se esconden] Los cambios surgidos durante el trabajo (datos de demostración en CHG-001, adopción de los diseños de referencia en CHG-002) se analizaron frente a lo ya aprobado antes de implementarlos. Así se detectó, por ejemplo, que el diseño de la novedad omitía la hora del hecho y la posibilidad de varios vehículos, que eran requisitos aprobados.
+  \item[La base de datos como segunda barrera] Llevar reglas como ``una sola entrada abierta por vehículo'' o ``máximo un reenvío'' a restricciones de la base de datos protege la integridad aunque falle la lógica de la aplicación o haya registros simultáneos.
+  \item[Diseñar para probar] El reloj sustituible y el correo detrás de una interfaz permitieron probar casos que dependen del tiempo (el día 8 frente al día 9, la medianoche) y fallos del correo, sin esperar fechas reales ni usar servicios externos.
+\end{description}
+
+\section{Limitaciones}
+\begin{itemize}
+  \item La prueba de registros simultáneos verifica que la base de datos rechaza el choque y que el usuario ve el mensaje correcto, pero no ejecuta dos procesos reales al mismo tiempo.
+  \item El tiempo de respuesta (RNF-006) no se midió formalmente.
+  \item El sistema usa el servidor de desarrollo de Django, adecuado para la demostración local pero no para un uso real 24/7.
+  \item El correo es simulado (DEC-007): conectar un servicio real requiere otra implementación de la interfaz \texttt{ServicioCorreo} y gestionar sus credenciales (RNF-012).
+\end{itemize}
+
+\section{Trabajo futuro}
+\begin{description}[style=nextline]
+  \item[Iteración 2: gestión de usuarios y celdas] Pantallas de propietarios, vehículos y celdas (RF-101 a RF-105) y horarios de los operadores (RF-107). Las tablas ya existen por DEC-001, por lo que el trabajo se concentra en las pantallas y en confirmar la entidad provisional de horarios.
+  \item[Iteración 3: gestión de pagos] Registro de pagos, consulta de vigencia e historial, y gestión de tarifas (RF-201 a RF-204). La vigencia ya se calcula a partir de la tabla de pagos, así que los pagos registrados desde la interfaz se reflejarán de inmediato en las entradas y en la lista de vencidos.
+  \item[Mejoras posibles] Correo real, adjuntos en las novedades (RN-18) y un servidor de aplicaciones para un despliegue fuera del entorno local.
+\end{description}
