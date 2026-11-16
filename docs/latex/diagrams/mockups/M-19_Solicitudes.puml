@@ -1,0 +1,17 @@
+@startsalt M-19_Solicitudes
+title M-19 Solicitudes de cambio de propietario (HU-017) - administrador
+{+
+  {* Entrada | Salida | Dentro | Historial | Novedades | Vencidos | Propietarios | Vehículos | Celdas | Admin }
+  ==
+  { Estado | ^Pendientes^ }
+  {#
+    Fecha | Vehículo | De | A | Motivo | Solicitó | .
+    15/11/2026 10:20 | JTR625 | Laura Méndez | Andrés Gómez | Venta del vehículo | María Rodríguez | [Aprobar] | [Rechazar]
+    15/11/2026 09:05 | BGT219 | Andrés Gómez | Sofía Ruiz | Traspaso familiar | Julián Torres | [Aprobar] | [Rechazar]
+  }
+  {^"Rechazar solicitud"
+    Observación | "Falta el documento de traspaso       "
+    . | [Confirmar rechazo]
+  }
+}
+@endsalt

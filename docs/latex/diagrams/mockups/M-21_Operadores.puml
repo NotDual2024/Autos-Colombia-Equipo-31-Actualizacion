@@ -1,0 +1,17 @@
+@startsalt M-21_Operadores
+title M-21 Gestión de operadores ampliada (HU-019) - administrador
+{+
+  {* Entrada | Salida | Dentro | Historial | Novedades | Vencidos | Propietarios | Vehículos | Celdas | Admin }
+  ==
+  {#
+    Usuario | Nombre | Estado | Horario | .
+    operador | María Rodríguez | Activo | Lun-Vie 06:00-14:00 | [Editar] | [Restablecer contraseña] | [Horario] | [Desactivar]
+    operador2 | Julián Torres | Activo | Vie 22:00-06:00 | [Editar] | [Restablecer contraseña] | [Horario] | [Desactivar]
+  }
+  {^"Restablecer contraseña de operador2"
+    Nueva contraseña | "********      "
+    Confirmar | "********      "
+    . | [Guardar]
+  }
+}
+@endsalt

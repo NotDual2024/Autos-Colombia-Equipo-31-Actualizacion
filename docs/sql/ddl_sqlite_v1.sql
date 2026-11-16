@@ -1,6 +1,6 @@
 -- =====================================================================
 -- Parqueadero "Autos Colombia" - Modelo físico v1 (SQLite 3)
--- Estado: v1.2 APROBADO el 2026-11-15 (v1.1 + CHG-002: tipo de novedad OBSERVACION)
+-- Estado: v1.3 APROBADO el 2026-11-15 (iteración 2: bitácora, horarios, autorizaciones, cambio de propietario).
 --
 -- Este script documenta y valida el diseño. En la implementación, las
 -- tablas las crean las migraciones de Django a partir de los modelos, que
@@ -25,7 +25,9 @@ CREATE TABLE cuentas_usuario (
     last_login      DATETIME     NULL
 );
 
--- Iteración 2 (RF-107). PROVISIONAL: atributos a confirmar en esa iteración.
+-- Franjas de trabajo por día (RF-107, DEC-014). dia_semana: 1 = lunes ... 7 = domingo.
+-- Si hora_fin < hora_inicio, la franja cruza la medianoche (RN-36).
+-- Que no se crucen dos franjas del mismo día (RN-37) se valida en el servicio.
 CREATE TABLE cuentas_horariooperador (
     id              INTEGER      PRIMARY KEY AUTOINCREMENT,
     operador_id     INTEGER      NOT NULL REFERENCES cuentas_usuario (id) ON DELETE RESTRICT,
@@ -34,7 +36,21 @@ CREATE TABLE cuentas_horariooperador (
     hora_fin        TIME         NOT NULL,
     CHECK (hora_inicio <> hora_fin)
 );
-CREATE INDEX idx_horario_operador ON cuentas_horariooperador (operador_id);
+CREATE INDEX idx_horario_operador ON cuentas_horariooperador (operador_id, dia_semana);
+
+-- Autorización para ingresar fuera de turno (RF-110, RN-32, DEC-014).
+CREATE TABLE cuentas_autorizacionfueraturno (
+    id                 INTEGER   PRIMARY KEY AUTOINCREMENT,
+    operador_id        INTEGER   NOT NULL REFERENCES cuentas_usuario (id) ON DELETE RESTRICT,
+    autorizado_por_id  INTEGER   NOT NULL REFERENCES cuentas_usuario (id) ON DELETE RESTRICT,
+    motivo             TEXT      NOT NULL CHECK (length(trim(motivo)) > 0),
+    desde              DATETIME  NOT NULL,
+    hasta              DATETIME  NOT NULL,
+    fecha_registro     DATETIME  NOT NULL,
+    CHECK (hasta > desde),
+    CHECK (operador_id <> autorizado_por_id)
+);
+CREATE INDEX idx_autorizacion_operador ON cuentas_autorizacionfueraturno (operador_id, hasta);
 
 -- -------------------------------------------------------- usuarios_celdas
 CREATE TABLE usuarios_celdas_propietario (
@@ -43,7 +59,8 @@ CREATE TABLE usuarios_celdas_propietario (
     numero_documento  VARCHAR(10)  NOT NULL UNIQUE        -- cédula de ciudadanía (P-23)
                       CHECK (numero_documento NOT GLOB '*[^0-9]*'
                              AND length(numero_documento) BETWEEN 5 AND 10),
-    telefono          VARCHAR(20)  NOT NULL,
+    telefono          VARCHAR(10)  NOT NULL               -- celular colombiano (RN-30)
+                      CHECK (telefono GLOB '3[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]'),
     correo            VARCHAR(254) NOT NULL,             -- obligatorio (DEC-002)
     direccion         VARCHAR(200) NOT NULL,
     activo            BOOLEAN      NOT NULL DEFAULT 1,
@@ -66,6 +83,41 @@ CREATE TABLE usuarios_celdas_vehiculo (
     fecha_registro  DATETIME     NOT NULL
 );
 CREATE INDEX idx_vehiculo_propietario ON usuarios_celdas_vehiculo (propietario_id);
+
+-- Propietarios ANTERIORES de un vehículo (RN-33, DEC-015). El propietario actual está en
+-- vehiculo.propietario_id; su fecha de inicio es el 'hasta' del último registro de esta tabla
+-- (o la fecha de registro del vehículo si nunca cambió). Así no se duplica el dato (DM-09).
+CREATE TABLE usuarios_celdas_historialpropiedad (
+    id              INTEGER   PRIMARY KEY AUTOINCREMENT,
+    vehiculo_id     INTEGER   NOT NULL REFERENCES usuarios_celdas_vehiculo (id) ON DELETE RESTRICT,
+    propietario_id  INTEGER   NOT NULL REFERENCES usuarios_celdas_propietario (id) ON DELETE RESTRICT,
+    desde           DATETIME  NOT NULL,
+    hasta           DATETIME  NOT NULL,
+    CHECK (hasta > desde)
+);
+CREATE INDEX idx_historial_vehiculo ON usuarios_celdas_historialpropiedad (vehiculo_id, hasta);
+
+-- Solicitud de cambio de propietario (RF-109, RN-33, DEC-015).
+CREATE TABLE usuarios_celdas_solicitudcambiopropietario (
+    id                     INTEGER      PRIMARY KEY AUTOINCREMENT,
+    vehiculo_id            INTEGER      NOT NULL REFERENCES usuarios_celdas_vehiculo (id) ON DELETE RESTRICT,
+    propietario_actual_id  INTEGER      NOT NULL REFERENCES usuarios_celdas_propietario (id) ON DELETE RESTRICT,
+    propietario_nuevo_id   INTEGER      NOT NULL REFERENCES usuarios_celdas_propietario (id) ON DELETE RESTRICT,
+    motivo                 TEXT         NOT NULL CHECK (length(trim(motivo)) > 0),
+    solicitado_por_id      INTEGER      NOT NULL REFERENCES cuentas_usuario (id) ON DELETE RESTRICT,
+    fecha_solicitud        DATETIME     NOT NULL,
+    estado                 VARCHAR(10)  NOT NULL DEFAULT 'PENDIENTE'
+                           CHECK (estado IN ('PENDIENTE', 'APROBADA', 'RECHAZADA')),
+    resuelto_por_id        INTEGER      NULL REFERENCES cuentas_usuario (id) ON DELETE RESTRICT,
+    fecha_resolucion       DATETIME     NULL,
+    observacion            TEXT         NULL,
+    CHECK (propietario_nuevo_id <> propietario_actual_id),
+    CHECK ((estado = 'PENDIENTE') = (resuelto_por_id IS NULL)),
+    CHECK ((resuelto_por_id IS NULL) = (fecha_resolucion IS NULL))
+);
+-- Solo una solicitud pendiente por vehículo.
+CREATE UNIQUE INDEX uq_solicitud_pendiente
+    ON usuarios_celdas_solicitudcambiopropietario (vehiculo_id) WHERE estado = 'PENDIENTE';
 
 CREATE TABLE usuarios_celdas_celda (
     id              INTEGER      PRIMARY KEY AUTOINCREMENT,
@@ -169,3 +221,27 @@ CREATE TABLE notificaciones_contactoautoridad (
     observacion        TEXT     NOT NULL CHECK (length(trim(observacion)) > 0)
 );
 CREATE INDEX idx_contacto_pago ON notificaciones_contactoautoridad (pago_id);
+
+-- --------------------------------------------------------------- bitacora
+-- Bitácora de operaciones (RF-111, RN-34, DEC-013). Polimórfica: entidad + entidad_id
+-- identifican el registro afectado (sin clave foránea, porque apunta a varias tablas).
+-- detalle guarda los cambios en JSON: {"campo": ["antes", "después"], ...}. Nunca se borra.
+CREATE TABLE bitacora_registrooperacion (
+    id           INTEGER      PRIMARY KEY AUTOINCREMENT,
+    fecha_hora   DATETIME     NOT NULL,
+    usuario_id   INTEGER      NOT NULL REFERENCES cuentas_usuario (id) ON DELETE RESTRICT,
+    accion       VARCHAR(25)  NOT NULL CHECK (accion IN (
+                     'CREAR', 'MODIFICAR', 'ACTIVAR', 'INACTIVAR',
+                     'SOLICITAR_CAMBIO', 'APROBAR_CAMBIO', 'RECHAZAR_CAMBIO',
+                     'RESTABLECER_CLAVE', 'ASIGNAR_HORARIO', 'QUITAR_HORARIO',
+                     'AUTORIZAR_FUERA_TURNO')),
+    entidad      VARCHAR(20)  NOT NULL CHECK (entidad IN (
+                     'PROPIETARIO', 'VEHICULO', 'OPERADOR', 'HORARIO',
+                     'AUTORIZACION', 'SOLICITUD_CAMBIO')),
+    entidad_id   INTEGER      NOT NULL,
+    descripcion  VARCHAR(255) NOT NULL,
+    detalle      TEXT         NULL
+);
+CREATE INDEX idx_bitacora_entidad ON bitacora_registrooperacion (entidad, entidad_id);
+CREATE INDEX idx_bitacora_usuario_fecha ON bitacora_registrooperacion (usuario_id, fecha_hora);
+CREATE INDEX idx_bitacora_fecha ON bitacora_registrooperacion (fecha_hora);

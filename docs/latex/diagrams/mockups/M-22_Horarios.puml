@@ -1,0 +1,18 @@
+@startsalt M-22_Horarios
+title M-22 Horario del operador (HU-020) - administrador
+{+
+  {* Entrada | Salida | Dentro | Historial | Novedades | Vencidos | Propietarios | Vehículos | Celdas | Admin }
+  ==
+  { <b>Horario de María Rodríguez</b> (operador) }
+  {#
+    Día | Franjas | .
+    Lunes | 06:00 - 14:00 | [Quitar]
+    Martes | 06:00 - 10:00 · 16:00 - 20:00 | [Quitar]
+    Viernes | 22:00 - 06:00 (cruza la medianoche) | [Quitar]
+  }
+  {^"Agregar franja"
+    Día | ^Martes^ | Desde | "12:00" | Hasta | "18:00" | [Agregar]
+  }
+  <color:red>La franja se cruza con otra del mismo día.</color>
+}
+@endsalt

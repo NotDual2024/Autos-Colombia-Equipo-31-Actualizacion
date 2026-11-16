@@ -1,0 +1,18 @@
+@startsalt M-24_Autorizaciones
+title M-24 Autorizaciones fuera de turno (HU-022) - administrador
+{+
+  {* Entrada | Salida | Dentro | Historial | Novedades | Vencidos | Propietarios | Vehículos | Celdas | Admin }
+  ==
+  {^"Nueva autorización"
+    Operador | ^Julián Torres (operador2)^
+    Desde | "15/11/2026 15:00" | Hasta | "15/11/2026 19:00"
+    Motivo | "Cubre ausencia de María Rodríguez      "
+    . | [Autorizar]
+  }
+  {#
+    Operador | Desde | Hasta | Motivo | Autorizó | Estado
+    Julián Torres | 15/11 15:00 | 15/11 19:00 | Cubre ausencia | Laura Castillo | Vigente
+    María Rodríguez | 10/11 14:00 | 10/11 16:00 | Inventario | Laura Castillo | Vencida
+  }
+}
+@endsalt

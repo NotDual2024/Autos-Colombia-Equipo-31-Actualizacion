@@ -1,0 +1,18 @@
+@startsalt M-16_FormVehiculo
+title M-16 Registrar / editar vehículo (HU-013, HU-015)
+{+
+  {* Entrada | Salida | Dentro | Historial | Novedades | Vencidos | Propietarios | Vehículos | Celdas | Admin }
+  ==
+  {^"Registrar vehículo"
+    Propietario | { "1023456789  " | [Buscar] | Laura Méndez (activo) }
+    Placa | "JTR625  " | (no se puede editar después)
+    Tipo | ^Carro^
+    Marca | "Mazda         "
+    Nombre (línea) | "3             "
+    Modelo (año) | "2021  "
+    Color | "Blanco        "
+  }
+  <color:red>La placa no corresponde al tipo de vehículo.</color>
+  [Cancelar] | [Guardar]
+}
+@endsalt

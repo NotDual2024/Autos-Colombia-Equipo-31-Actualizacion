@@ -14,7 +14,7 @@ Se avanza paso a paso, por iteraciones:
 En cada iteración: documentación y diagramas (Arquitecto) → código (Ingeniero) → commit a GitHub.
 
 ## Fase actual
-**Iteración 1 cerrada** (2026-11-15): diseño aprobado, implementación verificada (100/100 pruebas) y PDF completo de 83 páginas con conclusiones. Siguiente: iteración 2 (gestión de usuarios y celdas).
+Iteración 1 cerrada y subida a GitHub (2026-11-15). **Iteración 2 (gestión de usuarios y celdas):** requerimientos (v1.4) e historias HU-012 a HU-023 aprobados; modelo de datos v1.3 aprobado (DDL 60/60). **Diseño de la iteración 2 aprobado** e incorporado al PDF (114 páginas). Siguiente: plan de implementación del Ingeniero.
 
 ## Artefactos
 | Artefacto | Archivo | Estado |
@@ -32,6 +32,10 @@ En cada iteración: documentación y diagramas (Arquitecto) → código (Ingenie
 | Plan de implementación (iteración 1) | docs/Plan_Implementacion_Iteracion1.md | **Aprobado** (2026-11-15) |
 | Código de la iteración 1 (pasos 1-8) | src/ + requirements.txt + README.md | Implementado y probado: 100/100 pruebas |
 | Informe de implementación | docs/Informe_Implementacion_Iteracion1.md | Hecho |
+| Requerimientos iteración 2 v1.4 | docs/Requerimientos_Iteracion2_v1.md | **Aprobado** (2026-11-15; v1.4 = aclaraciones de RN-35, RN-37 y del turno en el encabezado) |
+| Historias de usuario iteración 2 v1.1 | docs/Historias_Usuario_Iteracion2_v1.md | **Aprobado** (2026-11-15) |
+| Modelo de datos v1.3 (iteración 2) | docs/Modelo_Datos_v1.md §7 + DDL v1.3 + MER-01/MR-01 | **Aprobado** (2026-11-15; incluye DM-08: nuevo módulo `bitacora`) |
+| Diseño iteración 2 v1 | docs/Diseno_Iteracion2_v1.md + diagrams (mockups M-13 a M-25, uml UC-02/CL-03/CL-04/PK-01 v2, arquitectura ARQ-03 v2) | **Aprobado** (2026-11-15) |
 | Referencias de interfaz | docs/referencias_ui/ + docs/Analisis_Referencias_UI.md | CHG-002 **aprobado** (2026-11-15) |
 | Documento LaTeX | docs/latex/main.tex → main.pdf (capítulos 03, 05 y 11 generados con scripts/generar_capitulos.py) | **Completo** para la iteración 1 (83 páginas, incluye conclusiones) |
 
@@ -50,6 +54,9 @@ En cada iteración: documentación y diagramas (Arquitecto) → código (Ingenie
 | DEC-010 | Django 5.2 LTS + Python 3.12 o superior | Aprobada (2026-11-15) |
 | DEC-011 | Creación de operadores (RF-106 básico) en la iteración 1 | Aprobada (2026-11-15) |
 | DEC-012 | Hash de contraseñas: Argon2 (argon2-cffi) | Aprobada (2026-11-15) |
+| DEC-013 | Bitácora de operaciones | Aprobada (2026-11-15) |
+| DEC-014 | Horarios por franjas (con turnos nocturnos) + autorizaciones fuera de turno | Aprobada (2026-11-15) |
+| DEC-015 | Cambio de propietario con solicitud e historial | Aprobada (2026-11-15) |
 
 ## Información dada por el equipo
 - El servicio es solo por mensualidad. La mensualidad se paga por vehículo (carro/camioneta 150 000 COP; moto 80 000 COP).
@@ -78,8 +85,8 @@ En cada iteración: documentación y diagramas (Arquitecto) → código (Ingenie
 - Fecha: la actual. Semestre: sexto.
 
 ## Pendientes
-- Commit y push del cierre de la iteración 1 (comandos entregados al equipo).
-- Al iniciar la iteración 2: detallar RF-101 a RF-107 y confirmar la entidad provisional HorarioOperador.
+- Iteración 2: plan de implementación (Ingeniero).
+- Iteración 3 (pendiente anotado): motivo de inactivación y reactivación automática al registrar el pago (P-33).
 - Revisión del primer PDF LaTeX.
 
 ## Próximas actividades
@@ -91,5 +98,5 @@ En cada iteración: documentación y diagramas (Arquitecto) → código (Ingenie
 6. ~~Aprobar UML y mockups e incorporarlos al PDF~~ (hecho 2026-11-15).
 7. ~~Implementación (Ingeniero)~~ (hecho 2026-11-15: 100/100 pruebas).
 8. ~~Conclusiones (capítulo 12)~~ (hecho 2026-11-15).
-9. Iteración 2: gestión de usuarios y celdas (mismo proceso: diseño → código → commit).
+9. Iteración 2: gestión de usuarios y celdas (en análisis).
 10. Iteración 3: gestión de pagos.

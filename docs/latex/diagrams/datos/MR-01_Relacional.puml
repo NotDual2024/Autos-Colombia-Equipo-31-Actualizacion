@@ -1,5 +1,5 @@
 @startuml MR-01_Relacional
-' MR-01 - Modelo relacional / físico (notación pata de gallo) - SQLite - v1.1
+' MR-01 - Modelo relacional / físico (notación pata de gallo) - SQLite - v1.3
 !pragma layout smetana
 hide circle
 skinparam linetype ortho
@@ -21,7 +21,7 @@ entity "cuentas_usuario" as usuario {
   * date_joined : DATETIME
     last_login : DATETIME
 }
-entity "cuentas_horariooperador\n(provisional, iteración 2)" as horario {
+entity "cuentas_horariooperador" as horario {
   * id : INTEGER <<PK>>
   --
   * operador_id : INTEGER <<FK>>
@@ -34,7 +34,7 @@ entity "usuarios_celdas_propietario" as propietario {
   --
   * nombre_completo : VARCHAR(150)
   * numero_documento : VARCHAR(10) <<UQ, CHECK cédula>>
-  * telefono : VARCHAR(20)
+  * telefono : VARCHAR(10) <<CHECK celular>>
   * correo : VARCHAR(254)
   * direccion : VARCHAR(200)
   * activo : BOOLEAN
@@ -59,6 +59,51 @@ entity "usuarios_celdas_celda" as celda {
   * codigo : VARCHAR(10) <<UQ>>
   * tipo : VARCHAR(15) <<CHECK>>
   * activa : BOOLEAN
+}
+entity "cuentas_autorizacionfueraturno" as autorizacion {
+  * id : INTEGER <<PK>>
+  --
+  * operador_id : INTEGER <<FK>>
+  * autorizado_por_id : INTEGER <<FK>>
+  * motivo : TEXT
+  * desde : DATETIME
+  * hasta : DATETIME
+  * fecha_registro : DATETIME
+}
+entity "usuarios_celdas_historialpropiedad" as historial {
+  * id : INTEGER <<PK>>
+  --
+  * vehiculo_id : INTEGER <<FK>>
+  * propietario_id : INTEGER <<FK>>
+  * desde : DATETIME
+  * hasta : DATETIME
+}
+entity "usuarios_celdas_solicitudcambiopropietario" as solicitud {
+  * id : INTEGER <<PK>>
+  --
+  * vehiculo_id : INTEGER <<FK>>
+  * propietario_actual_id : INTEGER <<FK>>
+  * propietario_nuevo_id : INTEGER <<FK>>
+  * motivo : TEXT
+  * solicitado_por_id : INTEGER <<FK>>
+  * fecha_solicitud : DATETIME
+  * estado : VARCHAR(10) <<CHECK>>
+    resuelto_por_id : INTEGER <<FK>>
+    fecha_resolucion : DATETIME
+    observacion : TEXT
+  ..
+  UQ parcial (vehiculo_id) si PENDIENTE
+}
+entity "bitacora_registrooperacion" as bitacora {
+  * id : INTEGER <<PK>>
+  --
+  * fecha_hora : DATETIME
+  * usuario_id : INTEGER <<FK>>
+  * accion : VARCHAR(25) <<CHECK>>
+  * entidad : VARCHAR(20) <<CHECK>>
+  * entidad_id : INTEGER
+  * descripcion : VARCHAR(255)
+    detalle : TEXT (JSON)
 }
 entity "pagos_tarifa" as tarifa {
   * id : INTEGER <<PK>>
@@ -93,7 +138,7 @@ entity "entradas_salidas_estadia" as estadia {
 entity "novedades_novedad" as novedad {
   * id : INTEGER <<PK>>
   --
-  * tipo : VARCHAR(10) <<CHECK>>
+  * tipo : VARCHAR(12) <<CHECK>>
   * descripcion : TEXT
   * fecha_hora_ocurrencia : DATETIME
   * fecha_hora_registro : DATETIME
@@ -141,4 +186,11 @@ usuario ||--o{ novedad : registra
 usuario ||--o{ pago : registra
 usuario |o--o{ aviso : envía (manual)
 usuario ||--o{ contacto : registra
+usuario ||--o{ autorizacion : autoriza / recibe
+vehiculo ||--o{ historial
+propietario ||--o{ historial
+vehiculo ||--o{ solicitud
+propietario ||--o{ solicitud : actual / nuevo
+usuario ||--o{ solicitud : solicita / resuelve
+usuario ||--o{ bitacora : realiza
 @enduml

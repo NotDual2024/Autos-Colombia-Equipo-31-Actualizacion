@@ -1,0 +1,15 @@
+@startsalt M-25_Bitacora
+title M-25 Bitácora de operaciones (HU-023) - administrador
+{+
+  {* Entrada | Salida | Dentro | Historial | Novedades | Vencidos | Propietarios | Vehículos | Celdas | Admin }
+  ==
+  { Usuario | ^Todos^ | Acción | ^Todas^ | Desde | "15/11/2026" | Hasta | "15/11/2026" | [Filtrar] }
+  {#
+    Fecha | Usuario | Acción | Registro | Detalle
+    15/11 10:20 | María Rodríguez | Solicitar cambio | Vehículo JTR625 | Laura Méndez → Andrés Gómez
+    15/11 10:12 | María Rodríguez | Modificar | Propietario Laura Méndez | celular: 3001112233 → 3001234567
+    15/11 09:40 | Laura Castillo | Autorizar fuera de turno | Operador operador2 | 15:00 – 19:00
+    15/11 09:30 | Laura Castillo | Restablecer contraseña | Operador operador2 | (sin mostrar la contraseña)
+  }
+}
+@endsalt

@@ -1,0 +1,13 @@
+@startsalt M-13_Propietarios
+title M-13 Propietarios (HU-014 / UC-18)
+{+
+  {* Entrada | Salida | Dentro | Historial | Novedades | Vencidos | Propietarios | Vehículos | Celdas | Admin }
+  ==
+  { Buscar por nombre o cédula | "Méndez            " | [Buscar] | . | [+ Nuevo propietario] }
+  {#
+    Nombre | Cédula | Celular | Vehículos | Estado | .
+    Laura Méndez | 1023456789 | 3001234567 | JTR625, ZXC456 | Activo | [Ver ficha]
+    Carlos Herrera | 1034567890 | 3109876543 | MNP913 | <color:orange>Inactivo</color> | [Ver ficha]
+  }
+}
+@endsalt

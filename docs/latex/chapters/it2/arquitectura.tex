@@ -1,0 +1,22 @@
+% ARCHIVO GENERADO por scripts/generar_capitulos.py. No editar a mano.
+\section{Actualización de la iteración 2}
+\subsection{Mecanismo de control de turno}
+
+\begin{longtable}{>{\raggedright\arraybackslash}p{1.6cm}>{\raggedright\arraybackslash}p{4.4cm}>{\raggedright\arraybackslash}p{8.4cm}}
+\toprule
+\textbf{Momento} & \textbf{Dónde} & \textbf{Qué hace}\\
+\midrule\endhead
+Inicio de sesión & \texttt{BackendTurno} (servidor) & Si el operador no tiene horario o está fuera de su franja sin una autorización vigente, no lo deja entrar y muestra el mensaje de M-23.\\
+Cada petición & \texttt{ControlTurnoMiddleware} (servidor) & Calcula el fin de la jornada (franja o autorización). Si ya pasó: (1) una petición que \textbf{guarda un registro} (POST) se completa y después se cierra la sesión; (2) en cualquier otra petición, si pasaron más de 5 minutos de gracia desde el fin, se cierra la sesión.\\
+En la página & Script ``vigilante de sesión'' (navegador) & Recibe la hora de fin de la jornada. Al llegar a esa hora: si no hay un formulario empezado, muestra el aviso con cuenta regresiva de 5 minutos y luego cierra la sesión. Si hay un formulario empezado y el operador escribe, no hace nada. Si pasan 5 minutos sin escribir, muestra el aviso y empieza otra cuenta de 5 minutos; si vuelve a escribir, el aviso desaparece.\\
+\bottomrule
+\end{longtable}
+
+
+\textbf{Por qué en dos lugares:} el servidor no puede saber si el operador está escribiendo; el navegador sí. El servidor es la barrera de seguridad: aunque se desactive el script, la sesión no sigue abierta más allá de la gracia, salvo para completar el guardado en curso.
+
+
+\textbf{Limitación:} si el operador cierra la pestaña sin cerrar sesión, la sesión se cierra en la siguiente petición o cuando expire la cookie de sesión. Propongo que la cookie de sesión de los operadores dure como máximo 12 horas.
+
+
+

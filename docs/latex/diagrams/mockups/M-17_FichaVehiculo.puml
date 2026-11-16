@@ -1,0 +1,24 @@
+@startsalt M-17_FichaVehiculo
+title M-17 Ficha del vehículo (HU-014, HU-016)
+{+
+  {* Entrada | Salida | Dentro | Historial | Novedades | Vencidos | Propietarios | Vehículos | Celdas | Admin }
+  ==
+  { <b>JTR625</b> · Carro · Mazda 3 2021, blanco · Activo · Dentro (A-004) | . | [Editar] | [Inactivar] | [Solicitar cambio de propietario] }
+  {^"Propietario actual"
+    Laura Méndez · CC 1023456789 · desde 15/05/2026
+  }
+  {^"Historial de propietarios"
+    {#
+      Propietario | Desde | Hasta
+      Andrés Gómez | 02/01/2025 | 15/05/2026
+    }
+  }
+  {^"Bitácora del vehículo"
+    {#
+      Fecha | Usuario | Operación
+      15/05/2026 09:00 | Laura Castillo (admin) | Aprobó cambio de propietario: Andrés Gómez → Laura Méndez
+      14/05/2026 17:30 | María Rodríguez | Solicitó cambio de propietario (Venta del vehículo)
+    }
+  }
+}
+@endsalt

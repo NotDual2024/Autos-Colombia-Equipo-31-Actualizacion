@@ -1,0 +1,27 @@
+@startsalt M-15_FichaPropietario
+title M-15 Ficha del propietario (HU-014, HU-015)
+{+
+  {* Entrada | Salida | Dentro | Historial | Novedades | Vencidos | Propietarios | Vehículos | Celdas | Admin }
+  ==
+  { <b>Laura Méndez</b> · CC 1023456789 · Activo | . | [Editar] | [Inactivar] }
+  {^"Datos"
+    Celular | 3001234567 | Correo | laura@correo.co
+    Dirección | Calle 10 # 20-30 | Registrado | 15/05/2026 por María Rodríguez
+  }
+  {^"Vehículos"
+    {#
+      Placa | Tipo | Vehículo | Estado | Ubicación | .
+      JTR625 | Carro | Mazda 3 2021, blanco | Activo | Dentro (A-004) | [Ver]
+      ZXC456 | Carro | Hyundai i10 2015, negro | Activo | Fuera | [Ver]
+    }
+    [+ Registrar vehículo para este propietario]
+  }
+  {^"Bitácora del propietario"
+    {#
+      Fecha | Usuario | Operación
+      15/11/2026 10:12 | María Rodríguez | Modificó celular: 3001112233 → 3001234567
+      15/05/2026 08:00 | María Rodríguez | Registró al propietario
+    }
+  }
+}
+@endsalt

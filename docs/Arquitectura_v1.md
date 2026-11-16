@@ -207,3 +207,12 @@ No se usan frameworks de CSS externos que haya que descargar. Los estilos son CS
 ## 11. Decisión surgida en este documento
 
 **DEC-012 — Algoritmo de hash de contraseñas:** aprobada el 2026-11-15 con la alternativa A (Argon2 con `argon2-cffi`). El detalle está en el Registro de decisiones.
+
+
+---
+
+## 12. Actualización de la iteración 2 (aprobada el 2026-11-15)
+
+- **Módulo nuevo `bitacora`** (DM-08): bitácora de operaciones (DEC-013). Depende solo de `core`; el usuario se referencia con `settings.AUTH_USER_MODEL`. `cuentas` y `usuarios_celdas` dependen de él.
+- **Control de turno** (RN-31, RN-35, RN-36): un backend de autenticación (`BackendTurno`), un middleware (`ControlTurnoMiddleware`) y un script de vigilancia de la sesión en el navegador. La sesión de un operador dura como máximo 12 horas. Detalle en `Diseno_Iteracion2_v1.md`, sección 5.
+- Diagramas actualizados: ARQ-03 v2 y PK-01 v2.

@@ -14,6 +14,9 @@
 | DEC-010 | Versiones de Python y Django | **Aprobada** (Django 5.2 LTS, Python 3.12 o superior) |
 | DEC-011 | Creación de operadores por el administrador desde la iteración 1 | **Aprobada** (A) |
 | DEC-012 | Algoritmo de hash de contraseñas | **Aprobada** (A: Argon2 con argon2-cffi) |
+| DEC-013 | Registro de "qué operador hizo qué operación" (iteración 2) | **Aprobada** (B: bitácora de operaciones) |
+| DEC-014 | Modelo de horarios y autorizaciones fuera de turno (iteración 2) | **Aprobada** (A: franjas por día + autorizaciones) |
+| DEC-015 | Cambio de propietario con solicitud e historial (iteración 2) | **Aprobada** (A: solicitud + historial) |
 
 ---
 
@@ -509,5 +512,71 @@ docs/latex/
 **Responsable de aprobación:** Equipo del proyecto.
 
 **Artefactos afectados:** Arquitectura v1 (7.1, 9), `requirements.txt`.
+
+**Estado:** Aprobada.
+
+---
+
+# Decisiones de la iteración 2
+
+Las alternativas completas están en `Requerimientos_Iteracion2_v1.md`, sección 5.
+
+## DEC-013 — Registro de "qué operador hizo qué operación"
+
+**Problema:** P-32 pide mostrar qué operador hizo cada operación (RNF-004, RN-34).
+
+**Alternativas:** A. Columnas `creado_por` / `modificado_por` en cada tabla (solo la última modificación). B. Bitácora de operaciones (usuario, fecha y hora, acción, entidad, identificador y detalle de los cambios).
+
+**Recomendación del arquitecto:** B.
+
+**Decisión seleccionada:** B. Bitácora de operaciones.
+
+**Justificación:** Guarda todas las operaciones y permite mostrarlas por usuario, vehículo o propietario. El equipo aceptó la recomendación.
+
+**Fecha:** 2026-11-15
+
+**Responsable de aprobación:** Equipo del proyecto.
+
+**Artefactos afectados:** RF-111, modelo de datos (v1.3: nueva tabla de bitácora).
+
+**Estado:** Aprobada.
+
+## DEC-014 — Modelo de horarios y autorizaciones fuera de turno
+
+**Problema:** P-27, P-34, P-35 y P-37 definen turnos fijos, turnos nocturnos, varias franjas por día y autorizaciones del administrador.
+
+**Alternativas:** A. Franjas por día de la semana (`HorarioOperador`, que puede cruzar la medianoche) más una tabla de autorizaciones fuera de turno. B. Turnos con nombre y horas fijas.
+
+**Recomendación del arquitecto:** A.
+
+**Decisión seleccionada:** A.
+
+**Justificación:** Es flexible: admite varias franjas por día (P-37) y turnos nocturnos (P-35), y reutiliza la tabla que ya existe. El nombre del turno se calcula para el encabezado. El equipo aceptó la recomendación.
+
+**Fecha:** 2026-11-15
+
+**Responsable de aprobación:** Equipo del proyecto.
+
+**Artefactos afectados:** RF-107, RF-110, RN-31, RN-32, RN-35, RN-36, modelo de datos (v1.3: `HorarioOperador` deja de ser provisional y se agrega la tabla de autorizaciones).
+
+**Estado:** Aprobada.
+
+## DEC-015 — Cambio de propietario con solicitud e historial
+
+**Problema:** P-29: el cambio de propietario se pide al administrador y debe quedar el registro del propietario anterior.
+
+**Alternativas:** A. Tabla de solicitudes (pendiente, aprobada o rechazada) más tabla de historial de propietarios. B. Solo el historial; el administrador hace el cambio directamente.
+
+**Recomendación del arquitecto:** A.
+
+**Decisión seleccionada:** A.
+
+**Justificación:** Cumple con que la petición pase por el administrador y conserva el historial. El equipo aceptó la recomendación.
+
+**Fecha:** 2026-11-15
+
+**Responsable de aprobación:** Equipo del proyecto.
+
+**Artefactos afectados:** RF-108, RF-109, RN-33, modelo de datos (v1.3: dos tablas nuevas).
 
 **Estado:** Aprobada.

@@ -1,5 +1,5 @@
 @startuml PK-01_Paquetes
-' PK-01 - Diagrama de paquetes - v1
+' PK-01 - Diagrama de paquetes - v2 (iteración 2: módulo bitacora, DM-08)
 skinparam packageStyle folder
 skinparam package {
   BackgroundColor #F4F7FC
@@ -21,6 +21,8 @@ package "apps" {
   package "pagos" as pagos {
   }
   package "usuarios_celdas" as uc {
+  }
+  package "bitacora" as bit {
   }
   package "cuentas" as cuentas {
   }
@@ -57,6 +59,10 @@ pagos ..> uc
 pagos ..> core
 uc ..> core
 cuentas ..> core
+bit ..> core
+uc ..> bit : registra operaciones
+cuentas ..> bit : registra operaciones
+uc ..> cuentas
 es ..> cuentas : usuario que registra
 nov ..> cuentas
 notif ..> cuentas
@@ -64,6 +70,12 @@ pagos ..> cuentas
 cuentas ..> argon
 core ..> django
 
+note right of bit
+  DM-08: bitácora de operaciones (DEC-013).
+  Solo depende de core. El usuario se referencia
+  con settings.AUTH_USER_MODEL, sin importar cuentas,
+  así cuentas puede registrar operaciones sin ciclo.
+end note
 note right of core
   Base: no depende de ningún
   otro módulo de la aplicación.

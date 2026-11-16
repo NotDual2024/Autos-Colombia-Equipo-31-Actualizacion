@@ -1,0 +1,21 @@
+@startsalt M-23_FinTurno
+title M-23 Control de turno (HU-021)
+{+
+  {^"Inicio de sesión"
+    <color:red>Estás fuera de tu turno. Solicita autorización al administrador.</color>
+    <color:red>No tienes un horario asignado. Contacta al administrador.</color>
+  }
+  .
+  {^"Encabezado durante el turno"
+    María Rodríguez · Operador · Turno 06:00 – 14:00
+  }
+  .
+  {^"Aviso al terminar el turno (sin registro en curso)"
+    <color:orange>Tu turno terminó. La sesión se cerrará a las 14:05.</color> | [Cerrar sesión ahora]
+  }
+  .
+  {^"Registro en curso sin escribir durante 5 minutos"
+    <color:orange>No has escrito nada en 5 minutos. La sesión se cerrará en 5:00.</color> | [Seguir trabajando]
+  }
+}
+@endsalt

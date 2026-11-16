@@ -1,0 +1,88 @@
+@startuml CL-04_Servicios_It2
+' CL-04 - Clases de servicio de la iteración 2 - v1
+!pragma layout smetana
+skinparam classAttributeIconSize 0
+skinparam class {
+  BackgroundColor #FDFDFD
+  BorderColor #0B3D91
+}
+title Clases de servicio y control - Iteración 2
+
+package bitacora {
+  class ServicioBitacora {
+    + registrar(usuario, accion, entidad, entidad_id, descripcion, cambios : dict) : RegistroOperacion
+    + de_entidad(entidad, entidad_id) : list<RegistroOperacion>
+    + buscar(usuario, accion, desde, hasta) : list<RegistroOperacion>
+  }
+}
+
+package usuarios_celdas {
+  class ServicioPropietarios {
+    + registrar(datos, usuario) : Propietario
+    + modificar(propietario, datos, usuario) : Propietario
+    + cambiar_estado(propietario, activo : bool, usuario) : Propietario
+  }
+  class ServicioVehiculos {
+    + registrar(datos, propietario, usuario) : Vehiculo
+    + modificar(vehiculo, datos, usuario) : Vehiculo  {placa no editable}
+    + cambiar_estado(vehiculo, activo : bool, usuario) : Vehiculo
+  }
+  class ServicioCambioPropietario {
+    + solicitar(vehiculo, nuevo : Propietario, motivo, operador) : SolicitudCambioPropietario
+    + aprobar(solicitud, administrador, observacion) : Vehiculo
+    + rechazar(solicitud, administrador, observacion) : SolicitudCambioPropietario
+  }
+  class ConsultasUsuariosCeldas <<selectors>> {
+    + buscar_propietarios(texto) : list<Propietario>
+    + buscar_vehiculos(placa) : list<Vehiculo>
+    + mapa_celdas(zona, bloque) : list<EstadoCelda>
+  }
+}
+
+package cuentas {
+  class ServicioOperadores {
+    + crear_operador(...) : Usuario
+    + editar_nombre(admin, operador, nombre) : Usuario
+    + restablecer_clave(admin, operador, clave) : void
+    + cambiar_estado(admin, operador, activo) : Usuario
+  }
+  class ServicioHorarios {
+    + asignar_franja(admin, operador, dia, inicio, fin) : HorarioOperador
+    + quitar_franja(admin, franja) : void
+    + turno_actual(operador, momento) : HorarioOperador [0..1]
+    + puede_ingresar(usuario, momento) : bool
+    + fin_de_jornada(usuario, momento) : datetime [0..1]
+  }
+  class ServicioAutorizaciones {
+    + autorizar(admin, operador, desde, hasta, motivo) : AutorizacionFueraTurno
+    + vigente(operador, momento) : AutorizacionFueraTurno [0..1]
+  }
+  class BackendTurno <<authentication>> {
+    + user_can_authenticate(usuario) : bool
+  }
+  class ControlTurnoMiddleware <<middleware>> {
+    + __call__(request) : HttpResponse
+  }
+}
+
+package core {
+  class Reloj
+  class ErrorNegocio <<exception>>
+}
+
+ServicioPropietarios ..> ServicioBitacora
+ServicioVehiculos ..> ServicioBitacora
+ServicioCambioPropietario ..> ServicioBitacora
+ServicioOperadores ..> ServicioBitacora
+ServicioHorarios ..> ServicioBitacora
+ServicioAutorizaciones ..> ServicioBitacora
+ServicioCambioPropietario ..> Reloj
+ServicioHorarios ..> ServicioAutorizaciones
+BackendTurno ..> ServicioHorarios : RN-31, RN-36
+ControlTurnoMiddleware ..> ServicioHorarios : RN-35
+ControlTurnoMiddleware ..> Reloj
+ServicioPropietarios ..> ErrorNegocio : lanza
+ServicioVehiculos ..> ErrorNegocio : lanza
+ServicioCambioPropietario ..> ErrorNegocio : lanza
+ServicioHorarios ..> ErrorNegocio : lanza
+@enduml

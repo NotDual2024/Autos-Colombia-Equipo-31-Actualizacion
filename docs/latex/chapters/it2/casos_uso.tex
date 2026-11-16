@@ -1,0 +1,42 @@
+% ARCHIVO GENERADO por scripts/generar_capitulos.py. No editar a mano.
+\section{Casos de uso de la iteración 2}
+
+
+\diagrama{uml/UC-02_CasosUso_It2.png}{UC-02}{fig:UC-02_CasosUso_It2}{1.0}
+
+\textbf{Actores:} Operador; Administrador (especializa al Operador); \textbf{Reloj del sistema}, que dispara el cierre de sesión al terminar el turno.
+
+
+\textbf{Relaciones:}
+
+\begin{itemize}
+  \item \textbf{UC-01 Iniciar sesión «include» UC-25 Verificar turno.}
+  \item Todos los casos que modifican datos «include» \textbf{UC-29 Registrar operación en la bitácora}.
+  \item UC-19 (modificar) y UC-20 (solicitar cambio) «extend» UC-18, desde la ficha.
+\end{itemize}
+
+\subsubsection{Especificaciones}
+
+\begin{longtable}{>{\raggedright\arraybackslash}p{2.4000000000000004cm}>{\raggedright\arraybackslash}p{2.6cm}>{\raggedright\arraybackslash}p{3.8cm}>{\raggedright\arraybackslash}p{3.2cm}>{\raggedright\arraybackslash}p{2.4000000000000004cm}}
+\toprule
+\textbf{UC} & \textbf{Actor} & \textbf{Flujo principal} & \textbf{Alternativos y excepciones} & \textbf{Trazabilidad}\\
+\midrule\endhead
+\textbf{UC-16} Registrar propietario & Operador & Llena los 5 datos $\rightarrow$ se valida $\rightarrow$ se guarda activo $\rightarrow$ UC-29. & Cédula repetida; celular inválido; correo inválido; campo vacío. & RF-101, HU-012\\
+\textbf{UC-17} Registrar vehículo & Operador & Busca al propietario por cédula $\rightarrow$ llena los datos $\rightarrow$ la placa se normaliza $\rightarrow$ se valida $\rightarrow$ se guarda $\rightarrow$ UC-29. & Placa que no corresponde al tipo; placa repetida; propietario inactivo; modelo fuera de rango. & RF-102, HU-013\\
+\textbf{UC-18} Consultar propietarios y vehículos & Operador & Busca por nombre, cédula o placa $\rightarrow$ abre la ficha (datos, vehículos o historial, bitácora del registro). & Sin resultados. & RF-108, HU-014\\
+\textbf{UC-19} Modificar, activar e inactivar & Operador & Desde la ficha: edita (la placa no) o cambia el estado $\rightarrow$ UC-29 con los valores antes y después. & Datos inválidos. Inactivar con el vehículo dentro: permite la salida pero no la entrada (RN-29). & RF-105, HU-015\\
+\textbf{UC-20} Solicitar cambio de propietario & Operador & Desde la ficha del vehículo: elige el nuevo propietario y el motivo $\rightarrow$ solicitud pendiente $\rightarrow$ UC-29. & Ya hay una pendiente; mismo propietario; nuevo propietario inactivo. & RF-109, HU-016\\
+\textbf{UC-21} Resolver solicitud & Administrador & Bandeja $\rightarrow$ aprobar: en una transacción se guarda el historial del propietario anterior, se cambia el propietario y se marca la solicitud como aprobada $\rightarrow$ UC-29. Rechazar: con una observación. & Solicitud ya resuelta; acceso de un operador $\rightarrow$ 403. & RF-109, HU-017\\
+\textbf{UC-22} Consultar mapa de celdas & Operador & Elige la zona y el bloque $\rightarrow$ ve libres y ocupadas, con las placas y los contadores. & --- & RF-104, HU-018\\
+\textbf{UC-23} Editar operador y restablecer contraseña & Administrador & Edita el nombre o asigna una contraseña nueva (validada y guardada con Argon2) $\rightarrow$ UC-29, sin guardar la contraseña. & Contraseña débil; confirmación distinta. & RF-106, HU-019\\
+\textbf{UC-24} Asignar horarios & Administrador & Agrega una franja (día, desde, hasta) $\rightarrow$ valida que no se cruce con otra $\rightarrow$ guarda $\rightarrow$ UC-29. Quitar una franja $\rightarrow$ UC-29. & Franja cruzada (RN-37); inicio igual al fin. & RF-107, HU-020\\
+\textbf{UC-25} Verificar turno & Sistema (incluido en UC-01) & Administrador: siempre puede ingresar. Operador: debe tener horario (RN-36) y estar dentro de una franja o de una autorización vigente (RN-31, RN-32). & Fuera de turno; sin horario $\rightarrow$ mensaje y no ingresa. & RN-31, RN-32, RN-36, HU-021\\
+\textbf{UC-26} Cerrar sesión por fin de turno & Reloj del sistema & Al terminar la franja o la autorización: si no hay un registro en curso $\rightarrow$ aviso y 5 minutos $\rightarrow$ cierre. Si hay un registro en curso $\rightarrow$ no cierra mientras el operador escriba; al guardar o cancelar $\rightarrow$ cierre. Si pasan 5 minutos sin escribir $\rightarrow$ aviso y 5 minutos más $\rightarrow$ cierre. & Autorización vigente $\rightarrow$ no se cierra. & RN-35, HU-021\\
+\textbf{UC-27} Autorizar ingreso fuera de turno & Administrador & Elige el operador, desde, hasta y el motivo $\rightarrow$ se guarda $\rightarrow$ UC-29. & Hasta $\leq$ desde; autorizarse a sí mismo. & RF-110, HU-022\\
+\textbf{UC-28} Consultar bitácora & Administrador & Filtra por usuario, acción y fechas $\rightarrow$ lista con el detalle de los cambios. & Un operador recibe 403 en la bitácora completa; ve la de cada registro en su ficha (UC-18). & RF-111, HU-023\\
+\textbf{UC-29} Registrar operación en la bitácora & Sistema (incluido) & Guarda el usuario, la fecha y hora, la acción, la entidad, el id, la descripción y los cambios (sin contraseñas). & --- & RN-34, DEC-013\\
+\bottomrule
+\end{longtable}
+
+
+

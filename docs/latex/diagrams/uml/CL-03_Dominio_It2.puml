@@ -1,0 +1,102 @@
+@startuml CL-03_Dominio_It2
+' CL-03 - Clases de dominio nuevas o modificadas en la iteración 2 - v1
+!pragma layout smetana
+skinparam classAttributeIconSize 0
+skinparam class {
+  BackgroundColor #FDFDFD
+  BorderColor #0B3D91
+}
+title Clases de dominio - Iteración 2 (en gris: clases de la iteración 1)
+
+package cuentas {
+  class Usuario #EEEEEE {
+    - rol : Rol
+    - is_active : bool
+    + es_administrador() : bool
+  }
+  class HorarioOperador {
+    - dia_semana : int {1 = lunes}
+    - hora_inicio : time
+    - hora_fin : time
+    + cruza_medianoche() : bool
+    + cubre(momento : datetime) : bool
+    + se_cruza_con(otra : HorarioOperador) : bool
+    + fin_en(momento : datetime) : datetime
+  }
+  class AutorizacionFueraTurno {
+    - motivo : str
+    - desde : datetime
+    - hasta : datetime
+    - fecha_registro : datetime
+    + vigente(momento : datetime) : bool
+  }
+}
+
+package usuarios_celdas {
+  class Propietario #EEEEEE {
+    - nombre_completo : str
+    - numero_documento : str
+    - telefono : str {celular}
+    - correo : str
+    - direccion : str
+    - activo : bool
+  }
+  class Vehiculo #EEEEEE {
+    - placa : str  {sin edición}
+    - tipo : TipoVehiculo
+    - activo : bool
+    + propietario_desde() : datetime
+  }
+  enum EstadoSolicitud {
+    PENDIENTE
+    APROBADA
+    RECHAZADA
+  }
+  class SolicitudCambioPropietario {
+    - motivo : str
+    - fecha_solicitud : datetime
+    - estado : EstadoSolicitud
+    - fecha_resolucion : datetime [0..1]
+    - observacion : str [0..1]
+  }
+  class HistorialPropiedad {
+    - desde : datetime
+    - hasta : datetime
+  }
+}
+
+package bitacora {
+  enum Accion {
+    CREAR
+    MODIFICAR
+    ACTIVAR
+    INACTIVAR
+    SOLICITAR_CAMBIO
+    APROBAR_CAMBIO
+    RECHAZAR_CAMBIO
+    RESTABLECER_CLAVE
+    ASIGNAR_HORARIO
+    QUITAR_HORARIO
+    AUTORIZAR_FUERA_TURNO
+  }
+  class RegistroOperacion {
+    - fecha_hora : datetime
+    - accion : Accion
+    - entidad : str
+    - entidad_id : int
+    - descripcion : str
+    - detalle : dict [0..1]
+  }
+}
+
+Usuario "1" *-- "0..*" HorarioOperador : trabaja en >
+Usuario "1" -- "0..*" AutorizacionFueraTurno : recibe >
+Usuario "1" -- "0..*" AutorizacionFueraTurno : autoriza >
+Propietario "1" -- "0..*" Vehiculo : posee >
+Vehiculo "1" -- "0..*" HistorialPropiedad : tuvo >
+Propietario "1" -- "0..*" HistorialPropiedad : fue dueño >
+Vehiculo "1" -- "0..*" SolicitudCambioPropietario
+Propietario "1" -- "0..*" SolicitudCambioPropietario : actual / nuevo >
+Usuario "1" -- "0..*" SolicitudCambioPropietario : solicita / resuelve >
+Usuario "1" -- "0..*" RegistroOperacion : realiza >
+@enduml

@@ -8,6 +8,7 @@
 | Versión | Cambios |
 |---|---|
 | 1 | Borrador inicial. |
+| 1.3 | Iteración 2 (sección 7). **Aprobada** por el equipo el 2026-11-15, incluidas DM-08 a DM-11. |
 | 1.2 | CHG-002 (aprobado 2026-11-15): el tipo de novedad admite OBSERVACION; por eso la columna `tipo` de la novedad pasa de VARCHAR(10) a VARCHAR(12). |
 | 1.1 | Respuestas del equipo a P-22 a P-25: formato de placa, datos del propietario (nombre completo, cédula, teléfono, correo, dirección) y del vehículo (marca, nombre, modelo, color); los envíos fallidos no cuentan para el límite; se permiten varios contactos con autoridades por vencimiento. |
 
@@ -216,3 +217,49 @@ Ejecuté el DDL en SQLite 3.50.4 con `docs/sql/validar_ddl.py`: **42 comprobacio
 - **Documento:** solo cédula de ciudadanía, por eso ya no hay columna de tipo de documento.
 - **Coherencia entre placa y tipo:** que una moto tenga placa de moto y un carro placa de carro se valida en la aplicación (RN-23).
 - **HORARIO_OPERADOR** sigue provisional hasta la iteración 2.
+
+
+---
+
+## 7. Cambios del modelo v1.3 — Iteración 2 (aprobado el 2026-11-15)
+
+**Base:** requerimientos de la iteración 2 v1.4 y DEC-013 a DEC-015 (aprobados).
+**Validación:** `docs/sql/validar_ddl.py` con el DDL v1.3: **60 comprobaciones, 60 pasan**. Son las 42 anteriores más 18 nuevas.
+
+### 7.1. Tablas nuevas y modificadas
+
+| Tabla | Cambio | Origen | Restricciones principales |
+|---|---|---|---|
+| `usuarios_celdas_propietario` | `telefono` pasa a `VARCHAR(10)` con validación de celular | RN-30 | CHECK `telefono GLOB '3' + 9 dígitos` |
+| `cuentas_horariooperador` | **Deja de ser provisional.** Franjas por día (1 = lunes … 7 = domingo); si `hora_fin < hora_inicio`, la franja cruza la medianoche | DEC-014, RN-36, P-37 | CHECK día 1..7; inicio ≠ fin. Que no se crucen dos franjas del mismo día (RN-37) se valida en el servicio, porque depende de otras filas. |
+| `cuentas_autorizacionfueraturno` (nueva) | operador, autorizado por, motivo, desde, hasta, fecha de registro | RF-110, RN-32 | CHECK hasta > desde; el operador no se autoriza a sí mismo; motivo no vacío |
+| `usuarios_celdas_solicitudcambiopropietario` (nueva) | vehículo, propietario actual, propietario nuevo, motivo, solicitado por, fecha, estado, resuelto por, fecha de resolución, observación | RF-109, RN-33, DEC-015 | Estado ∈ {PENDIENTE, APROBADA, RECHAZADA}; nuevo ≠ actual; PENDIENTE ⇔ sin resolución; **UQ parcial**: una sola pendiente por vehículo |
+| `usuarios_celdas_historialpropiedad` (nueva) | **propietarios anteriores**: vehículo, propietario, desde, hasta | RN-33, DEC-015 | CHECK hasta > desde |
+| `bitacora_registrooperacion` (nueva) | fecha y hora, usuario, acción, entidad, id de la entidad, descripción, detalle (JSON con los valores antes y después) | RF-111, RN-34, DEC-013 | Acción y entidad acotadas por CHECK; índices por entidad, por usuario y fecha, y por fecha |
+
+### 7.2. Decisiones de diseño del modelo (aprobadas con esta versión)
+
+| ID | Decisión | Alternativa descartada | Por qué |
+|---|---|---|---|
+| DM-08 | La bitácora va en un **módulo nuevo `bitacora`**. Depende **solo de `core`** y referencia al usuario con `settings.AUTH_USER_MODEL` (corrección aprobada el 2026-11-15 con el diseño de la iteración 2, para evitar el ciclo con `cuentas`); los módulos que registran operaciones dependen de él. | Ponerla en `core` (crearía un ciclo, porque necesita al usuario de `cuentas`) o en `cuentas` (mezcla responsabilidades). | Mantiene las dependencias sin ciclos (arquitectura, sección 4.2). **Agrega un noveno módulo a la arquitectura aprobada**, por eso requiere su aprobación. |
+| DM-09 | `historialpropiedad` guarda **solo los propietarios anteriores**. El actual sigue en `vehiculo.propietario_id`, y su fecha de inicio es el `hasta` del último registro del historial (o la fecha de registro del vehículo). | Guardar también al propietario actual en el historial (con `hasta` nulo). | Evita duplicar el propietario actual en dos tablas que se podrían contradecir (3FN). |
+| DM-10 | La bitácora es **polimórfica**: `entidad` + `entidad_id`, **sin clave foránea**. | Una tabla de bitácora por cada entidad, o una columna FK por cada tipo. | Una sola tabla cubre propietarios, vehículos, operadores, horarios, autorizaciones y solicitudes. Como nada se borra (RN-07), las referencias no quedan huérfanas. |
+| DM-11 | La bitácora **no guarda contraseñas**: al restablecer una, solo registra que se hizo. | — | RNF-001, RNF-007. |
+
+### 7.3. Normalización
+
+- Las tablas nuevas están en **3FN**: sus atributos dependen solo de su clave.
+- `solicitudcambiopropietario.propietario_actual_id` repite un dato del vehículo **en el momento de la solicitud**. Es una copia histórica, como DM-04: muestra a quién pertenecía el vehículo cuando se pidió el cambio.
+- `bitacora.detalle` (JSON) no se consulta por sus partes; es un registro de lo que ocurrió, no datos de trabajo.
+
+### 7.4. Trazabilidad
+
+| RF | Tablas |
+|---|---|
+| RF-101, RF-102, RF-105, RF-108 | propietario, vehiculo, bitacora |
+| RF-104 | celda, estadia |
+| RF-106 | usuario, bitacora |
+| RF-107 | horariooperador, bitacora |
+| RF-109 | solicitudcambiopropietario, historialpropiedad, vehiculo, bitacora |
+| RF-110 | autorizacionfueraturno, bitacora |
+| RF-111 | bitacora |

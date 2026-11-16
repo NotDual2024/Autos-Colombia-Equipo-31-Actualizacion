@@ -1,0 +1,60 @@
+% ARCHIVO GENERADO por scripts/generar_capitulos.py. No editar a mano.
+\section{Cambios del modelo v1.3 (iteración 2)}
+\textbf{Base:} requerimientos de la iteración 2 v1.4 y DEC-013 a DEC-015 (aprobados).
+
+\textbf{Validación:} \texttt{docs/sql/validar\_ddl.py} con el DDL v1.3: \textbf{60 comprobaciones, 60 pasan}. Son las 42 anteriores más 18 nuevas.
+
+
+\subsubsection{Tablas nuevas y modificadas}
+
+\begin{longtable}{>{\raggedright\arraybackslash}p{1.8cm}>{\raggedright\arraybackslash}p{5.8cm}>{\raggedright\arraybackslash}p{1.6cm}>{\raggedright\arraybackslash}p{5.2cm}}
+\toprule
+\textbf{Tabla} & \textbf{Cambio} & \textbf{Origen} & \textbf{Restricciones principales}\\
+\midrule\endhead
+\texttt{usuarios\_celdas\_propietario} & \texttt{telefono} pasa a \texttt{VARCHAR(10)} con validación de celular & RN-30 & CHECK \texttt{telefono GLOB '3' + 9 dígitos}\\
+\texttt{cuentas\_horariooperador} & \textbf{Deja de ser provisional.} Franjas por día (1 = lunes ... 7 = domingo); si \texttt{hora\_fin < hora\_inicio}, la franja cruza la medianoche & DEC-014, RN-36, P-37 & CHECK día 1..7; inicio $\neq$ fin. Que no se crucen dos franjas del mismo día (RN-37) se valida en el servicio, porque depende de otras filas.\\
+\texttt{cuentas\_autorizacionfueraturno} (nueva) & operador, autorizado por, motivo, desde, hasta, fecha de registro & RF-110, RN-32 & CHECK hasta > desde; el operador no se autoriza a sí mismo; motivo no vacío\\
+\texttt{usuarios\_celdas\_solicitudcambiopropietario} (nueva) & vehículo, propietario actual, propietario nuevo, motivo, solicitado por, fecha, estado, resuelto por, fecha de resolución, observación & RF-109, RN-33, DEC-015 & Estado $\in$ \{PENDIENTE, APROBADA, RECHAZADA\}; nuevo $\neq$ actual; PENDIENTE $\Leftrightarrow$ sin resolución; \textbf{UQ parcial}: una sola pendiente por vehículo\\
+\texttt{usuarios\_celdas\_historialpropiedad} (nueva) & \textbf{propietarios anteriores}: vehículo, propietario, desde, hasta & RN-33, DEC-015 & CHECK hasta > desde\\
+\texttt{bitacora\_registrooperacion} (nueva) & fecha y hora, usuario, acción, entidad, id de la entidad, descripción, detalle (JSON con los valores antes y después) & RF-111, RN-34, DEC-013 & Acción y entidad acotadas por CHECK; índices por entidad, por usuario y fecha, y por fecha\\
+\bottomrule
+\end{longtable}
+
+
+\subsubsection{Decisiones de diseño del modelo (aprobadas con esta versión)}
+
+\begin{longtable}{>{\raggedright\arraybackslash}p{1.5cm}>{\raggedright\arraybackslash}p{4.8cm}>{\raggedright\arraybackslash}p{3.8000000000000003cm}>{\raggedright\arraybackslash}p{4.3cm}}
+\toprule
+\textbf{ID} & \textbf{Decisión} & \textbf{Alternativa descartada} & \textbf{Por qué}\\
+\midrule\endhead
+DM-08 & La bitácora va en un **módulo nuevo \texttt{bitacora}\textbf{. Depende }solo de \texttt{core}** y referencia al usuario con \texttt{settings.AUTH\_USER\_MODEL} (corrección aprobada el 2026-11-15 con el diseño de la iteración 2, para evitar el ciclo con \texttt{cuentas}); los módulos que registran operaciones dependen de él. & Ponerla en \texttt{core} (crearía un ciclo, porque necesita al usuario de \texttt{cuentas}) o en \texttt{cuentas} (mezcla responsabilidades). & Mantiene las dependencias sin ciclos (arquitectura, sección 4.2). \textbf{Agrega un noveno módulo a la arquitectura aprobada}, por eso requiere su aprobación.\\
+DM-09 & \texttt{historialpropiedad} guarda \textbf{solo los propietarios anteriores}. El actual sigue en \texttt{vehiculo.propietario\_id}, y su fecha de inicio es el \texttt{hasta} del último registro del historial (o la fecha de registro del vehículo). & Guardar también al propietario actual en el historial (con \texttt{hasta} nulo). & Evita duplicar el propietario actual en dos tablas que se podrían contradecir (3FN).\\
+DM-10 & La bitácora es \textbf{polimórfica}: \texttt{entidad} + \texttt{entidad\_id}, \textbf{sin clave foránea}. & Una tabla de bitácora por cada entidad, o una columna FK por cada tipo. & Una sola tabla cubre propietarios, vehículos, operadores, horarios, autorizaciones y solicitudes. Como nada se borra (RN-07), las referencias no quedan huérfanas.\\
+DM-11 & La bitácora \textbf{no guarda contraseñas}: al restablecer una, solo registra que se hizo. & --- & RNF-001, RNF-007.\\
+\bottomrule
+\end{longtable}
+
+
+\subsubsection{Normalización}
+
+\begin{itemize}
+  \item Las tablas nuevas están en \textbf{3FN}: sus atributos dependen solo de su clave.
+  \item \texttt{solicitudcambiopropietario.propietario\_actual\_id} repite un dato del vehículo \textbf{en el momento de la solicitud}. Es una copia histórica, como DM-04: muestra a quién pertenecía el vehículo cuando se pidió el cambio.
+  \item \texttt{bitacora.detalle} (JSON) no se consulta por sus partes; es un registro de lo que ocurrió, no datos de trabajo.
+\end{itemize}
+
+\subsubsection{Trazabilidad}
+
+\begin{longtable}{>{\raggedright\arraybackslash}p{3.7cm}>{\raggedright\arraybackslash}p{10.7cm}}
+\toprule
+\textbf{RF} & \textbf{Tablas}\\
+\midrule\endhead
+RF-101, RF-102, RF-105, RF-108 & propietario, vehiculo, bitacora\\
+RF-104 & celda, estadia\\
+RF-106 & usuario, bitacora\\
+RF-107 & horariooperador, bitacora\\
+RF-109 & solicitudcambiopropietario, historialpropiedad, vehiculo, bitacora\\
+RF-110 & autorizacionfueraturno, bitacora\\
+RF-111 & bitacora\\
+\bottomrule
+\end{longtable}

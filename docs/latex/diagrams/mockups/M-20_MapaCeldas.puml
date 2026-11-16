@@ -1,0 +1,21 @@
+@startsalt M-20_MapaCeldas
+title M-20 Mapa de celdas (HU-018)
+{+
+  {* Entrada | Salida | Dentro | Historial | Novedades | Vencidos | Propietarios | Vehículos | Celdas | Admin }
+  ==
+  { Zona A · carro/camioneta: 112 ocupadas / 150 | . | Zona M · moto: 31 ocupadas / 50 }
+  {^"Zona A (bloque 1 de 7)"
+    {#
+      A-001 BGT219 | A-002 libre | A-003 KLM482 | A-004 JTR625 | A-005 RSD508 | A-006 libre
+      A-007 libre | A-008 HJC671 | A-009 libre | A-010 PLN304 | A-011 libre | A-012 ABC123
+    }
+    [‹ Anterior] | [Siguiente ›]
+  }
+  {^"Zona M"
+    {#
+      M-01 libre | M-02 XQH73F | M-03 libre | M-04 JGS94D | M-05 libre | M-06 libre
+    }
+  }
+  <i>Las celdas son fijas: no se agregan, no se borran ni cambian de tipo.</i>
+}
+@endsalt

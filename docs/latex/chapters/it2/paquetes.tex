@@ -1,0 +1,14 @@
+% ARCHIVO GENERADO por scripts/generar_capitulos.py. No editar a mano.
+\section{Cambios de la iteración 2}
+
+
+
+
+\begin{itemize}
+  \item **Módulo nuevo \texttt{bitacora}** (DM-08, aprobado con el modelo v1.3).
+  \item \textbf{Corrección de DM-08 detectada al dibujar el diagrama.} El texto aprobado dice que \texttt{bitacora} "depende de \texttt{core} y \texttt{cuentas}", pero \texttt{cuentas} también registra operaciones en la bitácora (operadores, horarios y autorizaciones), y eso formaría un \textbf{ciclo}. Para evitarlo, propongo que \texttt{bitacora} **solo dependa de \texttt{core}** y referencie al usuario con \texttt{settings.AUTH\_USER\_MODEL}, el mecanismo estándar de Django, sin importar \texttt{cuentas}. Así \texttt{cuentas} y \texttt{usuarios\_celdas} dependen de \texttt{bitacora}, y no al revés. Las tablas y las relaciones del modelo no cambian.
+  \item \texttt{usuarios\_celdas} y \texttt{cuentas} dependen de \texttt{bitacora}; \texttt{usuarios\_celdas} también de \texttt{cuentas} (usuario que solicita o resuelve).
+  \item ARQ-03 se actualizó con el módulo \texttt{bitacora} y las nuevas responsabilidades de \texttt{cuentas} y \texttt{usuarios\_celdas}.
+\end{itemize}
+
+

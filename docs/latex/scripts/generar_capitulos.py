@@ -23,7 +23,8 @@ ESPECIALES = {
     "_": r"\_", "{": r"\{", "}": r"\}", "~": r"\textasciitilde{}", "^": r"\textasciicircum{}",
 }
 UNICODE = {"≥": r"$\geq$", "≤": r"$\leq$", "→": r"$\rightarrow$", "✓": r"$\checkmark$",
-           "“": "``", "”": "''", "…": "...", "×": r"$\times$"}
+           "“": "``", "”": "''", "…": "...", "×": r"$\times$", "≠": r"$\neq$", "⇔": r"$\Leftrightarrow$",
+           "∈": r"$\in$", "✔": r"$\checkmark$", "‹": "<", "›": ">"}
 
 
 def tex(texto: str) -> str:

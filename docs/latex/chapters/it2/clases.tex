@@ -1,0 +1,42 @@
+% ARCHIVO GENERADO por scripts/generar_capitulos.py. No editar a mano.
+\section{Clases de la iteración 2}
+
+
+\subsubsection{Dominio (CL-03)}
+
+\diagrama{uml/CL-03_Dominio_It2.png}{CL-03}{fig:CL-03_Dominio_It2}{1.0}
+
+Clases nuevas: \texttt{AutorizacionFueraTurno}, \texttt{SolicitudCambioPropietario}, \texttt{HistorialPropiedad} y \texttt{RegistroOperacion}. \texttt{HorarioOperador} queda definitiva, con métodos de dominio:
+
+\begin{itemize}
+  \item \texttt{cruza\_medianoche()};
+  \item \texttt{cubre(momento)}: si el momento está dentro de la franja, incluido el tramo después de medianoche de una franja del día anterior;
+  \item \texttt{se\_cruza\_con(otra)}: para RN-37;
+  \item \texttt{fin\_en(momento)}: cuándo termina la franja que cubre ese momento.
+\end{itemize}
+
+\texttt{Vehiculo.propietario\_desde()} calcula desde cuándo el propietario actual es dueño (DM-09).
+
+
+\subsubsection{Servicios y control (CL-04)}
+
+\diagrama{uml/CL-04_Servicios_It2.png}{CL-04}{fig:CL-04_Servicios_It2}{1.0}
+
+\begin{longtable}{>{\raggedright\arraybackslash}p{5.0cm}>{\raggedright\arraybackslash}p{9.4cm}}
+\toprule
+\textbf{Clase} & \textbf{Responsabilidad}\\
+\midrule\endhead
+\texttt{ServicioPropietarios}, \texttt{ServicioVehiculos} & Registrar, modificar y cambiar el estado, con validaciones (RN-23, RN-25, RN-26, RN-30) y registro en la bitácora.\\
+\texttt{ServicioCambioPropietario} & Solicitar; aprobar en una transacción (historial + cambio + estado); rechazar.\\
+\texttt{ConsultasUsuariosCeldas} & Búsquedas, fichas y mapa de celdas (solo lectura).\\
+\texttt{ServicioOperadores} (ampliado) & Editar el nombre y restablecer la contraseña.\\
+\texttt{ServicioHorarios} & Asignar y quitar franjas (RN-37); \texttt{puede\_ingresar()} (RN-31, RN-36); \texttt{fin\_de\_jornada()} (franja o autorización).\\
+\texttt{ServicioAutorizaciones} & Crear autorizaciones y consultar la vigente.\\
+\texttt{ServicioBitacora} & Registrar y consultar operaciones (DEC-013).\\
+\texttt{BackendTurno} & Backend de autenticación de Django: rechaza el inicio de sesión fuera de turno o sin horario (UC-25).\\
+\texttt{ControlTurnoMiddleware} & Aplica RN-35 en cada petición (sección 5).\\
+\bottomrule
+\end{longtable}
+
+
+

@@ -1,0 +1,14 @@
+@startsalt M-18_SolicitarCambio
+title M-18 Solicitar cambio de propietario (HU-016)
+{+
+  {^"Solicitar cambio de propietario"
+    Vehículo | JTR625 · Mazda 3
+    Propietario actual | Laura Méndez · CC 1023456789
+    Nuevo propietario | { "1012345678  " | [Buscar] | Andrés Gómez (activo) }
+    Motivo | "Venta del vehículo                      "
+  }
+  <i>La solicitud queda pendiente hasta que el administrador la apruebe.</i>
+  <color:red>Ya hay una solicitud pendiente para este vehículo.</color>
+  [Cancelar] | [Enviar solicitud]
+}
+@endsalt

@@ -21,6 +21,9 @@ DEC-009 & Documentación LaTeX y herramienta de diagramas & \textbf{Aprobada} (e
 DEC-010 & Versiones de Python y Django & \textbf{Aprobada} (Django 5.2 LTS, Python 3.12 o superior)\\
 DEC-011 & Creación de operadores por el administrador desde la iteración 1 & \textbf{Aprobada} (A)\\
 DEC-012 & Algoritmo de hash de contraseñas & \textbf{Aprobada} (A: Argon2 con argon2-cffi)\\
+DEC-013 & Registro de ``qué operador hizo qué operación'' (iteración 2) & \textbf{Aprobada} (B: bitácora de operaciones)\\
+DEC-014 & Modelo de horarios y autorizaciones fuera de turno (iteración 2) & \textbf{Aprobada} (A: franjas por día + autorizaciones)\\
+DEC-015 & Cambio de propietario con solicitud e historial (iteración 2) & \textbf{Aprobada} (A: solicitud + historial)\\
 DEC-002, RF-010, RNF-012, RNF-013 & Envío automático de correo, un proceso diario y credenciales fuera del código. & \\
 \bottomrule
 \end{longtable}
@@ -116,6 +119,30 @@ DEC-002, RF-010, RNF-012, RNF-013 & Envío automático de correo, un proceso dia
   \item[Problema] RNF-001 (aprobado) exige bcrypt o Argon2, pero Django usa PBKDF2 por defecto. Se detectó al redactar el documento de arquitectura.
   \item[Decisión seleccionada] A. Argon2 como algoritmo principal (\texttt{PASSWORD\_HASHERS} con \texttt{Argon2PasswordHasher} en primer lugar).
   \item[Justificación] Respeta RNF-001 tal como se aprobó. El equipo aceptó la recomendación.
+  \item[Fecha] 2026-11-15
+  \item[Estado] Aprobada.
+\end{description}
+\subsection{DEC-013 — Registro de ``qué operador hizo qué operación''}
+\begin{description}[style=nextline]
+  \item[Problema] P-32 pide mostrar qué operador hizo cada operación (RNF-004, RN-34).
+  \item[Decisión seleccionada] B. Bitácora de operaciones.
+  \item[Justificación] Guarda todas las operaciones y permite mostrarlas por usuario, vehículo o propietario. El equipo aceptó la recomendación.
+  \item[Fecha] 2026-11-15
+  \item[Estado] Aprobada.
+\end{description}
+\subsection{DEC-014 — Modelo de horarios y autorizaciones fuera de turno}
+\begin{description}[style=nextline]
+  \item[Problema] P-27, P-34, P-35 y P-37 definen turnos fijos, turnos nocturnos, varias franjas por día y autorizaciones del administrador.
+  \item[Decisión seleccionada] A.
+  \item[Justificación] Es flexible: admite varias franjas por día (P-37) y turnos nocturnos (P-35), y reutiliza la tabla que ya existe. El nombre del turno se calcula para el encabezado. El equipo aceptó la recomendación.
+  \item[Fecha] 2026-11-15
+  \item[Estado] Aprobada.
+\end{description}
+\subsection{DEC-015 — Cambio de propietario con solicitud e historial}
+\begin{description}[style=nextline]
+  \item[Problema] P-29: el cambio de propietario se pide al administrador y debe quedar el registro del propietario anterior.
+  \item[Decisión seleccionada] A.
+  \item[Justificación] Cumple con que la petición pase por el administrador y conserva el historial. El equipo aceptó la recomendación.
   \item[Fecha] 2026-11-15
   \item[Estado] Aprobada.
 \end{description}

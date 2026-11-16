@@ -1,15 +1,16 @@
 @startuml ARQ-03_Componentes
-' ARQ-03 - Diagrama de componentes de la aplicación web (C4 nivel 3) - Iteración 1 - v1
+' ARQ-03 - Diagrama de componentes (C4 nivel 3) - v2 (iteración 2: módulo bitacora)
 !include <C4/C4_Component>
 LAYOUT_TOP_DOWN()
 title Componentes de la aplicación web (módulos Django)
 
 Container_Boundary(web, "Aplicación web Django") {
-  Component(cuentas, "cuentas", "Módulo Django", "Inicio de sesión, roles (Administrador / Operador), gestión de operadores (RF-106).")
+  Component(cuentas, "cuentas", "Módulo Django", "Inicio de sesión, roles, operadores, horarios, autorizaciones y control de turno (RF-106, RF-107, RF-110).")
   Component(es, "entradas_salidas", "Módulo Django", "Entradas, salidas, ocupación, historial (RF-001 a RF-006).")
   Component(nov, "novedades", "Módulo Django", "Registro y consulta de novedades (RF-007, RF-008).")
   Component(notif, "notificaciones", "Módulo Django", "Vencimientos dentro, avisos simulados, plazo de 8 días y autoridades (RF-009 a RF-012). Contiene el planificador.")
-  Component(uc, "usuarios_celdas", "Módulo Django", "Propietarios, vehículos y celdas. Iteración 1: solo modelos y datos de demostración.")
+  Component(uc, "usuarios_celdas", "Módulo Django", "Propietarios, vehículos, celdas, cambio de propietario e historial (iteración 2).")
+  Component(bit, "bitacora", "Módulo Django", "Bitácora de operaciones (RF-111, DEC-013, DM-08).")
   Component(pagos, "pagos", "Módulo Django", "Pagos y vigencia de la mensualidad. Iteración 1: modelo, servicio de vigencia y datos de demostración.")
   Component(core, "core", "Módulo Django", "Plantilla base, reloj del sistema, interfaz ServicioCorreo y correo simulado.")
   Component(demo, "demo", "Módulo Django", "Comando cargar_datos_demo (RNF-014). Depende de todos; nadie depende de él.")
@@ -27,6 +28,9 @@ Rel(notif, core, "Usa ServicioCorreo y reloj")
 Rel(es, core, "Usa reloj")
 Rel(pagos, uc, "Pagos por vehículo")
 Rel(cuentas, core, "Plantilla base")
+Rel(uc, bit, "Registra operaciones")
+Rel(cuentas, bit, "Registra operaciones")
+Rel(bit, core, "Base")
 Rel(demo, uc, "Crea datos de demostración")
 Rel(demo, pagos, "Crea pagos de demostración")
 Rel(demo, cuentas, "Crea usuarios de prueba")
