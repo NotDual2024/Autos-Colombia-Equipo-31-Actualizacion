@@ -1,0 +1,144 @@
+@startuml MR-01_Relacional
+' MR-01 - Modelo relacional / físico (notación pata de gallo) - SQLite - v1.1
+!pragma layout smetana
+hide circle
+skinparam linetype ortho
+skinparam class {
+  BackgroundColor #FDFDFD
+  BorderColor #0B3D91
+}
+title Modelo relacional y físico - SQLite (PK = clave primaria, FK = clave foránea, UQ = única)
+
+entity "cuentas_usuario" as usuario {
+  * id : INTEGER <<PK>>
+  --
+  * username : VARCHAR(150) <<UQ>>
+  * password : VARCHAR(128)
+  * first_name : VARCHAR(150)
+  * last_name : VARCHAR(150)
+  * rol : VARCHAR(15) <<CHECK>>
+  * is_active : BOOLEAN
+  * date_joined : DATETIME
+    last_login : DATETIME
+}
+entity "cuentas_horariooperador\n(provisional, iteración 2)" as horario {
+  * id : INTEGER <<PK>>
+  --
+  * operador_id : INTEGER <<FK>>
+  * dia_semana : SMALLINT <<CHECK 1..7>>
+  * hora_inicio : TIME
+  * hora_fin : TIME
+}
+entity "usuarios_celdas_propietario" as propietario {
+  * id : INTEGER <<PK>>
+  --
+  * nombre_completo : VARCHAR(150)
+  * numero_documento : VARCHAR(10) <<UQ, CHECK cédula>>
+  * telefono : VARCHAR(20)
+  * correo : VARCHAR(254)
+  * direccion : VARCHAR(200)
+  * activo : BOOLEAN
+  * fecha_registro : DATETIME
+}
+entity "usuarios_celdas_vehiculo" as vehiculo {
+  * id : INTEGER <<PK>>
+  --
+  * placa : VARCHAR(6) <<UQ, CHECK formato>>
+  * tipo : VARCHAR(10) <<CHECK>>
+  * marca : VARCHAR(50)
+  * nombre : VARCHAR(50)
+  * modelo : SMALLINT <<CHECK año>>
+  * color : VARCHAR(30)
+  * propietario_id : INTEGER <<FK>>
+  * activo : BOOLEAN
+  * fecha_registro : DATETIME
+}
+entity "usuarios_celdas_celda" as celda {
+  * id : INTEGER <<PK>>
+  --
+  * codigo : VARCHAR(10) <<UQ>>
+  * tipo : VARCHAR(15) <<CHECK>>
+  * activa : BOOLEAN
+}
+entity "pagos_tarifa" as tarifa {
+  * id : INTEGER <<PK>>
+  --
+  * categoria : VARCHAR(15) <<UQ1>>
+  * valor : INTEGER <<CHECK positivo>>
+  * vigente_desde : DATE <<UQ1>>
+}
+entity "pagos_pago" as pago {
+  * id : INTEGER <<PK>>
+  --
+  * vehiculo_id : INTEGER <<FK>>
+  * periodo_inicio : DATE
+  * periodo_fin : DATE
+  * valor : INTEGER <<CHECK positivo>>
+  * fecha_pago : DATETIME
+  * registrado_por_id : INTEGER <<FK>>
+}
+entity "entradas_salidas_estadia" as estadia {
+  * id : INTEGER <<PK>>
+  --
+  * vehiculo_id : INTEGER <<FK>>
+  * celda_id : INTEGER <<FK>>
+  * fecha_hora_entrada : DATETIME
+  * usuario_entrada_id : INTEGER <<FK>>
+    fecha_hora_salida : DATETIME
+    usuario_salida_id : INTEGER <<FK>>
+  ..
+  UQ parcial (vehiculo_id) si salida nula
+  UQ parcial (celda_id) si salida nula
+}
+entity "novedades_novedad" as novedad {
+  * id : INTEGER <<PK>>
+  --
+  * tipo : VARCHAR(10) <<CHECK>>
+  * descripcion : TEXT
+  * fecha_hora_ocurrencia : DATETIME
+  * fecha_hora_registro : DATETIME
+  * registrado_por_id : INTEGER <<FK>>
+}
+entity "novedades_novedadestadia" as novest {
+  * novedad_id : INTEGER <<PK, FK>>
+  * estadia_id : INTEGER <<PK, FK>>
+}
+entity "notificaciones_avisocorreo" as aviso {
+  * id : INTEGER <<PK>>
+  --
+  * pago_id : INTEGER <<FK>>
+    numero_envio : SMALLINT <<CHECK 1..2>>
+  * origen : VARCHAR(10) <<CHECK>>
+    enviado_por_id : INTEGER <<FK>>
+  * destinatario : VARCHAR(254)
+  * asunto : VARCHAR(200)
+  * cuerpo : TEXT
+  * fecha_hora : DATETIME
+  * resultado : VARCHAR(20) <<CHECK>>
+  ..
+  UQ parcial (pago_id, numero_envio)
+}
+entity "notificaciones_contactoautoridad" as contacto {
+  * id : INTEGER <<PK>>
+  --
+  * pago_id : INTEGER <<FK>>
+  * fecha_hora : DATETIME
+  * registrado_por_id : INTEGER <<FK>>
+  * observacion : TEXT
+}
+
+propietario ||--o{ vehiculo
+vehiculo ||--o{ pago
+vehiculo ||--o{ estadia
+celda ||--o{ estadia
+estadia ||--o{ novest
+novedad ||--|{ novest
+pago ||--o{ aviso
+pago ||--o{ contacto
+usuario ||--o{ horario
+usuario ||--o{ estadia : registra
+usuario ||--o{ novedad : registra
+usuario ||--o{ pago : registra
+usuario |o--o{ aviso : envía (manual)
+usuario ||--o{ contacto : registra
+@enduml

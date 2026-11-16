@@ -23,4 +23,14 @@
   morekeywords={Escenario,Dado,Dada,Dados,Dadas,Cuando,Entonces,Y},
   keywordstyle=\bfseries\color{azul}
 }
+\lstdefinestyle{sql}{
+  language=SQL, basicstyle=\ttfamily\scriptsize, backgroundcolor=\color{gris},
+  frame=single, rulecolor=\color{black!20}, breaklines=true, columns=fullflexible,
+  keepspaces=true, inputencoding=utf8, extendedchars=true,
+  keywordstyle=\bfseries\color{azul}, commentstyle=\itshape\color{black!55},
+  morekeywords={AUTOINCREMENT,REFERENCES,RESTRICT,GLOB,PRAGMA,BOOLEAN,DATETIME,SMALLINT,TEXT},
+  literate={á}{{\'a}}1 {é}{{\'e}}1 {í}{{\'i}}1 {ó}{{\'o}}1 {ú}{{\'u}}1
+           {Á}{{\'A}}1 {É}{{\'E}}1 {Í}{{\'I}}1 {Ó}{{\'O}}1 {Ú}{{\'U}}1
+           {ñ}{{\~n}}1 {Ñ}{{\~N}}1 {–}{{--}}1 {"}{{\textquotedbl}}1
+}
 \setlist{itemsep=2pt,topsep=4pt}

@@ -14,19 +14,20 @@ Se avanza paso a paso, por iteraciones:
 En cada iteración: documentación y diagramas (Arquitecto) → código (Ingeniero) → commit a GitHub.
 
 ## Fase actual
-Iteración 1. Arquitectura aprobada. Primer PDF LaTeX compilado (53 páginas), en revisión por el equipo. Siguiente: modelo de datos (MER, MR, físico).
+Iteración 1. Modelo de datos v1.1 aprobado e incorporado al PDF (64 páginas). Siguiente: diagramas UML (casos de uso, clases, paquetes) y mockups.
 
 ## Artefactos
 | Artefacto | Archivo | Estado |
 |---|---|---|
 | Requerimientos v1 | docs/Requerimientos_v1.md | Sustituido por v2 (se conserva como historial) |
-| Requerimientos v2.9 (iteración 1) | docs/Requerimientos_v2.md | **Aprobado** (2026-11-15; v2.5 = RNF-014, v2.6 = RF-106 básico y RN-21, v2.7 = correo simulado y RF-012, v2.8 = RN-22 por P-20, v2.9 = un solo reenvío) |
+| Requerimientos v2.10 (iteración 1) | docs/Requerimientos_v2.md | **Aprobado** (2026-11-15; v2.5 = RNF-014, v2.6 = RF-106 básico y RN-21, v2.7 = correo simulado y RF-012, v2.8 = RN-22 por P-20, v2.9 = un solo reenvío, v2.10 = RN-23 y datos de propietario y vehículo) |
 | Historias de usuario v1 (iteración 1) | docs/Historias_Usuario_v1.md | HU-001 a HU-011 **Aprobadas** (2026-11-15) |
 | .gitignore | .gitignore | Creado |
 | PlantUML 1.2026.10 | tools/plantuml.jar (no se versiona) | Descargado del repositorio oficial y verificado (diagrama de clases con Smetana y mockup Salt) |
 | Registro de decisiones | docs/Registro_Decisiones.md | En uso |
 | Arquitectura v1 | docs/Arquitectura_v1.md + docs/latex/diagrams/arquitectura/ARQ-01 a ARQ-05 | **Aprobado** (2026-11-15) |
-| Documento LaTeX | docs/latex/main.tex → main.pdf (capítulos 03, 05 y 11 generados con scripts/generar_capitulos.py) | Primera versión compilada; capítulos 06–10 y 12 pendientes |
+| Modelo de datos v1.1 | docs/Modelo_Datos_v1.md + diagrams/datos (MER-01, MR-01) + docs/sql/ddl_sqlite_v1.sql + validar_ddl.py (42/42) | **Aprobado** (2026-11-15) |
+| Documento LaTeX | docs/latex/main.tex → main.pdf (capítulos 03, 05 y 11 generados con scripts/generar_capitulos.py) | Compilado (64 páginas); capítulos 06, 08, 09, 10 y 12 pendientes |
 
 ## Decisiones
 | ID | Decisión | Estado |
@@ -57,6 +58,7 @@ Iteración 1. Arquitectura aprobada. Primer PDF LaTeX compilado (53 páginas), e
 - Los 8 días se cuentan desde el vencimiento de la mensualidad. Se envía un solo correo automático el día del vencimiento: debe pagar para mantener el vehículo o habrá consecuencias.
 - Correo de retiro: el primero (automático o manual) y como máximo un reenvío con confirmación (RN-22).
 - Un vehículo con la mensualidad vencida puede salir, pero no vuelve a entrar mientras no pague.
+- Propietario: nombre completo, cédula, teléfono, correo y dirección. Vehículo: placa (ABC123 / ABC12D / ABC12), tipo, marca, nombre, modelo y color.
 - Al registrar una novedad, el sistema verifica que todos los vehículos involucrados estaban dentro a la hora del hecho.
 - Si el propietario paga dentro de los 8 días, el vehículo sale del proceso de retiro.
 - Las novedades no llevan fotos ni adjuntos en esta versión.
@@ -70,6 +72,7 @@ Iteración 1. Arquitectura aprobada. Primer PDF LaTeX compilado (53 páginas), e
 - Fecha: la actual. Semestre: sexto.
 
 ## Pendientes
+- Ninguna decisión abierta. Siguiente: casos de uso, clases, paquetes y mockups.
 - Revisión del primer PDF LaTeX.
 
 ## Próximas actividades
@@ -77,4 +80,5 @@ Iteración 1. Arquitectura aprobada. Primer PDF LaTeX compilado (53 páginas), e
 2. ~~Aprobar las historias de usuario de la iteración 1~~ (hecho 2026-11-15).
 3. ~~Aprobar la arquitectura v1~~ (hecho 2026-11-15).
 4. ~~Crear el documento LaTeX inicial~~ (hecho 2026-11-15; pendiente la revisión del equipo).
-5. MER completo (DEC-001), MR, modelo físico, casos de uso, clases, paquetes y mockups de la iteración 1.
+5. ~~Aprobar el modelo de datos e incorporarlo al capítulo 7~~ (hecho 2026-11-15).
+6. Casos de uso, diagrama de clases, diagrama de paquetes y mockups de la iteración 1.

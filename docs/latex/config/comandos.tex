@@ -3,6 +3,11 @@
   \begin{figure}[H]\centering
   \includegraphics[width=#4\textwidth,height=0.8\textheight,keepaspectratio]{#1}
   \caption{#2}\label{#3}\end{figure}}
+% Figura de diagrama en página horizontal: \diagramahorizontal{ruta}{pie}{etiqueta}
+\newcommand{\diagramahorizontal}[3]{%
+  \begin{landscape}\begin{figure}[p]\centering
+  \includegraphics[width=22cm,height=14.5cm,keepaspectratio]{#1}
+  \caption{#2}\label{#3}\end{figure}\end{landscape}}
 % Recuadro de capítulo pendiente
 \newcommand{\pendiente}[1]{%
   \begin{center}\fcolorbox{black!30}{gris}{\parbox{0.9\textwidth}{\textbf{Capítulo en elaboración.} #1}}\end{center}}

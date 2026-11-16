@@ -1,7 +1,142 @@
 \chapter{Modelo de datos}\label{cap:datos}
 
-\pendiente{Se agregan el Modelo Entidad-Relación (MER) del sistema completo (DEC-001), el modelo relacional normalizado y el modelo físico para SQLite.}
+Por la decisión DEC-001, el modelo de datos cubre el \textbf{sistema completo} (las tres iteraciones), aunque en la iteración 1 solo se implementan las pantallas de entradas y salidas, novedades, avisos y operadores. Versión 1.1, aprobada por el equipo el 2026-11-15.
 
 \section{Modelo Entidad-Relación (MER)}
+La figura~\ref{fig:mer01} (en la página siguiente, en horizontal) muestra el MER del sistema completo.
+\diagramahorizontal{datos/MER-01_Chen.png}{MER-01: Modelo Entidad-Relación en notación de Chen (sistema completo)}{fig:mer01}
+
+\subsection{Entidades}
+\begin{longtable}{>{\raggedright\arraybackslash}p{4.6cm}>{\raggedright\arraybackslash}p{6.6cm}>{\raggedright\arraybackslash}p{3.2cm}}
+\toprule
+\textbf{Entidad} & \textbf{Qué representa} & \textbf{Origen}\\
+\midrule\endhead
+USUARIO & Persona que usa el sistema: administrador u operador. & RNF-001, RNF-002, RF-106\\
+HORARIO\_OPERADOR & Franja de trabajo de un operador. Entidad débil; provisional hasta la iteración 2. & RF-107\\
+PROPIETARIO & Cliente mensualista dueño de uno o varios vehículos. & RF-101, DEC-002\\
+VEHICULO & Vehículo registrado: moto, carro o camioneta. & RF-102, RN-02, RN-23\\
+CELDA & Espacio de parqueo de tipo moto o carro/camioneta. & RF-103, RN-08, RN-20\\
+TARIFA & Valor mensual por categoría de vehículo, con fecha de vigencia. & RF-204, RN-19\\
+PAGO & Mensualidad pagada de un vehículo para un periodo; su fin es la fecha de vencimiento. & RF-201, RN-10\\
+ESTADIA & Permanencia de un vehículo en una celda, desde la entrada hasta la salida. & RF-001, RF-004\\
+NOVEDAD & Hecho ocurrido dentro de las instalaciones. & RF-007, RN-14 a RN-16\\
+AVISO\_CORREO & Cada intento de enviar (simulado) el correo de retiro por un vencimiento. & RF-010, RF-012, RN-11, RN-22\\
+CONTACTO\_AUTORIDAD & Registro de que el administrador contactó a las autoridades por un vencimiento. & RF-011, RN-12\\
+\bottomrule
+\end{longtable}
+
+\subsection{Relaciones y cardinalidades}
+\begin{longtable}{>{\raggedright\arraybackslash}p{4.4cm}>{\raggedright\arraybackslash}p{1.6cm}>{\raggedright\arraybackslash}p{8.4cm}}
+\toprule
+\textbf{Relación} & \textbf{Card.} & \textbf{Justificación}\\
+\midrule\endhead
+PROPIETARIO posee VEHICULO & 1 : N & Un cliente puede tener varios vehículos (RN-10). Todo vehículo tiene dueño (participación total).\\
+VEHICULO paga PAGO & 1 : N & La mensualidad se paga por vehículo (RN-10).\\
+VEHICULO ingresa ESTADIA & 1 : N & Un vehículo entra muchas veces, con máximo una estadía abierta (RN-04).\\
+CELDA ocupa ESTADIA & 1 : N & Una celda se usa muchas veces, con máximo una estadía abierta (RN-05).\\
+NOVEDAD involucra ESTADIA & N : M & Una novedad vincula uno o varios vehículos (RN-14). Se vincula a la estadía para probar que el vehículo estaba dentro (RF-007).\\
+PAGO avisa AVISO\_CORREO & 1 : N & El vencimiento se identifica por el pago vencido; máximo un primer correo y un reenvío exitosos (RN-11, RN-22).\\
+PAGO escala CONTACTO\_AUTORIDAD & 1 : N & Se permiten varios contactos por vencimiento (P-25).\\
+USUARIO tiene HORARIO\_OPERADOR & 1 : N & Relación identificadora de la entidad débil (provisional).\\
+USUARIO registra ESTADIA, NOVEDAD, PAGO, CONTACTO; envía AVISO manual & 1 : N & Trazabilidad (RNF-004). El diagrama solo dibuja ``registra ESTADIA'' para no saturarlo.\\
+\bottomrule
+\end{longtable}
+TARIFA no se relaciona con PAGO por clave foránea: el pago copia el valor vigente al momento de pagar (DM-04).
+
+\subsection{Decisiones de diseño del modelo}
+\begin{description}[style=nextline]
+  \item[DM-01] El estado ocupada/libre de una celda se calcula a partir de las estadías abiertas; no se guarda, para evitar datos contradictorios.
+  \item[DM-02] La novedad se vincula a la estadía (tabla asociativa); el vehículo se obtiene de ella sin redundancia.
+  \item[DM-03] El vencimiento se identifica por el pago vencido. \texttt{numero\_envio} (1 = primero, 2 = reenvío) con unicidad por pago hace que la base de datos imponga RN-11 y RN-22. El proceso de retiro se calcula, por lo que RN-17 se cumple al pagar.
+  \item[DM-04] Desnormalización controlada: el pago guarda una copia del valor, y el aviso guarda el destinatario, el asunto y el cuerpo, como evidencia histórica.
+  \item[DM-05] Todas las claves foráneas usan \texttt{ON DELETE RESTRICT}; los registros se desactivan, nunca se borran (RN-07).
+  \item[DM-06] Los valores se guardan en pesos enteros (\texttt{INTEGER}).
+  \item[DM-07] Zona horaria \texttt{America/Bogota}; Django guarda las fechas en UTC.
+\end{description}
+
 \section{Modelo relacional (MR)}
-\section{Modelo físico}
+La figura~\ref{fig:mr01} (en horizontal) muestra las tablas con sus tipos, claves y relaciones; sirve también como diagrama del modelo físico.
+\diagramahorizontal{datos/MR-01_Relacional.png}{MR-01: Modelo relacional y físico en notación pata de gallo}{fig:mr01}
+
+\begin{longtable}{>{\raggedright\arraybackslash}p{4.4cm}>{\raggedright\arraybackslash}p{10cm}}
+\toprule
+\textbf{Tabla} & \textbf{Claves y restricciones}\\
+\midrule\endhead
+\texttt{cuentas\_usuario} & PK id · UQ username · CHECK rol $\in$ \{ADMINISTRADOR, OPERADOR\}\\
+\texttt{cuentas\_horariooperador} & PK id · FK operador\_id · CHECK día 1..7 (provisional)\\
+\texttt{usuarios\_celdas\_propietario} & PK id · UQ numero\_documento · CHECK cédula de 5 a 10 dígitos · correo y dirección no nulos\\
+\texttt{usuarios\_celdas\_vehiculo} & PK id · UQ placa · CHECK formato de placa (RN-23) · CHECK tipo · CHECK modelo 1950--2100 · FK propietario\_id\\
+\texttt{usuarios\_celdas\_celda} & PK id · UQ codigo · CHECK tipo\\
+\texttt{pagos\_tarifa} & PK id · UQ (categoria, vigente\_desde) · CHECK valor $>$ 0\\
+\texttt{pagos\_pago} & PK id · FK vehiculo\_id, registrado\_por\_id · CHECK periodo\_fin $\geq$ periodo\_inicio · CHECK valor $>$ 0\\
+\texttt{entradas\_salidas\_estadia} & PK id · 4 FK · CHECK salida $>$ entrada · CHECK salida y usuario de salida nulos a la vez · UQ parcial vehiculo\_id y UQ parcial celda\_id cuando la salida es nula\\
+\texttt{novedades\_novedad} & PK id · FK registrado\_por\_id · CHECK tipo · CHECK descripción no vacía · CHECK ocurrencia $\leq$ registro\\
+\texttt{novedades\_novedadestadia} & PK (novedad\_id, estadia\_id) · 2 FK\\
+\texttt{notificaciones\_avisocorreo} & PK id · FK pago\_id, enviado\_por\_id · CHECK numero\_envio $\in$ \{1, 2\} · CHECK manual $\Leftrightarrow$ usuario · CHECK exitoso $\Leftrightarrow$ número · UQ parcial (pago\_id, numero\_envio)\\
+\texttt{notificaciones\_contactoautoridad} & PK id · 2 FK · CHECK observación no vacía\\
+\bottomrule
+\end{longtable}
+
+\subsection{Dependencias funcionales}
+\begin{itemize}
+  \item \texttt{usuario.id} $\rightarrow$ username, rol, \ldots; \texttt{username} $\rightarrow$ id (clave candidata).
+  \item \texttt{propietario.id} $\rightarrow$ nombre\_completo, numero\_documento, telefono, correo, direccion; \texttt{numero\_documento} $\rightarrow$ id.
+  \item \texttt{vehiculo.id} $\rightarrow$ placa, tipo, marca, nombre, modelo, color, propietario\_id; \texttt{placa} $\rightarrow$ id. Marca, nombre y modelo no determinan otros atributos.
+  \item \texttt{celda.id} $\rightarrow$ codigo, tipo; \texttt{codigo} $\rightarrow$ id.
+  \item \texttt{pago.id} $\rightarrow$ vehiculo\_id, periodo\_inicio, periodo\_fin, valor, fecha\_pago, registrado\_por\_id.
+  \item \texttt{estadia.id} $\rightarrow$ vehiculo\_id, celda\_id, fechas y usuarios.
+  \item \texttt{avisocorreo.id} $\rightarrow$ \ldots; (\texttt{pago\_id}, \texttt{numero\_envio}) $\rightarrow$ id cuando el número no es nulo.
+\end{itemize}
+
+\subsection{Normalización}
+\begin{description}[style=nextline]
+  \item[1FN] Todos los atributos son atómicos. Los vehículos de una novedad se guardan en la tabla asociativa, no como lista.
+  \item[2FN] Las tablas con clave simple cumplen trivialmente; la única clave compuesta (\texttt{novedadestadia}) no tiene atributos fuera de la clave.
+  \item[3FN] Ningún atributo no clave depende de otro atributo no clave. El vehículo de una novedad no se repite (DM-02) y el estado de la celda no se guarda (DM-01).
+  \item[Excepciones justificadas] Las copias históricas de DM-04 representan el valor en el momento del hecho y no dependen del valor actual de la tarifa o del propietario.
+\end{description}
+
+\section{Modelo físico (SQLite 3)}
+En la implementación, las tablas las crean las migraciones de Django a partir de los modelos, que deben reproducir estas columnas, restricciones e índices. El script DDL documenta el diseño y permite validarlo.
+
+\subsection{Tipos de datos}
+\begin{longtable}{>{\raggedright\arraybackslash}p{2.8cm}>{\raggedright\arraybackslash}p{5.6cm}>{\raggedright\arraybackslash}p{6cm}}
+\toprule
+\textbf{Tipo lógico} & \textbf{SQLite / Django} & \textbf{Uso}\\
+\midrule\endhead
+Identificador & \texttt{INTEGER PRIMARY KEY} / \texttt{BigAutoField} & Claves primarias simples\\
+Texto corto & \texttt{VARCHAR(n)} / \texttt{CharField} & Placa (6), cédula (10), código de celda (10), marca y nombre (50), color (30), dirección (200), correo (254)\\
+Texto largo & \texttt{TEXT} / \texttt{TextField} & Descripción, cuerpo del correo, observación\\
+Enumerado & \texttt{VARCHAR} + \texttt{CHECK} / \texttt{choices} + \texttt{CheckConstraint} & Rol, tipos, origen, resultado\\
+Fecha & \texttt{DATE} / \texttt{DateField} & Periodo del pago, vigencia de tarifa\\
+Fecha y hora & \texttt{DATETIME} / \texttt{DateTimeField} (UTC) & Entradas, salidas y registros\\
+Dinero & \texttt{INTEGER} / \texttt{PositiveIntegerField} & Valores en COP\\
+Año & \texttt{SMALLINT} / \texttt{PositiveSmallIntegerField} & Modelo del vehículo\\
+Booleano & \texttt{BOOLEAN} / \texttt{BooleanField} & \texttt{activo}, \texttt{is\_active}\\
+\bottomrule
+\end{longtable}
+SQLite tiene tipado flexible: los tipos declarados documentan la intención y Django valida los valores antes de guardarlos. Las restricciones \texttt{CHECK}, \texttt{UNIQUE} y de clave foránea sí las aplica el motor.
+
+\subsection{Índices}
+\begin{longtable}{>{\raggedright\arraybackslash}p{6cm}>{\raggedright\arraybackslash}p{8.4cm}}
+\toprule
+\textbf{Índice} & \textbf{Propósito}\\
+\midrule\endhead
+\texttt{uq\_estadia\_vehiculo\_abierta} (único parcial) & RN-04 y búsqueda de la estadía abierta de una placa (RF-001, RF-004)\\
+\texttt{uq\_estadia\_celda\_abierta} (único parcial) & RN-05, ocupación y consulta de celda (RF-003, RF-005)\\
+\texttt{idx\_estadia\_vehiculo\_entrada} & Historial por placa (RF-006) y validación de presencia en novedades (RF-007)\\
+\texttt{idx\_estadia\_entrada} & Historial por rango de fechas (RF-006)\\
+\texttt{idx\_pago\_vehiculo\_fin} & Vigencia de la mensualidad (RF-002) y vencimientos (RF-009)\\
+\texttt{uq\_aviso\_envio} (único parcial) & RN-11 y RN-22\\
+\texttt{idx\_novedad\_ocurrencia} & Consulta de novedades por fechas (RF-008)\\
+Otros (claves foráneas y \texttt{UNIQUE}) & Búsquedas por placa, código, usuario, cédula y relaciones\\
+\bottomrule
+\end{longtable}
+
+\subsection{Integridad y validación}
+Las fechas de registro las asigna la aplicación con el reloj del sistema, para poder simularlas en las pruebas. Las reglas que cruzan tablas (RN-03 vigencia, RN-08 compatibilidad de celda, RN-16 presencia y RN-22 confirmación) se validan en los servicios, dentro de transacciones.
+
+El script se ejecutó en SQLite 3.50.4 con \texttt{docs/sql/validar\_ddl.py}: \textbf{42 comprobaciones, 42 aprobadas}. Entre ellas se verificó el rechazo de una segunda estadía abierta por vehículo o por celda, de placas con formato inválido, de un segundo reenvío del correo y del borrado de un vehículo con estadías; y la aceptación de salidas que cruzan la medianoche y de novedades con dos vehículos.
+
+\subsection{Script DDL}
+\lstinputlisting[style=sql]{../sql/ddl_sqlite_v1.sql}

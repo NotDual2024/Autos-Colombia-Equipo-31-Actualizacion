@@ -2,7 +2,7 @@
 
 \chapter{Requerimientos}\label{cap:requerimientos}
 
-Este capítulo reproduce los requerimientos de la iteración 1 aprobados por el equipo (versión 2.9. del documento de requerimientos). Etiquetas de origen: \textbf{[E]} enunciado, \textbf{[U]} indicado por el equipo, \textbf{[I]} inferido y confirmado. Prioridad según MoSCoW (Must, Should, Could, Won't).
+Este capítulo reproduce los requerimientos de la iteración 1 aprobados por el equipo (versión 2.10. del documento de requerimientos). Etiquetas de origen: \textbf{[E]} enunciado, \textbf{[U]} indicado por el equipo, \textbf{[I]} inferido y confirmado. Prioridad según MoSCoW (Must, Should, Could, Won't).
 
 \section{Actores}
 \begin{longtable}{>{\raggedright\arraybackslash}p{3.4cm}>{\raggedright\arraybackslash}p{8.2cm}>{\raggedright\arraybackslash}p{2.8cm}}
@@ -42,7 +42,8 @@ RN-18 & Las novedades no llevan fotos ni archivos adjuntos en esta versión. La 
 RN-19 & La tarifa mensual depende del tipo de vehículo: \textbf{carro o camioneta, 150 000 COP}; \textbf{moto, 80 000 COP}. & [U] (P-08). Se aplica en la iteración 3.\\
 RN-20 & El parqueadero opera las 24 horas. Por ahora tiene \textbf{150 celdas de carro/camioneta} y \textbf{50 celdas de moto}. & [U] (P-06). Como el equipo dijo ``por el momento'', la cantidad de celdas se trata como un dato configurable y no como un valor fijo en el código [I].\\
 RN-21 & Si el servidor estuvo apagado el día del vencimiento, el correo pendiente se envía al encenderlo, siempre que el vehículo siga dentro y sin pagar. El plazo de RN-12 se sigue contando desde el vencimiento. & [U] (P-19)\\
-RN-22 & Después del primer correo de un vencimiento (automático o manual), el botón ``Enviar correo'' sigue disponible, pero pide confirmación para reenviar. Se permite \textbf{un solo reenvío} por vencimiento, es decir, \textbf{2 correos en total}: el primero y un reenvío. & [U] (P-20, aclarado por el equipo el 2026-11-15)\\
+RN-22 & Después del primer correo de un vencimiento (automático o manual), el botón ``Enviar correo'' sigue disponible, pero pide confirmación para reenviar. Se permite \textbf{un solo reenvío} por vencimiento, es decir, \textbf{2 correos en total}: el primero y un reenvío. Solo cuentan los envíos exitosos; un intento fallido se registra y se puede reintentar. & [U] (P-20, aclarado por el equipo el 2026-11-15)\\
+RN-23 & La placa se guarda en mayúsculas y sin espacios. Formatos válidos: carro o camioneta \texttt{ABC123}; moto \texttt{ABC12D} o \texttt{ABC12} (antigua). El formato debe corresponder al tipo de vehículo. & [U] (P-22). La correspondencia entre formato y tipo es [I].\\
 \bottomrule
 \end{longtable}
 
@@ -278,6 +279,7 @@ Origen & [U]\\
 \begin{itemize}
   \item Dado un vehículo que sigue dentro y cuya mensualidad venció hace 8 días o más, cuando se consulta la lista, entonces aparece marcado como ``Plazo vencido – contactar autoridades''.
   \item Dado ese vehículo, cuando se registra el contacto con las autoridades, entonces queda guardado con fecha, usuario y observación.
+  \item Dado un vehículo con un contacto ya registrado, cuando el administrador registra otro (seguimiento), entonces también queda guardado (P-25).
 \end{itemize}
 
 \subsection{RF-012 — Enviar correo de retiro manualmente (simulado)}
@@ -359,8 +361,8 @@ Estos requerimientos solo se identifican para diseñar el modelo de datos comple
 \toprule
 \textbf{ID} & \textbf{Nombre} & \textbf{Descripción} & \textbf{Origen}\\
 \midrule\endhead
-RF-101 & Registrar propietario & Documento, nombre, contacto y \textbf{correo electrónico obligatorio} (DEC-002). Lo hace el operador. & [E][U]\\
-RF-102 & Registrar vehículo & Placa, tipo y propietario. Un propietario puede tener varios vehículos. & [E][U]\\
+RF-101 & Registrar propietario & Nombre completo, cédula (CC), teléfono, \textbf{correo electrónico obligatorio} (DEC-002) y dirección. Lo hace el operador. & [E][U]\\
+RF-102 & Registrar vehículo & Placa (RN-23), tipo, marca, nombre (línea), modelo (año), color y propietario. Un propietario puede tener varios vehículos. & [E][U]\\
 RF-103 & Registrar celdas & Código y tipo (moto o carro/camioneta). Capacidad inicial: 150 de carro/camioneta y 50 de moto (RN-20). & [E][U]\\
 RF-104 & Consultar estado de celdas & Libres y ocupadas, por tipo. & [E]\\
 RF-105 & Modificar propietarios, vehículos y celdas & Actualizar datos y activar o inactivar. & [I]\\
