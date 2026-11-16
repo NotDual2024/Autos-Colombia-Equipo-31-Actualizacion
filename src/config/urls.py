@@ -8,6 +8,8 @@ urlpatterns = [
     path("operacion/", include("apps.entradas_salidas.urls")),
     path("novedades/", include("apps.novedades.urls")),
     path("vencidos/", include("apps.notificaciones.urls")),
+    path("clientes/", include("apps.usuarios_celdas.urls")),
+    path("bitacora/", include("apps.bitacora.urls")),
 ]
 
 handler403 = "apps.cuentas.views.acceso_denegado"

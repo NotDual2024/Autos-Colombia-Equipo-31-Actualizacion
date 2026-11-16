@@ -23,6 +23,7 @@
   font-size: 15px;
 }
 * { box-sizing: border-box; }
+[hidden] { display: none !important; } /* .alerta usa display:flex; el atributo hidden debe ganar */
 html, body { margin: 0; }
 body {
   font-family: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;

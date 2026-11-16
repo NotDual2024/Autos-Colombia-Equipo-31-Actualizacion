@@ -3,14 +3,18 @@
 Uso:  python manage.py cargar_datos_demo            (base de datos vacía)
       python manage.py cargar_datos_demo --reiniciar (BORRA todos los datos y los vuelve a cargar)
 """
-from datetime import timedelta
+from datetime import time, timedelta
 
 from django.core.management import call_command
 from django.core.management.base import BaseCommand, CommandError
 from django.db import transaction
 
 from apps.core import reloj
-from apps.cuentas.models import Rol, Usuario
+from apps.cuentas.models import HorarioOperador, Rol, Usuario
+from apps.usuarios_celdas import services as clientes
+from apps.usuarios_celdas.models import HistorialPropiedad
+from apps.bitacora import services as bitacora
+from apps.bitacora.models import Accion, Entidad
 from apps.demo import fabricas as f
 from apps.novedades.models import Novedad, NovedadEstadia
 
@@ -34,7 +38,8 @@ class Command(BaseCommand):
             self._cargar()
         self.stdout.write(self.style.SUCCESS("Datos de demostración cargados."))
         self.stdout.write(f"  Administrador: {ADMIN[0]} / {ADMIN[1]}")
-        self.stdout.write(f"  Operador:      {OPERADOR[0]} / {OPERADOR[1]}")
+        self.stdout.write(f"  Operador:      {OPERADOR[0]} / {OPERADOR[1]}  (turno de 24 horas)")
+        self.stdout.write(f"  Operador:      {OPERADOR_2[0]} / {OPERADOR_2[1]}  (lunes a viernes 06:00-07:00)")
 
     def _cargar(self):
         ahora = reloj.ahora()
@@ -45,6 +50,11 @@ class Command(BaseCommand):
         retirado = f.crear_usuario("operador_retirado", "OperadorDemo2026", "Pedro Gómez")
         retirado.is_active = False  # ejemplo de operador desactivado (RF-106)
         retirado.save(update_fields=["is_active"])
+        # Horarios (plan iteración 2, sección 3): operador 24 h para probar a cualquier hora;
+        # operador2 de lunes a viernes 06:00-07:00 para mostrar el bloqueo y la autorización.
+        f.asignar_horario_24h(op)
+        HorarioOperador.objects.bulk_create(
+            [HorarioOperador(operador=op2, dia_semana=d, hora_inicio=time(6), hora_fin=time(7)) for d in range(1, 6)])
         f.crear_celdas()
         f.crear_tarifas(hoy.replace(month=1, day=1))
 
@@ -116,3 +126,11 @@ class Command(BaseCommand):
         n3 = Novedad.objects.create(tipo="OBSERVACION", descripcion="El cliente solicita apoyo para salir de la celda. Se realiza acompañamiento sin inconvenientes.",
                                     fecha_hora_ocurrencia=d(1, 12, 35), fecha_hora_registro=d(1, 12, 38), registrado_por=op)
         NovedadEstadia.objects.create(novedad=n3, estadia=e_ant1)
+
+        # Iteración 2: historial de propietarios, solicitud pendiente y operaciones en la bitácora
+        HistorialPropiedad.objects.create(vehiculo=bgt, propietario=paula, desde=ahora - timedelta(days=400), hasta=ahora - timedelta(days=60))
+        bitacora.registrar(admin, Accion.APROBAR_CAMBIO, Entidad.VEHICULO, bgt.pk, "Aprobó el cambio de propietario de BGT219",
+                           {"propietario": [paula.nombre_completo, andres.nombre_completo]})
+        clientes.modificar_propietario(laura, {"nombre_completo": laura.nombre_completo, "numero_documento": laura.numero_documento,
+                                               "telefono": "3009876543", "correo": laura.correo, "direccion": laura.direccion}, op)
+        clientes.solicitar_cambio(jtr, andres, "Venta del vehículo", op)

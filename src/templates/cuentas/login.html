@@ -24,6 +24,9 @@
       <div class="llave">{% include "core/icono.html" with nombre="llave" %}</div>
       <h1 style="font-size:1.45rem">Bienvenido de nuevo</h1>
       <p class="suave" style="margin-top:0">Ingresa tus credenciales para iniciar tu turno.</p>
+      {% if aviso and not form.non_field_errors %}
+        <div class="alerta aviso">{% include "core/icono.html" with nombre="reloj" %}<div><strong>Sesión cerrada</strong>{{ aviso }}</div></div>
+      {% endif %}
       {% if form.non_field_errors %}
         <div class="alerta error">{% include "core/icono.html" with nombre="alerta" %}<div><strong>No pudimos iniciar sesión</strong>{{ form.non_field_errors.0 }}</div></div>
       {% endif %}

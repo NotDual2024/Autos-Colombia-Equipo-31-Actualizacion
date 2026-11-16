@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block titulo %}{% if vehiculo %}Editar vehículo{% else %}Registrar vehículo{% endif %}{% endblock %}
+{% block contenido %}
+<div class="migas">P16 / Clientes</div>
+<div class="titulo-pagina"><div><h1>{% if vehiculo %}Editar vehículo {{ vehiculo.placa }}{% else %}Registrar vehículo{% endif %}</h1>
+  <div class="suave">Para entrar, el vehículo necesita además la mensualidad pagada (RN-03).</div></div></div>
+{% if error %}<div class="alerta error" role="alert">{% include "core/icono.html" with nombre="alerta" %}<div>{{ error }}</div></div>{% endif %}
+<div class="tarjeta" style="max-width:760px">
+  {% if not vehiculo %}
+  <form method="get" class="filtros" style="margin-bottom:14px">
+    <div class="campo"><label for="documento">Propietario (cédula)</label><input id="documento" type="text" name="documento" value="{{ documento }}" inputmode="numeric" placeholder="Ej. 1023456789" {% if not propietario %}autofocus{% endif %}></div>
+    <div class="acciones-filtro"><button class="boton secundario" type="submit">{% include "core/icono.html" with nombre="buscar" %} Buscar</button></div>
+  </form>
+  {% if propietario %}<div class="alerta {% if propietario.activo %}exito{% else %}aviso{% endif %}">{% include "core/icono.html" with nombre="usuarios" %}<div><strong>{{ propietario.nombre_completo }}</strong>{% if propietario.activo %}Propietario activo{% else %}El propietario está inactivo{% endif %}</div></div>
+  {% elif busco %}<div class="alerta aviso">{% include "core/icono.html" with nombre="alerta" %}<div>No hay un propietario con esa cédula. <a href="{% url 'usuarios_celdas:propietario_nuevo' %}">Registrarlo</a></div></div>{% endif %}
+  {% endif %}
+  {% if vehiculo or propietario %}
+  <form method="post" class="formulario-registro">{% csrf_token %}
+    <input type="hidden" name="documento" value="{{ documento }}">
+    <div class="rejilla-mitades">
+      <div class="campo"><label for="placa">Placa</label>
+        {% if vehiculo %}<input id="placa" type="text" value="{{ vehiculo.placa }}" readonly><div class="diminuto" style="margin-top:4px">La placa no se puede editar (RN-26).</div>
+        {% else %}<input id="placa" type="text" name="placa" value="{{ placa }}" maxlength="7" placeholder="ABC123" autofocus>{% endif %}</div>
+      <div class="campo"><label for="tipo">Tipo</label><select id="tipo" name="tipo">{% for v, n in tipos %}<option value="{{ v }}" {% if v == datos.tipo %}selected{% endif %}>{{ n }}</option>{% endfor %}</select></div>
+      <div class="campo"><label for="marca">Marca</label><input id="marca" type="text" name="marca" value="{{ datos.marca|default:'' }}" maxlength="50"></div>
+      <div class="campo"><label for="nombre">Nombre (línea)</label><input id="nombre" type="text" name="nombre" value="{{ datos.nombre|default:'' }}" maxlength="50" placeholder="Ej. Spark"></div>
+      <div class="campo"><label for="modelo">Modelo (año)</label><input id="modelo" type="text" name="modelo" value="{{ datos.modelo|default:'' }}" inputmode="numeric" maxlength="4"></div>
+      <div class="campo"><label for="color">Color</label><input id="color" type="text" name="color" value="{{ datos.color|default:'' }}" maxlength="30"></div>
+    </div>
+    <div class="pie-acciones"><span class="diminuto">Carro y camioneta: ABC123 · Moto: ABC12D o ABC12</span><div class="grupo">
+      <a class="boton secundario" href="{% if vehiculo %}{% url 'usuarios_celdas:vehiculo' vehiculo.pk %}{% else %}{% url 'usuarios_celdas:vehiculos' %}{% endif %}" data-cancelar>Cancelar</a>
+      <button class="boton" type="submit">{% include "core/icono.html" with nombre="check" %} Guardar</button></div></div>
+  </form>
+  {% endif %}
+</div>
+{% endblock %}

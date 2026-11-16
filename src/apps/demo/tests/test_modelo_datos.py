@@ -35,7 +35,7 @@ class ModeloDatosTests(TestCase):
     def setUpTestData(cls):
         cls.admin = Usuario.objects.create_user("admin", password="x", rol=Rol.ADMINISTRADOR)
         cls.prop = Propietario.objects.create(
-            nombre_completo="Ana Gil", numero_documento="1023456789", telefono="300", correo="a@b.co",
+            nombre_completo="Ana Gil", numero_documento="1023456789", telefono="3001234567", correo="a@b.co",
             direccion="Cra 1 # 2-3", fecha_registro=D,
         )
         cls.carro = Vehiculo.objects.create(placa="ABC123", tipo="CARRO", marca="Chevrolet", nombre="Spark", modelo=2020, color="Rojo", propietario=cls.prop, fecha_registro=D)
@@ -54,13 +54,13 @@ class ModeloDatosTests(TestCase):
         self.falla(lambda: Usuario.objects.create(username="x", password="h", rol="JEFE"))
 
     def test_cedula_duplicada(self):
-        self.falla(lambda: Propietario.objects.create(nombre_completo="X", numero_documento="1023456789", telefono="1", correo="x@y.co", direccion="C", fecha_registro=D))
+        self.falla(lambda: Propietario.objects.create(nombre_completo="X", numero_documento="1023456789", telefono="3001112233", correo="x@y.co", direccion="C", fecha_registro=D))
 
     def test_cedula_con_letras(self):
-        self.falla(lambda: Propietario.objects.create(nombre_completo="X", numero_documento="10A3456", telefono="1", correo="x@y.co", direccion="C", fecha_registro=D))
+        self.falla(lambda: Propietario.objects.create(nombre_completo="X", numero_documento="10A3456", telefono="3001112233", correo="x@y.co", direccion="C", fecha_registro=D))
 
     def test_cedula_muy_corta(self):
-        self.falla(lambda: Propietario.objects.create(nombre_completo="X", numero_documento="1234", telefono="1", correo="x@y.co", direccion="C", fecha_registro=D))
+        self.falla(lambda: Propietario.objects.create(nombre_completo="X", numero_documento="1234", telefono="3001112233", correo="x@y.co", direccion="C", fecha_registro=D))
 
     # --- vehículos (RN-02, RN-23)
     def test_tipo_invalido(self):

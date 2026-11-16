@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block titulo %}Solicitudes de cambio{% endblock %}
+{% block contenido %}
+<div class="migas">P19 / Administración</div>
+<div class="titulo-pagina"><div><h1>Solicitudes de cambio de propietario</h1><div class="suave">Al aprobar, el propietario anterior queda en el historial del vehículo.</div></div></div>
+<div class="tarjeta"><form method="get" class="filtros"><div class="campo"><label for="estado">Estado</label><select id="estado" name="estado" onchange="this.form.submit()"><option value="">Todas</option>{% for v, n in estados %}<option value="{{ v }}" {% if v == estado %}selected{% endif %}>{{ n }}</option>{% endfor %}</select></div></form></div>
+<div class="tarjeta">
+  <table class="tabla"><thead><tr><th>Fecha</th><th>Vehículo</th><th>De</th><th>A</th><th>Motivo</th><th>Solicitó</th><th>Estado / acción</th></tr></thead>
+  <tbody>{% for s in solicitudes %}
+    <tr><td class="mono">{{ s.fecha_solicitud|date:"d/m/Y H:i" }}</td><td><a href="{% url 'usuarios_celdas:vehiculo' s.vehiculo.pk %}"><strong>{{ s.vehiculo.placa }}</strong></a></td>
+      <td>{{ s.propietario_actual.nombre_completo }}</td><td>{{ s.propietario_nuevo.nombre_completo }}</td><td>{{ s.motivo }}</td><td>{{ s.solicitado_por.nombre_completo }}</td>
+      <td>{% if s.estado == "PENDIENTE" %}
+        <form method="post" action="{% url 'usuarios_celdas:resolver_solicitud' s.pk %}" style="display:grid;gap:6px">{% csrf_token %}
+          <input type="text" name="observacion" placeholder="Observación (obligatoria para rechazar)">
+          <div class="acciones"><button class="boton pequeno" name="decision" value="aprobar" type="submit">Aprobar</button><button class="boton peligro pequeno" name="decision" value="rechazar" type="submit">Rechazar</button></div></form>
+      {% else %}<span class="etiqueta-estado {% if s.estado == 'RECHAZADA' %}rojo{% endif %}">{{ s.get_estado_display }}</span><div class="diminuto">{{ s.resuelto_por.nombre_completo }} · {{ s.fecha_resolucion|date:"d/m/Y H:i" }}{% if s.observacion %}<br>{{ s.observacion }}{% endif %}</div>{% endif %}</td></tr>
+  {% empty %}<tr><td colspan="7"><div class="vacio"><strong>No hay solicitudes</strong></div></td></tr>{% endfor %}</tbody></table>
+</div>
+{% endblock %}

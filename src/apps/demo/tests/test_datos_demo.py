@@ -19,6 +19,14 @@ class DatosDemoTests(TestCase):
         self.assertGreaterEqual(selectors.vehiculos_dentro().count(), 10)
         dias = sorted(fila.dias_vencido for fila in services.vencidos_dentro())
         self.assertEqual(dias, [0, 3, 9])  # vence hoy, en plazo y plazo vencido
+        # Iteración 2: horarios, solicitud pendiente, historial y bitácora
+        from apps.bitacora.models import RegistroOperacion
+        from apps.usuarios_celdas.models import HistorialPropiedad, SolicitudCambioPropietario
+        self.assertEqual(Usuario.objects.get(username="operador").horarios.count(), 14)
+        self.assertEqual(Usuario.objects.get(username="operador2").horarios.count(), 5)
+        self.assertEqual(SolicitudCambioPropietario.objects.filter(estado="PENDIENTE").count(), 1)
+        self.assertEqual(HistorialPropiedad.objects.count(), 1)
+        self.assertGreaterEqual(RegistroOperacion.objects.count(), 3)
 
     def test_no_sobrescribe_sin_reiniciar(self):
         call_command("cargar_datos_demo", stdout=StringIO())

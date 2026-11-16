@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block titulo %}{% if propietario %}Editar propietario{% else %}Registrar propietario{% endif %}{% endblock %}
+{% block contenido %}
+<div class="migas">P14 / Clientes</div>
+<div class="titulo-pagina"><div><h1>{% if propietario %}Editar propietario{% else %}Registrar propietario{% endif %}</h1><div class="suave">Todos los campos son obligatorios. El correo se usa para los avisos de vencimiento.</div></div></div>
+{% if error %}<div class="alerta error" role="alert">{% include "core/icono.html" with nombre="alerta" %}<div>{{ error }}</div></div>{% endif %}
+<div class="tarjeta" style="max-width:720px">
+  <form method="post" class="formulario-registro">{% csrf_token %}
+    <div class="campo"><label for="nombre_completo">Nombre completo</label><input id="nombre_completo" type="text" name="nombre_completo" value="{{ datos.nombre_completo|default:'' }}" maxlength="150" autofocus></div>
+    <div class="rejilla-mitades">
+      <div class="campo"><label for="numero_documento">Cédula</label><input id="numero_documento" type="text" name="numero_documento" value="{{ datos.numero_documento|default:'' }}" inputmode="numeric" maxlength="10" placeholder="Solo dígitos"></div>
+      <div class="campo"><label for="telefono">Celular</label><input id="telefono" type="text" name="telefono" value="{{ datos.telefono|default:'' }}" inputmode="numeric" maxlength="10" placeholder="3001234567"><div class="diminuto" style="margin-top:4px">10 dígitos, empieza por 3.</div></div>
+    </div>
+    <div class="campo"><label for="correo">Correo</label><input id="correo" type="text" name="correo" value="{{ datos.correo|default:'' }}" maxlength="254"></div>
+    <div class="campo"><label for="direccion">Dirección</label><input id="direccion" type="text" name="direccion" value="{{ datos.direccion|default:'' }}" maxlength="200"></div>
+    <div class="pie-acciones"><span class="diminuto">La operación queda registrada en la bitácora.</span><div class="grupo">
+      <a class="boton secundario" href="{% if propietario %}{% url 'usuarios_celdas:propietario' propietario.pk %}{% else %}{% url 'usuarios_celdas:propietarios' %}{% endif %}" data-cancelar>Cancelar</a>
+      <button class="boton" type="submit">{% include "core/icono.html" with nombre="check" %} Guardar</button></div></div>
+  </form>
+</div>
+{% endblock %}

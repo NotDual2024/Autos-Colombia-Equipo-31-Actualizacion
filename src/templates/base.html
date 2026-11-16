@@ -6,7 +6,7 @@
   <title>{% block titulo %}{{ nombre_sistema }}{% endblock %} · {{ nombre_sistema }}</title>
   <link rel="stylesheet" href="{% static 'css/estilos.css' %}">
 </head>
-<body>
+<body{% if request.fin_jornada %} data-fin-jornada="{{ request.fin_jornada.isoformat }}"{% endif %}>
 {% block cuerpo %}
 <div class="app">
   <aside class="lateral">
@@ -14,24 +14,31 @@
       <div class="marca-logo">P</div>
       <div><div class="marca-nombre">{{ nombre_sistema }}</div><div class="marca-sub">Control de estacionamiento</div></div>
     </div>
-    <div class="lateral-titulo">Operación</div>
     <nav class="menu">
       {% with u=request.resolver_match.view_name %}
+      <div class="lateral-titulo">Operación</div>
       <a href="{% url 'entradas_salidas:entrada' %}" class="{% if u == 'entradas_salidas:entrada' %}activo{% endif %}">{% include "core/icono.html" with nombre="entrada" %} Registrar entrada</a>
       <a href="{% url 'entradas_salidas:salida' %}" class="{% if u == 'entradas_salidas:salida' %}activo{% endif %}">{% include "core/icono.html" with nombre="salida" %} Registrar salida</a>
       <a href="{% url 'entradas_salidas:dentro' %}" class="{% if u == 'entradas_salidas:dentro' %}activo{% endif %}">{% include "core/icono.html" with nombre="auto" %} Vehículos dentro</a>
       <a href="{% url 'entradas_salidas:historial' %}" class="{% if u == 'entradas_salidas:historial' %}activo{% endif %}">{% include "core/icono.html" with nombre="historial" %} Historial</a>
       <a href="{% url 'novedades:lista' %}" class="{% if 'novedades:' in u %}activo{% endif %}">{% include "core/icono.html" with nombre="novedad" %} Novedades</a>
       <a href="{% url 'notificaciones:vencidos' %}" class="{% if 'notificaciones:' in u %}activo{% endif %}">{% include "core/icono.html" with nombre="alerta" %} Vencidos</a>
+      <div class="lateral-titulo">Clientes</div>
+      <a href="{% url 'usuarios_celdas:propietarios' %}" class="{% if 'usuarios_celdas:propietario' in u %}activo{% endif %}">{% include "core/icono.html" with nombre="usuarios" %} Propietarios</a>
+      <a href="{% url 'usuarios_celdas:vehiculos' %}" class="{% if 'usuarios_celdas:vehiculo' in u or u == 'usuarios_celdas:solicitar_cambio' %}activo{% endif %}">{% include "core/icono.html" with nombre="auto" %} Vehículos</a>
+      <a href="{% url 'usuarios_celdas:mapa' %}" class="{% if u == 'usuarios_celdas:mapa' %}activo{% endif %}">{% include "core/icono.html" with nombre="celda" %} Mapa de celdas</a>
       {% if request.user.es_administrador %}
       <div class="lateral-titulo">Administración</div>
-      <a href="{% url 'cuentas:operadores' %}" class="{% if u == 'cuentas:operadores' %}activo{% endif %}">{% include "core/icono.html" with nombre="usuarios" %} Operadores</a>
+      <a href="{% url 'cuentas:operadores' %}" class="{% if u == 'cuentas:operadores' or u == 'cuentas:editar_operador' or u == 'cuentas:horario' %}activo{% endif %}">{% include "core/icono.html" with nombre="usuarios" %} Operadores</a>
+      <a href="{% url 'usuarios_celdas:solicitudes' %}" class="{% if u == 'usuarios_celdas:solicitudes' %}activo{% endif %}">{% include "core/icono.html" with nombre="novedad" %} Solicitudes{% if solicitudes_pendientes %} <span class="contador" style="margin-left:auto">{{ solicitudes_pendientes }}</span>{% endif %}</a>
+      <a href="{% url 'cuentas:autorizaciones' %}" class="{% if u == 'cuentas:autorizaciones' %}activo{% endif %}">{% include "core/icono.html" with nombre="reloj" %} Autorizaciones</a>
+      <a href="{% url 'bitacora:bitacora' %}" class="{% if u == 'bitacora:bitacora' %}activo{% endif %}">{% include "core/icono.html" with nombre="historial" %} Bitácora</a>
       {% endif %}
       {% endwith %}
     </nav>
     <div class="lateral-pie">
       <div class="en-linea">Sistema en línea</div>
-      <form method="post" action="{% url 'cuentas:logout' %}">{% csrf_token %}<button type="submit">{% include "core/icono.html" with nombre="salida" %} Cerrar sesión</button></form>
+      <form method="post" action="{% url 'cuentas:logout' %}" id="form-cerrar-sesion" data-login="{% url 'cuentas:login' %}">{% csrf_token %}<button type="submit">{% include "core/icono.html" with nombre="salida" %} Cerrar sesión</button></form>
     </div>
   </aside>
   <div class="principal">
@@ -39,10 +46,13 @@
       <div class="fecha">{% include "core/icono.html" with nombre="calendario" %} {{ ahora|date:"l, j \d\e F \d\e Y"|lower|capfirst }} <strong class="mono">{{ ahora|date:"H:i" }}</strong></div>
       <div class="usuario">
         <div class="avatar">{{ request.user.iniciales }}</div>
-        <div><div class="usuario-nombre">{{ request.user.nombre_completo }}</div><div class="diminuto">{{ request.user.get_rol_display }}</div></div>
+        <div><div class="usuario-nombre">{{ request.user.nombre_completo }}</div><div class="diminuto">{{ request.user.get_rol_display }}{% if texto_turno %} · {{ texto_turno }}{% endif %}</div></div>
       </div>
     </header>
     <main class="contenido">
+      <div class="alerta aviso" id="aviso-turno" role="alert" {% if not request.en_gracia %}hidden{% endif %}>{% include "core/icono.html" with nombre="reloj" %}
+        <div style="flex:1"><strong>Fin del turno</strong><span id="aviso-turno-texto">Tu turno terminó. La sesión se cerrará en pocos minutos.</span></div>
+        <button class="boton secundario pequeno" type="submit" form="form-cerrar-sesion">Cerrar sesión ahora</button></div>
       {% if messages %}{% for m in messages %}
         <div class="alerta {% if m.tags == 'error' %}error{% elif m.tags == 'warning' %}aviso{% else %}exito{% endif %}">{% include "core/icono.html" with nombre="check" %}<div>{{ m }}</div></div>
       {% endfor %}{% endif %}
@@ -51,6 +61,7 @@
   </div>
 </div>
 {% endblock %}
+{% if request.user.is_authenticated and not request.user.es_administrador %}<script src="{% static 'js/turno.js' %}"></script>{% endif %}
 {% block scripts %}{% endblock %}
 </body>
 </html>

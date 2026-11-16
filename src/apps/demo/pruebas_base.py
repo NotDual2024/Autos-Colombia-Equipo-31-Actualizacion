@@ -17,7 +17,7 @@ def fh(texto: str) -> datetime:
 
 
 class PruebaConReloj(TestCase):
-    """Fija 'ahora' en AHORA (sábado 15/11/2026 14:35, Bogotá) mediante el Reloj del sistema."""
+    """Fija 'ahora' en AHORA (domingo 15/11/2026 14:35, Bogotá) mediante el Reloj del sistema."""
 
     AHORA = fh("2026-11-15 14:35")
 
@@ -27,6 +27,7 @@ class PruebaConReloj(TestCase):
         self.addCleanup(parche.stop)
         self.admin = f.crear_usuario("admin", CLAVE, "Laura Castillo", Rol.ADMINISTRADOR)
         self.operador = f.crear_usuario("operador", CLAVE, "María Rodríguez")
+        f.asignar_horario_24h(self.operador)  # RN-36: sin horario no puede trabajar
         f.crear_celdas(carros=3, motos=2)  # A-001..A-003, M-01..M-02
         self.prop = f.crear_propietario("Ana Gil", "1045678901", "ana.gil@correo.co")
 

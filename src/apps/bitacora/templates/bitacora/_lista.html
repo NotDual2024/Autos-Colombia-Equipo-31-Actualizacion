@@ -1,0 +1,9 @@
+{# Bitácora de un registro (fichas) o completa #}
+<table class="tabla">
+  <thead><tr><th>Fecha</th><th>Usuario</th><th>Operación</th><th>Detalle</th></tr></thead>
+  <tbody>{% for op in operaciones %}
+    <tr><td class="mono">{{ op.fecha_hora|date:"d/m/Y H:i" }}</td><td>{{ op.usuario.nombre_completo }}</td>
+      <td><span class="etiqueta-estado gris">{{ op.get_accion_display }}</span><div class="diminuto">{{ op.descripcion }}</div></td>
+      <td class="diminuto">{% for campo, valores in op.detalle.items %}<div><strong>{{ campo }}</strong>: {{ valores.0|default:"—" }} → {{ valores.1|default:"—" }}</div>{% endfor %}</td></tr>
+  {% empty %}<tr><td colspan="4"><div class="vacio"><strong>Sin operaciones registradas</strong></div></td></tr>{% endfor %}</tbody>
+</table>

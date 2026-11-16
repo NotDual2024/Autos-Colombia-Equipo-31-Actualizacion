@@ -9,4 +9,7 @@ urlpatterns = [
     path("salir/", views.CierreSesionView.as_view(), name="logout"),
     path("operadores/", views.operadores, name="operadores"),
     path("operadores/<int:operador_id>/estado/", views.cambiar_estado, name="estado_operador"),
+    path("operadores/<int:operador_id>/editar/", views.editar_operador, name="editar_operador"),
+    path("operadores/<int:operador_id>/horario/", views.horario, name="horario"),
+    path("autorizaciones/", views.autorizaciones, name="autorizaciones"),
 ]

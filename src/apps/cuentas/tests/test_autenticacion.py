@@ -2,6 +2,7 @@ from django.test import TestCase
 from django.urls import reverse
 
 from apps.cuentas.models import Rol, Usuario
+from apps.demo.fabricas import asignar_horario_24h
 
 CLAVE = "ClaveSegura2026"
 
@@ -9,6 +10,7 @@ CLAVE = "ClaveSegura2026"
 class AutenticacionTests(TestCase):
     def setUp(self):
         self.operador = Usuario.objects.create_user("operador1", password=CLAVE, first_name="María", last_name="Pérez", rol=Rol.OPERADOR)
+        asignar_horario_24h(self.operador)  # RN-36 (iteración 2)
 
     def test_contrasena_se_guarda_con_argon2(self):
         # RNF-001, DEC-012

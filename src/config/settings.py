@@ -21,6 +21,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     # Módulos del sistema (Arquitectura v1, sección 4). No se habilita django.contrib.admin (DEC-011).
     "apps.core.apps.CoreConfig",
+    "apps.bitacora.apps.BitacoraConfig",
     "apps.cuentas.apps.CuentasConfig",
     "apps.usuarios_celdas.apps.UsuariosCeldasConfig",
     "apps.pagos.apps.PagosConfig",
@@ -38,6 +39,8 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    # Control de turno (RN-35): debe ir después de la autenticación.
+    "apps.cuentas.control_turno.ControlTurnoMiddleware",
 ]
 
 ROOT_URLCONF = "config.urls"
@@ -53,6 +56,8 @@ TEMPLATES = [
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
                 "apps.core.context_processors.contexto_general",
+                "apps.cuentas.context_processors.turno",
+                "apps.usuarios_celdas.context_processors.solicitudes",
             ],
         },
     },
@@ -69,6 +74,8 @@ DATABASES = {
 
 # --- Autenticación (RNF-001, RNF-002, DEC-012) ---
 AUTH_USER_MODEL = "cuentas.Usuario"
+# Impide iniciar sesión fuera del turno o sin horario (RN-31, RN-36).
+AUTHENTICATION_BACKENDS = ["apps.cuentas.control_turno.BackendTurno"]
 PASSWORD_HASHERS = [
     "django.contrib.auth.hashers.Argon2PasswordHasher",
     "django.contrib.auth.hashers.PBKDF2PasswordHasher",

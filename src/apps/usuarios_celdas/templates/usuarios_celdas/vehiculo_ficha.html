@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block titulo %}{{ vehiculo.placa }}{% endblock %}
+{% block contenido %}
+<div class="migas">P17 / Clientes</div>
+<div class="titulo-pagina">
+  <div><h1>{{ vehiculo.placa }}</h1><div class="suave">{{ vehiculo.get_tipo_display }} · {{ vehiculo.descripcion }} ·
+    {% if vehiculo.activo %}<span class="etiqueta-estado">Activo</span>{% else %}<span class="etiqueta-estado amarillo">Inactivo</span>{% endif %} ·
+    {% if ubicacion %}Dentro ({{ ubicacion }}){% else %}Fuera{% endif %}</div></div>
+  <div style="display:flex;gap:8px;flex-wrap:wrap">
+    <a class="boton secundario" href="{% url 'usuarios_celdas:vehiculo_editar' vehiculo.pk %}">Editar</a>
+    <form method="post" action="{% url 'usuarios_celdas:vehiculo_estado' vehiculo.pk %}">{% csrf_token %}
+      {% if vehiculo.activo %}<input type="hidden" name="activo" value="0"><button class="boton peligro" type="submit">Inactivar</button>
+      {% else %}<input type="hidden" name="activo" value="1"><button class="boton" type="submit">Activar</button>{% endif %}</form>
+    {% if not pendiente %}<a class="boton" href="{% url 'usuarios_celdas:solicitar_cambio' vehiculo.pk %}">Solicitar cambio de propietario</a>{% endif %}
+  </div>
+</div>
+{% if pendiente %}<div class="alerta aviso">{% include "core/icono.html" with nombre="reloj" %}<div><strong>Solicitud de cambio pendiente</strong>Pasaría a {{ pendiente.propietario_nuevo.nombre_completo }}. Motivo: {{ pendiente.motivo }}. La resuelve el administrador.</div></div>{% endif %}
+<div class="rejilla-mitades">
+  <div class="tarjeta"><h2>Propietario actual</h2>
+    <p><a href="{% url 'usuarios_celdas:propietario' vehiculo.propietario.pk %}"><strong>{{ vehiculo.propietario.nombre_completo }}</strong></a> · CC {{ vehiculo.propietario.numero_documento }}<br>
+    <span class="diminuto">Desde {{ vehiculo.propietario_desde|date:"d/m/Y" }}</span></p></div>
+  <div class="tarjeta" style="margin-top:0"><h2>Historial de propietarios</h2>
+    <table class="tabla" style="margin-top:8px"><thead><tr><th>Propietario</th><th>Desde</th><th>Hasta</th></tr></thead>
+    <tbody>{% for h in historial %}<tr><td>{{ h.propietario.nombre_completo }}</td><td>{{ h.desde|date:"d/m/Y" }}</td><td>{{ h.hasta|date:"d/m/Y" }}</td></tr>
+    {% empty %}<tr><td colspan="3" class="suave">Sin propietarios anteriores.</td></tr>{% endfor %}</tbody></table></div>
+</div>
+<div class="tarjeta"><h2 style="margin-bottom:10px">Bitácora del vehículo</h2>{% include "bitacora/_lista.html" %}</div>
+{% endblock %}

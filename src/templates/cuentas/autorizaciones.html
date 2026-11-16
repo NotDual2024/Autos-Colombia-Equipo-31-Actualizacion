@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block titulo %}Autorizaciones fuera de turno{% endblock %}
+{% block contenido %}
+<div class="migas">P24 / Administración</div>
+<div class="titulo-pagina"><div><h1>Autorizaciones fuera de turno</h1><div class="suave">Mientras la autorización esté vigente, el operador puede iniciar sesión y su sesión no se cierra por fin de turno.</div></div></div>
+{% if error %}<div class="alerta error" role="alert">{% include "core/icono.html" with nombre="alerta" %}<div>{{ error }}</div></div>{% endif %}
+<div class="rejilla-2">
+  <div class="tarjeta"><h2>Nueva autorización</h2>
+    <form method="post" style="margin-top:12px" class="formulario-registro">{% csrf_token %}
+      <div class="campo"><label for="operador">Operador</label><select id="operador" name="operador">{% for o in operadores %}<option value="{{ o.pk }}" {% if datos.operador == o.pk|stringformat:'s' %}selected{% endif %}>{{ o.nombre_completo }} ({{ o.username }})</option>{% endfor %}</select></div>
+      <div class="campo"><label for="desde">Desde</label><input id="desde" type="datetime-local" name="desde" value="{{ datos.desde|default:ahora_local }}"></div>
+      <div class="campo"><label for="hasta">Hasta</label><input id="hasta" type="datetime-local" name="hasta" value="{{ datos.hasta }}"></div>
+      <div class="campo"><label for="motivo">Motivo</label><input id="motivo" type="text" name="motivo" value="{{ datos.motivo }}" placeholder="Ej. Cubre ausencia"></div>
+      <button class="boton" type="submit">Autorizar</button></form></div>
+  <div class="tarjeta" style="margin-top:0">
+    <table class="tabla"><thead><tr><th>Operador</th><th>Desde</th><th>Hasta</th><th>Motivo</th><th>Autorizó</th><th>Estado</th></tr></thead>
+    <tbody>{% for a in autorizaciones %}
+      <tr><td>{{ a.operador.nombre_completo }}</td><td class="mono">{{ a.desde|date:"d/m H:i" }}</td><td class="mono">{{ a.hasta|date:"d/m H:i" }}</td><td>{{ a.motivo }}</td><td>{{ a.autorizado_por.nombre_completo }}</td>
+        <td>{% if a.desde <= ahora and ahora < a.hasta %}<span class="etiqueta-estado">Vigente</span>{% elif ahora < a.desde %}<span class="etiqueta-estado amarillo">Programada</span>{% else %}<span class="etiqueta-estado gris">Vencida</span>{% endif %}</td></tr>
+    {% empty %}<tr><td colspan="6"><div class="vacio"><strong>Sin autorizaciones</strong></div></td></tr>{% endfor %}</tbody></table>
+  </div>
+</div>
+{% endblock %}

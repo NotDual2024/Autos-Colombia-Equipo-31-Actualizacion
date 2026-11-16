@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block titulo %}Vehículos{% endblock %}
+{% block contenido %}
+<div class="migas">P13 / Clientes</div>
+<div class="titulo-pagina"><div><h1>Vehículos</h1><div class="suave">Vehículos registrados de los clientes mensualistas.</div></div>
+  <a class="boton" href="{% url 'usuarios_celdas:vehiculo_nuevo' %}">{% include "core/icono.html" with nombre="mas" %} Registrar vehículo</a></div>
+<div class="tarjeta">
+  <form method="get" class="filtros"><div class="campo"><label for="q">Placa o propietario</label><input id="q" type="text" name="q" value="{{ q }}" placeholder="Ej. JTR625" autofocus></div>
+    <div class="campo"><label for="tipo">Tipo</label><select id="tipo" name="tipo"><option value="">Todos</option>{% for v, n in tipos %}<option value="{{ v }}" {% if v == tipo %}selected{% endif %}>{{ n }}</option>{% endfor %}</select></div>
+    <div class="acciones-filtro"><button class="boton" type="submit">{% include "core/icono.html" with nombre="buscar" %} Buscar</button><a class="boton secundario" href="{% url 'usuarios_celdas:vehiculos' %}">Limpiar</a></div></form>
+</div>
+<div class="tarjeta">
+  <table class="tabla"><thead><tr><th>Placa</th><th>Tipo</th><th>Vehículo</th><th>Propietario</th><th>Estado</th><th></th></tr></thead>
+  <tbody>{% for v in pagina %}
+    <tr><td><strong>{{ v.placa }}</strong></td><td>{{ v.get_tipo_display }}</td><td>{{ v.descripcion }}</td><td>{{ v.propietario.nombre_completo }}</td>
+      <td>{% if v.activo %}<span class="etiqueta-estado">Activo</span>{% else %}<span class="etiqueta-estado amarillo">Inactivo</span>{% endif %}</td>
+      <td><a class="boton secundario pequeno" href="{% url 'usuarios_celdas:vehiculo' v.pk %}">Ver ficha</a></td></tr>
+  {% empty %}<tr><td colspan="6"><div class="vacio"><div class="icono-caja">{% include "core/icono.html" with nombre="auto" %}</div><strong>No se encontraron resultados</strong></div></td></tr>{% endfor %}</tbody></table>
+  {% if pagina.paginator.num_pages > 1 %}<div class="paginacion"><span>Mostrando {{ pagina.start_index }}-{{ pagina.end_index }} de {{ pagina.paginator.count }}</span><div class="grupo">
+    {% if pagina.has_previous %}<a class="boton secundario pequeno" href="?q={{ q }}&tipo={{ tipo }}&pagina={{ pagina.previous_page_number }}">Anterior</a>{% endif %}
+    {% if pagina.has_next %}<a class="boton secundario pequeno" href="?q={{ q }}&tipo={{ tipo }}&pagina={{ pagina.next_page_number }}">Siguiente</a>{% endif %}</div></div>{% endif %}
+</div>
+{% endblock %}

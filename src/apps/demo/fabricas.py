@@ -59,3 +59,15 @@ def crear_estadia(vehiculo: Vehiculo, codigo_celda: str, entrada: datetime, usua
         vehiculo=vehiculo, celda=Celda.objects.get(codigo=codigo_celda), fecha_hora_entrada=entrada,
         usuario_entrada=usuario, fecha_hora_salida=salida, usuario_salida=usuario_salida if salida else None,
     )
+
+
+def asignar_horario_24h(usuario: Usuario) -> None:
+    """Todos los días, 24 horas: 00:00–12:00 y 12:00–00:00 (RN-36). Para demostración y pruebas."""
+    from datetime import time
+
+    from apps.cuentas.models import HorarioOperador
+
+    HorarioOperador.objects.bulk_create(
+        [HorarioOperador(operador=usuario, dia_semana=d, hora_inicio=time(0), hora_fin=time(12)) for d in range(1, 8)]
+        + [HorarioOperador(operador=usuario, dia_semana=d, hora_inicio=time(12), hora_fin=time(0)) for d in range(1, 8)]
+    )

@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block titulo %}Mapa de celdas{% endblock %}
+{% block contenido %}
+<div class="migas">P20 / Clientes</div>
+<div class="titulo-pagina"><div><h1>Mapa de celdas</h1><div class="suave">Las celdas son fijas (RN-27): no se agregan, no se borran ni cambian de tipo.</div></div></div>
+<div class="rejilla-mitades" style="margin-bottom:14px">
+  {% for z, r in resumen.items %}
+  <a class="tarjeta" style="{% if z != mapa.zona %}opacity:.75{% endif %};color:inherit;text-decoration:none;margin-top:0" href="?zona={{ z }}">
+    <h3>Zona {{ z }} · {{ r.categoria }}</h3><div><span class="ocupacion"><span class="numero">{{ r.ocupadas }}</span></span> <span class="suave">ocupadas de {{ r.total }} · {{ r.libres }} libres</span></div></a>
+  {% endfor %}
+</div>
+<div class="tarjeta">
+  <div class="tarjeta-cabeza"><h2>Zona {{ mapa.zona }} · {{ mapa.categoria }}</h2>
+    <div class="paginador-celdas">{% if mapa.bloque > 1 %}<a class="boton secundario pequeno" href="?zona={{ mapa.zona }}&bloque={{ mapa.bloque|add:'-1' }}">‹ Anterior</a>{% endif %}
+      Bloque {{ mapa.bloque }} de {{ mapa.total_bloques }}
+      {% if mapa.bloque < mapa.total_bloques %}<a class="boton secundario pequeno" href="?zona={{ mapa.zona }}&bloque={{ mapa.bloque|add:'1' }}">Siguiente ›</a>{% endif %}</div></div>
+  <div class="leyenda"><span>Libre</span><span class="l-ocupada">Ocupada</span></div>
+  <div class="celdas">{% for c in mapa.celdas %}
+    <div class="celda {% if c.placa %}ocupada{% endif %}"><label><span class="simbolo">{% if c.placa %}▬{% else %}+{% endif %}</span>{{ c.codigo }}{% if c.placa %}<strong style="color:var(--texto)">{{ c.placa }}</strong>{% endif %}</label></div>
+  {% endfor %}</div>
+</div>
+{% endblock %}

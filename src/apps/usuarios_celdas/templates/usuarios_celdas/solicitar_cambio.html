@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block titulo %}Solicitar cambio de propietario{% endblock %}
+{% block contenido %}
+<div class="migas">P18 / Clientes</div>
+<div class="titulo-pagina"><div><h1>Solicitar cambio de propietario</h1><div class="suave">La solicitud queda pendiente hasta que el administrador la apruebe.</div></div></div>
+{% if error %}<div class="alerta error" role="alert">{% include "core/icono.html" with nombre="alerta" %}<div>{{ error }}</div></div>{% endif %}
+<div class="tarjeta" style="max-width:720px">
+  <dl class="datos"><div><dt>Vehículo</dt><dd>{{ vehiculo.placa }} · {{ vehiculo.descripcion }}</dd></div>
+    <div><dt>Propietario actual</dt><dd>{{ vehiculo.propietario.nombre_completo }} · CC {{ vehiculo.propietario.numero_documento }}</dd></div></dl>
+  <form method="get" class="filtros" style="margin:16px 0">
+    <div class="campo"><label for="documento">Nuevo propietario (cédula)</label><input id="documento" type="text" name="documento" value="{{ documento }}" inputmode="numeric"></div>
+    <div class="acciones-filtro"><button class="boton secundario" type="submit">{% include "core/icono.html" with nombre="buscar" %} Buscar</button></div></form>
+  {% if nuevo %}<div class="alerta {% if nuevo.activo %}exito{% else %}aviso{% endif %}">{% include "core/icono.html" with nombre="usuarios" %}<div><strong>{{ nuevo.nombre_completo }}</strong>{% if nuevo.activo %}Propietario activo{% else %}Propietario inactivo{% endif %}</div></div>
+  {% elif busco %}<div class="alerta aviso">{% include "core/icono.html" with nombre="alerta" %}<div>No hay un propietario con esa cédula. Primero regístralo.</div></div>{% endif %}
+  {% if nuevo %}
+  <form method="post" class="formulario-registro">{% csrf_token %}<input type="hidden" name="documento" value="{{ documento }}">
+    <div class="campo"><label for="motivo">Motivo</label><textarea id="motivo" name="motivo" placeholder="Ej. Venta del vehículo">{{ motivo }}</textarea></div>
+    <div class="pie-acciones"><span></span><div class="grupo"><a class="boton secundario" href="{% url 'usuarios_celdas:vehiculo' vehiculo.pk %}" data-cancelar>Cancelar</a><button class="boton" type="submit">Enviar solicitud</button></div></div>
+  </form>{% endif %}
+</div>
+{% endblock %}

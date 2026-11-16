@@ -4,12 +4,17 @@ from django.urls import reverse
 from apps.core.errores import ErrorNegocio
 from apps.cuentas import services
 from apps.cuentas.models import Usuario
+from apps.demo.fabricas import asignar_horario_24h
 from apps.demo.pruebas_base import CLAVE, PruebaConReloj
 
 
 class HU010Operadores(PruebaConReloj):
     def test_crear_operador_y_puede_iniciar_sesion(self):
-        services.crear_operador(self.admin, "Pedro Rojas", "operador2", CLAVE)
+        nuevo = services.crear_operador(self.admin, "Pedro Rojas", "operador2", CLAVE)
+        # Iteración 2 (RN-36): sin horario no puede iniciar sesión; con horario, sí.
+        r = self.client.post(reverse("cuentas:login"), {"username": "operador2", "password": CLAVE})
+        self.assertContains(r, "No tienes un horario asignado")
+        asignar_horario_24h(nuevo)
         r = self.client.post(reverse("cuentas:login"), {"username": "operador2", "password": CLAVE})
         self.assertEqual(r.status_code, 302)
 

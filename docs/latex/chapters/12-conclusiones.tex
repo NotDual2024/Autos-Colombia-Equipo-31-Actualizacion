@@ -29,13 +29,35 @@ Demostración & Un comando carga usuarios de prueba, 200 celdas y casos de uso l
 \begin{itemize}
   \item La prueba de registros simultáneos verifica que la base de datos rechaza el choque y que el usuario ve el mensaje correcto, pero no ejecuta dos procesos reales al mismo tiempo.
   \item El tiempo de respuesta (RNF-006) no se midió formalmente.
+  \item El aviso de fin de turno y el cierre por inactividad en el navegador (\texttt{turno.js}) se probaron solo de forma manual. El cierre de sesión en el servidor sí tiene pruebas automatizadas.
   \item El sistema usa el servidor de desarrollo de Django, adecuado para la demostración local pero no para un uso real 24/7.
   \item El correo es simulado (DEC-007): conectar un servicio real requiere otra implementación de la interfaz \texttt{ServicioCorreo} y gestionar sus credenciales (RNF-012).
 \end{itemize}
 
+\section{Resultados de la iteración 2}
+La iteración 2 añadió la gestión de usuarios y celdas: propietarios y vehículos con su ciclo de vida completo (sin borrado), cambio de propietario mediante solicitud aprobada por el administrador y con historial, mapa de celdas, gestión completa de operadores, horarios por franjas con turnos nocturnos, autorizaciones fuera de turno y una bitácora que registra quién hizo cada operación.
+
+\begin{longtable}{>{\raggedright\arraybackslash}p{4.6cm}>{\raggedright\arraybackslash}p{9.8cm}}
+\toprule
+\textbf{Aspecto} & \textbf{Resultado}\\
+\midrule\endhead
+Requerimientos & RF-101, RF-102 y RF-104 a RF-111 implementados (RF-103 quedó fuera de alcance por decisión del equipo), con las reglas RN-25 a RN-37.\\
+Historias de usuario & HU-012 a HU-023 implementadas, con pruebas automatizadas de sus escenarios.\\
+Pruebas & 154 pruebas automatizadas, todas aprobadas; las 100 de la iteración 1 siguen pasando. Verificación manual en el navegador del bloqueo fuera de turno, la autorización, la aprobación de una solicitud y la bitácora.\\
+Modelo de datos & Versión 1.3: cuatro tablas nuevas y horarios definitivos. El DDL pasa sus 60 comprobaciones y el ORM aplica las mismas restricciones.\\
+Arquitectura & El módulo nuevo \texttt{bitacora} depende solo de \texttt{core}; se mantuvo la ausencia de dependencias circulares entre módulos.\\
+\bottomrule
+\end{longtable}
+
+\section{Aprendizajes de la iteración 2}
+\begin{description}[style=nextline]
+  \item[Las reglas de tiempo necesitan ejemplos concretos] Los turnos nocturnos, la gracia de 5 minutos y el registro en curso al terminar el turno (RN-35) solo quedaron claros después de discutir casos concretos con el equipo. Las pruebas usan esos mismos casos, con el reloj sustituible.
+  \item[Revisar las dependencias en el diseño] La primera versión del modelo creaba una dependencia circular entre la bitácora y las cuentas. Se detectó en la revisión del diseño (DM-08), antes de escribir el código, donde la corrección era barata.
+  \item[La regresión protege lo ya entregado] La regla de no ingresar sin horario (RN-36) hizo fallar pruebas de la iteración 1. La suite completa lo detectó de inmediato y se ajustó la base de pruebas sin cambiar el comportamiento aprobado.
+\end{description}
+
 \section{Trabajo futuro}
 \begin{description}[style=nextline]
-  \item[Iteración 2: gestión de usuarios y celdas] Pantallas de propietarios, vehículos y celdas (RF-101 a RF-105) y horarios de los operadores (RF-107). Las tablas ya existen por DEC-001, por lo que el trabajo se concentra en las pantallas y en confirmar la entidad provisional de horarios.
-  \item[Iteración 3: gestión de pagos] Registro de pagos, consulta de vigencia e historial, y gestión de tarifas (RF-201 a RF-204). La vigencia ya se calcula a partir de la tabla de pagos, así que los pagos registrados desde la interfaz se reflejarán de inmediato en las entradas y en la lista de vencidos.
+  \item[Iteración 3: gestión de pagos] Registro de pagos, consulta de vigencia e historial, y gestión de tarifas (RF-201 a RF-204). La vigencia ya se calcula a partir de la tabla de pagos, así que los pagos registrados desde la interfaz se reflejarán de inmediato en las entradas y en la lista de vencidos. También queda pendiente el motivo de inactivación y la reactivación automática al registrar el pago (P-33).
   \item[Mejoras posibles] Correo real, adjuntos en las novedades (RN-18) y un servidor de aplicaciones para un despliegue fuera del entorno local.
 \end{description}
