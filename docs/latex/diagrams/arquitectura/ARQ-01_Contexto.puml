@@ -1,0 +1,16 @@
+@startuml ARQ-01_Contexto
+' ARQ-01 - Diagrama de contexto (C4 nivel 1) - Iteración 1 - v1
+!include <C4/C4_Context>
+LAYOUT_TOP_DOWN()
+title Contexto del sistema - Parqueadero "Autos Colombia"
+
+Person(admin, "Administrador", "Acceso total. Crea y desactiva operadores. Registra el contacto con autoridades.")
+Person(oper, "Operador", "Registra entradas, salidas y novedades. Consulta ocupación y vencimientos.")
+Person_Ext(prop, "Propietario", "Dueño de uno o varios vehículos. No usa el sistema.")
+
+System(sis, "Sistema de gestión del parqueadero", "Aplicación web local: entradas y salidas, celdas, novedades, avisos de vencimiento y operadores.")
+
+Rel(admin, sis, "Usa", "Navegador web")
+Rel(oper, sis, "Usa", "Navegador web")
+Rel(sis, prop, "Aviso de vencimiento por correo", "Simulado en esta versión (DEC-007)")
+@enduml

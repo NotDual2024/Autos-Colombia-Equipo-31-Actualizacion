@@ -1,0 +1,28 @@
+\chapter{Introducción}\label{cap:introduccion}
+
+\section{Contexto}
+El parqueadero ``Autos Colombia'' presta su servicio exclusivamente por mensualidad y necesita un software para gestionar sus operaciones diarias: registrar las entradas y salidas de los vehículos, registrar usuarios, manejar las celdas, registrar las novedades ocurridas sobre determinado vehículo dentro del parqueadero y gestionar los pagos.
+
+El enunciado del proyecto define tres grupos de requerimientos funcionales:
+\begin{itemize}
+  \item Gestión de la entrada y salida de vehículos.
+  \item Gestión de usuarios y gestión de celdas.
+  \item Gestión de pagos.
+\end{itemize}
+
+\section{Alcance de este documento}
+El sistema se desarrolla en tres iteraciones, una por cada grupo de requerimientos. Este documento corresponde a la \textbf{iteración 1: gestión de la entrada y salida de vehículos}, que incluye además el registro de novedades, el control de mensualidades vencidas con el vehículo dentro y la creación de operadores por parte del administrador.
+
+Por la decisión DEC-001, el modelo de datos se diseña completo desde la primera iteración, aunque las funcionalidades de las iteraciones 2 y 3 se implementan después.
+
+\section{Metodología de trabajo}
+El proyecto avanza de forma incremental. En cada iteración se siguen estos pasos:
+\begin{enumerate}
+  \item Análisis y diseño: requerimientos, historias de usuario, arquitectura, modelos de datos, diagramas UML y mockups.
+  \item Implementación y pruebas del código según los artefactos aprobados.
+  \item Publicación de los cambios en el repositorio de GitHub.
+\end{enumerate}
+Cada requerimiento, historia y decisión tiene un identificador único (RF, RNF, RN, HU, DEC) y solo se incorpora a este documento después de ser aprobado por el equipo del proyecto.
+
+\section{Organización del documento}
+El capítulo~\ref{cap:entregables} lista los entregables. El capítulo~\ref{cap:requerimientos} presenta los requerimientos y las reglas de negocio, y el capítulo~\ref{cap:arquitectura} la arquitectura del sistema. El capítulo~\ref{cap:historias} contiene las historias de usuario y el~\ref{cap:mockups} sus mockups. Los capítulos~\ref{cap:datos} a~\ref{cap:paquetes} contienen el modelo de datos y los diagramas UML. El capítulo~\ref{cap:decisiones} recoge las decisiones aprobadas y el~\ref{cap:conclusiones} las conclusiones.

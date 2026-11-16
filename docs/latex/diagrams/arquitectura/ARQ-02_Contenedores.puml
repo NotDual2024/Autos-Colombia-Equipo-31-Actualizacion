@@ -1,0 +1,22 @@
+@startuml ARQ-02_Contenedores
+' ARQ-02 - Diagrama de contenedores (C4 nivel 2) - Iteración 1 - v1
+!include <C4/C4_Container>
+LAYOUT_TOP_DOWN()
+title Contenedores - Parqueadero "Autos Colombia"
+
+Person(admin, "Administrador")
+Person(oper, "Operador")
+
+System_Boundary(sis, "Sistema de gestión del parqueadero (equipo local)") {
+  Container(nav, "Navegador web", "Chrome / Edge / Firefox", "Muestra las páginas HTML generadas por el servidor.")
+  Container(web, "Aplicación web", "Python 3.12+ / Django 5.2 LTS", "Vistas, reglas de negocio, autenticación y roles. Monolito modular en capas (DEC-004). Incluye el servicio de correo simulado (DEC-007).")
+  Container(sched, "Planificador de avisos", "APScheduler (dentro del proceso de Django)", "Ejecuta el proceso de vencimientos al iniciar y cada hora (DEC-008).")
+  ContainerDb(db, "Base de datos", "SQLite 3 (archivo db.sqlite3)", "Usuarios, vehículos, celdas, estadías, novedades, pagos y registro de correos.")
+}
+
+Rel(admin, nav, "Usa")
+Rel(oper, nav, "Usa")
+Rel(nav, web, "Peticiones HTTP", "localhost, puerto 8000")
+Rel(web, db, "Lee y escribe", "ORM de Django, transacciones")
+Rel(sched, web, "Invoca el servicio de avisos")
+@enduml

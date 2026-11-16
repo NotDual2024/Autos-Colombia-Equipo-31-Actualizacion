@@ -1,0 +1,36 @@
+@startuml ARQ-03_Componentes
+' ARQ-03 - Diagrama de componentes de la aplicación web (C4 nivel 3) - Iteración 1 - v1
+!include <C4/C4_Component>
+LAYOUT_TOP_DOWN()
+title Componentes de la aplicación web (módulos Django)
+
+Container_Boundary(web, "Aplicación web Django") {
+  Component(cuentas, "cuentas", "Módulo Django", "Inicio de sesión, roles (Administrador / Operador), gestión de operadores (RF-106).")
+  Component(es, "entradas_salidas", "Módulo Django", "Entradas, salidas, ocupación, historial (RF-001 a RF-006).")
+  Component(nov, "novedades", "Módulo Django", "Registro y consulta de novedades (RF-007, RF-008).")
+  Component(notif, "notificaciones", "Módulo Django", "Vencimientos dentro, avisos simulados, plazo de 8 días y autoridades (RF-009 a RF-012). Contiene el planificador.")
+  Component(uc, "usuarios_celdas", "Módulo Django", "Propietarios, vehículos y celdas. Iteración 1: solo modelos y datos de demostración.")
+  Component(pagos, "pagos", "Módulo Django", "Pagos y vigencia de la mensualidad. Iteración 1: modelo, servicio de vigencia y datos de demostración.")
+  Component(core, "core", "Módulo Django", "Plantilla base, reloj del sistema, interfaz ServicioCorreo y correo simulado.")
+  Component(demo, "demo", "Módulo Django", "Comando cargar_datos_demo (RNF-014). Depende de todos; nadie depende de él.")
+}
+ContainerDb(db, "Base de datos", "SQLite")
+
+Rel(es, uc, "Consulta vehículos y celdas")
+Rel(es, pagos, "Verifica vigencia (RF-002)")
+Rel(nov, es, "Valida presencia en estadías")
+Rel(nov, uc, "Consulta vehículos")
+Rel(notif, es, "Consulta estadías abiertas")
+Rel(notif, pagos, "Consulta vencimientos")
+Rel(notif, uc, "Consulta propietario y correo")
+Rel(notif, core, "Usa ServicioCorreo y reloj")
+Rel(es, core, "Usa reloj")
+Rel(pagos, uc, "Pagos por vehículo")
+Rel(cuentas, core, "Plantilla base")
+Rel(demo, uc, "Crea datos de demostración")
+Rel(demo, pagos, "Crea pagos de demostración")
+Rel(demo, cuentas, "Crea usuarios de prueba")
+Rel_D(es, db, "ORM")
+Rel_D(nov, db, "ORM")
+Rel_D(notif, db, "ORM")
+@enduml

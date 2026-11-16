@@ -1,0 +1,137 @@
+\chapter{Arquitectura del sistema}\label{cap:arquitectura}
+
+La arquitectura se definió a partir de los requerimientos aprobados y de las decisiones DEC-003 a DEC-012 (capítulo~\ref{cap:decisiones}). Se describe con el modelo C4 (contexto, contenedores y componentes), complementado con una vista de capas y una de despliegue.
+
+\section{Factores que guían la arquitectura}
+\begin{longtable}{>{\raggedright\arraybackslash}p{4.2cm}>{\raggedright\arraybackslash}p{3.2cm}>{\raggedright\arraybackslash}p{7cm}}
+\toprule
+\textbf{Factor} & \textbf{Origen} & \textbf{Respuesta arquitectónica}\\
+\midrule\endhead
+Ejecución local; el profesor la ejecuta en su máquina & P-09, RNF-011, RNF-014 & Aplicación web local, SQLite, instalación con \texttt{pip}, datos de demostración.\\
+Entrega en tres iteraciones & DEC-001 & Monolito modular: un módulo Django por área funcional y modelo de datos completo desde la iteración 1.\\
+Reglas de negocio verificables & RNF-008 & Reglas en una capa de servicios separada de las vistas y cubierta por pruebas automatizadas.\\
+Integridad de celdas y entradas & RN-04, RN-05, RNF-003 & Transacciones y restricciones de unicidad en la base de datos.\\
+Seguridad y roles & RNF-001, RNF-002, RNF-007 & Autenticación de Django, contraseñas con Argon2 y control de acceso por rol en cada vista.\\
+Avisos automáticos simulados & DEC-002, DEC-007, DEC-008 & APScheduler dentro del proceso; envío detrás de la interfaz \texttt{ServicioCorreo} con implementación simulada.\\
+Fechas y plazos & RN-12, RNF-010 & Zona horaria \texttt{America/Bogota} y un reloj del sistema sustituible en las pruebas.\\
+\bottomrule
+\end{longtable}
+
+\section{Vista de contexto}
+El administrador y el operador usan el sistema desde el navegador. El propietario no usa el sistema: solo recibiría el aviso de vencimiento, que en esta versión es simulado (DEC-007). No hay sistemas externos conectados.
+\diagrama{arquitectura/ARQ-01_Contexto.png}{ARQ-01: Diagrama de contexto (C4, nivel 1)}{fig:arq01}{0.55}
+
+\section{Vista de contenedores}
+\diagrama{arquitectura/ARQ-02_Contenedores.png}{ARQ-02: Diagrama de contenedores (C4, nivel 2)}{fig:arq02}{0.75}
+
+\begin{longtable}{>{\raggedright\arraybackslash}p{3.3cm}>{\raggedright\arraybackslash}p{4.3cm}>{\raggedright\arraybackslash}p{6.8cm}}
+\toprule
+\textbf{Contenedor} & \textbf{Tecnología} & \textbf{Responsabilidad}\\
+\midrule\endhead
+Navegador web & Cualquier navegador moderno & Muestra las páginas HTML generadas por el servidor.\\
+Aplicación web & Python 3.12+, Django 5.2 LTS & Vistas, reglas de negocio, autenticación, roles y envío simulado de correos.\\
+Planificador de avisos & APScheduler (mismo proceso) & Ejecuta el proceso de vencimientos al iniciar y cada hora.\\
+Base de datos & SQLite 3 (\texttt{db.sqlite3}) & Persistencia de todas las entidades.\\
+\bottomrule
+\end{longtable}
+
+\section{Vista de componentes}
+La aplicación es un \textbf{monolito modular en capas} (DEC-004). Cada módulo es una aplicación de Django con una responsabilidad funcional.
+\diagrama{arquitectura/ARQ-03_Componentes.png}{ARQ-03: Componentes de la aplicación web (C4, nivel 3)}{fig:arq03}{0.95}
+
+\begin{longtable}{>{\raggedright\arraybackslash}p{3cm}>{\raggedright\arraybackslash}p{7cm}>{\raggedright\arraybackslash}p{4.4cm}}
+\toprule
+\textbf{Módulo} & \textbf{Responsabilidad} & \textbf{RF / HU}\\
+\midrule\endhead
+\texttt{core} & Plantilla base, menú por rol, reloj del sistema, interfaz \texttt{ServicioCorreo} y correo simulado. No depende de otros módulos. & ---\\
+\texttt{cuentas} & Inicio de sesión, roles, crear y desactivar operadores. & RF-106, HU-010\\
+\texttt{usuarios\_celdas} & Propietarios, vehículos y celdas (iteración 1: modelos y datos de demostración). & RF-101 a RF-105\\
+\texttt{pagos} & Pagos, tarifas y vigencia de la mensualidad (iteración 1: modelo y servicio de vigencia). & RF-201 a RF-204\\
+\texttt{entradas\_salidas} & Entradas, salidas, ocupación, consulta de celda e historial. & RF-001 a RF-006, HU-001 a HU-004\\
+\texttt{novedades} & Registro y consulta de novedades con uno o varios vehículos. & RF-007, RF-008, HU-005, HU-006\\
+\texttt{notificaciones} & Vencimientos con el vehículo dentro, avisos simulados, plazo de 8 días, autoridades y planificador. & RF-009 a RF-012, HU-007 a HU-009, HU-011\\
+\texttt{demo} & Comando \texttt{cargar\_datos\_demo}. Depende de todos; ningún módulo depende de él. & RNF-014\\
+\bottomrule
+\end{longtable}
+
+\textbf{Reglas de dependencia.} Las dependencias van en un solo sentido, sin ciclos. Un módulo usa a otro solo a través de sus servicios y consultas públicas. El módulo \texttt{pagos} no depende de \texttt{notificaciones}: la regla RN-17 se resuelve consultando la vigencia en cada momento.
+
+\section{Capas dentro de cada módulo}
+\diagrama{arquitectura/ARQ-05_Capas.png}{ARQ-05: Capas de cada módulo funcional}{fig:arq05}{0.9}
+
+\begin{longtable}{>{\raggedright\arraybackslash}p{2.6cm}>{\raggedright\arraybackslash}p{3.6cm}>{\raggedright\arraybackslash}p{4.2cm}>{\raggedright\arraybackslash}p{4cm}}
+\toprule
+\textbf{Capa} & \textbf{Archivos} & \textbf{Puede} & \textbf{No puede}\\
+\midrule\endhead
+Presentación & \texttt{urls.py}, \texttt{views.py}, \texttt{forms.py}, plantillas & Validar el formato, llamar a servicios y consultas, controlar el acceso por rol. & Contener reglas de negocio ni escribir directamente en la base de datos.\\
+Lógica de negocio & \texttt{services.py} & Aplicar las reglas RN, abrir transacciones, usar el reloj y el \texttt{ServicioCorreo}. & Conocer HTTP, sesiones o plantillas.\\
+Acceso a datos & \texttt{models.py}, \texttt{selectors.py} & Definir entidades y restricciones; hacer consultas. & Contener reglas de flujo de negocio.\\
+\bottomrule
+\end{longtable}
+
+\section{Vista de despliegue}
+Todo se ejecuta en un solo computador: el navegador, Python en un entorno virtual con Django y APScheduler, y el archivo SQLite. Se usa el servidor de desarrollo de Django en \texttt{127.0.0.1:8000}.
+\diagrama{arquitectura/ARQ-04_Despliegue.png}{ARQ-04: Diagrama de despliegue local}{fig:arq04}{0.5}
+
+\textbf{Limitación conocida.} El servidor de desarrollo de Django no está pensado para producción. Es suficiente para la demostración académica en local; un uso real 24/7 requeriría un servidor WSGI, lo que está fuera del alcance.
+
+\section{Mecanismos transversales}
+\begin{description}[style=nextline]
+  \item[Autenticación y autorización] Modelo de usuario propio con un campo \texttt{rol} (Administrador u Operador), definido desde la primera migración. Todas las vistas exigen sesión. Un usuario desactivado no puede iniciar sesión. Contraseñas con Argon2 (DEC-012).
+  \item[Integridad y concurrencia] Entradas y salidas dentro de \texttt{transaction.atomic()}. Restricciones únicas parciales en la base de datos: un vehículo con una sola estadía abierta y una celda con un solo vehículo.
+  \item[Fechas y reloj] \texttt{TIME\_ZONE = America/Bogota} y \texttt{USE\_TZ = True}. Las horas se toman del servidor. Un componente \emph{Reloj} permite simular fechas en las pruebas y en los datos de demostración.
+  \item[Correo simulado] La interfaz \texttt{ServicioCorreo} tiene una implementación simulada que no contacta ningún servidor. Cada intento se registra con el vehículo, el vencimiento, el destinatario, el texto, el origen (automático o manual), el usuario, la fecha y el resultado. Se aplican RN-11, RN-21 y RN-22.
+  \item[Planificador] APScheduler se inicia una sola vez al arrancar la aplicación y ejecuta el proceso de avisos al iniciar y cada hora. El proceso es idempotente y también se puede ejecutar con \texttt{python manage.py enviar\_avisos\_vencimiento}.
+  \item[Trazabilidad] Las estadías, novedades, avisos y contactos con autoridades guardan el usuario y la hora del servidor. No se ofrece borrado y no se habilita el panel \texttt{/admin} de Django.
+  \item[Errores] Los servicios lanzan excepciones de negocio con un mensaje para el usuario. Los errores inesperados se registran y el usuario ve un mensaje genérico.
+\end{description}
+
+\section{Dependencias}
+\begin{longtable}{>{\raggedright\arraybackslash}p{4cm}>{\raggedright\arraybackslash}p{6.4cm}>{\raggedright\arraybackslash}p{4cm}}
+\toprule
+\textbf{Dependencia} & \textbf{Uso} & \textbf{Decisión}\\
+\midrule\endhead
+Django 5.2 LTS & Framework web & DEC-005, DEC-010\\
+APScheduler & Planificador de avisos & DEC-008\\
+argon2-cffi & Hash de contraseñas con Argon2 & DEC-012\\
+\bottomrule
+\end{longtable}
+
+\section{Estructura de carpetas}
+\begin{lstlisting}[basicstyle=\ttfamily\footnotesize,columns=fullflexible,keepspaces=true,frame=single,rulecolor=\color{black!20}]
+Ingenieria de Software/       (raiz del repositorio)
+|-- docs/                     documentacion (Markdown + LaTeX)
+|-- src/
+|   |-- manage.py
+|   |-- config/               settings.py, urls.py, wsgi.py
+|   |-- apps/
+|   |   |-- core/  cuentas/  usuarios_celdas/  pagos/
+|   |   |-- entradas_salidas/  novedades/  notificaciones/  demo/
+|   |-- templates/            plantilla base compartida
+|   |-- static/               CSS
+|-- requirements.txt          versiones fijadas
+|-- README.md                 instalacion, ejecucion, usuarios de demostracion
+|-- tools/                    plantuml.jar (no se versiona)
+\end{lstlisting}
+
+\section{Cobertura de requerimientos no funcionales}
+\begin{longtable}{>{\raggedright\arraybackslash}p{2cm}>{\raggedright\arraybackslash}p{12.4cm}}
+\toprule
+\textbf{RNF} & \textbf{Cómo lo cubre la arquitectura}\\
+\midrule\endhead
+RNF-001 & Autenticación de Django y contraseñas con Argon2 (DEC-012).\\
+RNF-002 & Campo \texttt{rol} y control de acceso en cada vista.\\
+RNF-003 & Transacciones y restricciones únicas parciales.\\
+RNF-004 & Usuario y hora del servidor en cada registro; sin borrado.\\
+RNF-005 & Formularios de entrada y salida con la placa y una confirmación; se valida con los mockups.\\
+RNF-006 & Índices sobre placa, celda y estadías abiertas en el modelo físico; se mide en las pruebas.\\
+RNF-007 & Datos personales visibles solo con sesión y según el rol.\\
+RNF-008 & Módulos y capas con pruebas por módulo.\\
+RNF-009 & El README documenta la copia y restauración de \texttt{db.sqlite3}.\\
+RNF-010 & Sin restricciones de horario; zona horaria y reloj del sistema.\\
+RNF-011 & Instalación con \texttt{pip install -r requirements.txt}, sin servicios externos.\\
+RNF-012 & Sin credenciales en esta versión; interfaz de correo preparada para un servicio real.\\
+RNF-013 & El fallo del envío simulado se registra y no afecta las entradas ni las salidas.\\
+RNF-014 & Comando \texttt{cargar\_datos\_demo} en el módulo \texttt{demo}, usando el reloj.\\
+\bottomrule
+\end{longtable}

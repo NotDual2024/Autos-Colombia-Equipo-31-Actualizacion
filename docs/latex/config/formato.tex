@@ -1,0 +1,26 @@
+\definecolor{azul}{RGB}{11,61,145}
+\definecolor{gris}{RGB}{245,245,245}
+\graphicspath{{diagrams/}}
+\setlength{\parskip}{0.5em}
+\setlength{\parindent}{0pt}
+\renewcommand{\arraystretch}{1.25}
+\titleformat{\chapter}[hang]{\Huge\bfseries\color{azul}}{\thechapter.}{0.6em}{}
+\titlespacing*{\chapter}{0pt}{-20pt}{18pt}
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\small Parqueadero ``Autos Colombia''}
+\fancyhead[R]{\small\nouppercase{\leftmark}}
+\fancyfoot[C]{\thepage}
+\fancypagestyle{plain}{\fancyhf{}\fancyfoot[C]{\thepage}\renewcommand{\headrulewidth}{0pt}}
+\lstdefinestyle{gherkin}{
+  basicstyle=\ttfamily\small, backgroundcolor=\color{gris}, frame=single,
+  rulecolor=\color{black!20}, breaklines=true, columns=fullflexible,
+  keepspaces=true, inputencoding=utf8, extendedchars=true,
+  literate={á}{{\'a}}1 {é}{{\'e}}1 {í}{{\'i}}1 {ó}{{\'o}}1 {ú}{{\'u}}1
+           {Á}{{\'A}}1 {É}{{\'E}}1 {Í}{{\'I}}1 {Ó}{{\'O}}1 {Ú}{{\'U}}1
+           {ñ}{{\~n}}1 {Ñ}{{\~N}}1 {¿}{{?`}}1 {¡}{{!`}}1 {–}{{--}}1
+           {“}{{``}}1 {”}{{''}}1,
+  morekeywords={Escenario,Dado,Dada,Dados,Dadas,Cuando,Entonces,Y},
+  keywordstyle=\bfseries\color{azul}
+}
+\setlist{itemsep=2pt,topsep=4pt}

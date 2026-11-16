@@ -1,0 +1,80 @@
+# Estado del proyecto — Parqueadero "Autos Colombia"
+
+**Última actualización:** 2026-11-15
+
+## Objetivo
+Software para la operación diaria de un parqueadero por mensualidad: entradas y salidas de vehículos, novedades, usuarios, celdas y pagos.
+
+## Proceso de trabajo (definido por el equipo)
+Se avanza paso a paso, por iteraciones:
+1. **Iteración 1:** Gestión de la entrada y salida de vehículos (incluye novedades).
+2. **Iteración 2:** Gestión de usuarios y celdas.
+3. **Iteración 3:** Gestión de pagos.
+
+En cada iteración: documentación y diagramas (Arquitecto) → código (Ingeniero) → commit a GitHub.
+
+## Fase actual
+Iteración 1. Arquitectura aprobada. Primer PDF LaTeX compilado (53 páginas), en revisión por el equipo. Siguiente: modelo de datos (MER, MR, físico).
+
+## Artefactos
+| Artefacto | Archivo | Estado |
+|---|---|---|
+| Requerimientos v1 | docs/Requerimientos_v1.md | Sustituido por v2 (se conserva como historial) |
+| Requerimientos v2.9 (iteración 1) | docs/Requerimientos_v2.md | **Aprobado** (2026-11-15; v2.5 = RNF-014, v2.6 = RF-106 básico y RN-21, v2.7 = correo simulado y RF-012, v2.8 = RN-22 por P-20, v2.9 = un solo reenvío) |
+| Historias de usuario v1 (iteración 1) | docs/Historias_Usuario_v1.md | HU-001 a HU-011 **Aprobadas** (2026-11-15) |
+| .gitignore | .gitignore | Creado |
+| PlantUML 1.2026.10 | tools/plantuml.jar (no se versiona) | Descargado del repositorio oficial y verificado (diagrama de clases con Smetana y mockup Salt) |
+| Registro de decisiones | docs/Registro_Decisiones.md | En uso |
+| Arquitectura v1 | docs/Arquitectura_v1.md + docs/latex/diagrams/arquitectura/ARQ-01 a ARQ-05 | **Aprobado** (2026-11-15) |
+| Documento LaTeX | docs/latex/main.tex → main.pdf (capítulos 03, 05 y 11 generados con scripts/generar_capitulos.py) | Primera versión compilada; capítulos 06–10 y 12 pendientes |
+
+## Decisiones
+| ID | Decisión | Estado |
+|---|---|---|
+| DEC-001 | Modelo de datos completo desde el inicio; implementación por iteración (alternativa B) | Aprobada (2026-11-15) |
+| DEC-002 | Notificación al propietario por correo automático (alternativa B) | Aprobada (2026-11-15) |
+| DEC-003 | Aplicación web local | Aprobada (2026-11-15) |
+| DEC-004 | Monolito modular en capas | Aprobada (2026-11-15) |
+| DEC-005 | Python + Django, plantillas en el servidor | Aprobada (2026-11-15) |
+| DEC-006 | SQLite | Aprobada (2026-11-15) |
+| DEC-007 | Correo simulado (dummy): proceso automático + botón "Enviar correo" | Aprobada (2026-11-15) |
+| DEC-008 | Proceso diario con APScheduler (al iniciar y cada hora); P-19 sí | Aprobada (2026-11-15) |
+| DEC-009 | LaTeX (13 capítulos, incluye requerimientos y decisiones) + MiKTeX + PlantUML local | Aprobada (2026-11-15) |
+| DEC-010 | Django 5.2 LTS + Python 3.12 o superior | Aprobada (2026-11-15) |
+| DEC-011 | Creación de operadores (RF-106 básico) en la iteración 1 | Aprobada (2026-11-15) |
+| DEC-012 | Hash de contraseñas: Argon2 (argon2-cffi) | Aprobada (2026-11-15) |
+
+## Información dada por el equipo
+- El servicio es solo por mensualidad. La mensualidad se paga por vehículo (carro/camioneta 150 000 COP; moto 80 000 COP).
+- Se admiten motos, carros y camionetas. Hay dos tipos de celda: 150 de carro/camioneta y 50 de moto (por el momento). Operación 24 horas.
+- Proyecto académico que se ejecuta en local. El profesor lo ejecutará y probará en su máquina. El curso no exige ningún lenguaje. El programa se mantendría activo 24/7. El correo es un dummy de demostración: un botón para enviarlo que no necesita funcionar de verdad.
+- Se necesitan un administrador y un operador de prueba (CHG-001 aprobado → RNF-014). El administrador debe poder crear operadores nuevos (DEC-011, aprobada).
+- El PDF LaTeX debe incluir: portada, introducción, entregables, arquitectura, historias de usuario, mockups, MER, MR, modelo físico, casos de uso, diagrama de clases, diagrama de paquetes y conclusiones.
+- Al terminar cada fase se entregan los comandos de Git (commit y push) para que el equipo los ejecute.
+- El vehículo toma cualquier celda libre de su tipo; el operador registra la celda y puede consultar si una celda está ocupada y por quién.
+- Solo pueden estar dentro los vehículos con la mensualidad pagada.
+- Si la mensualidad vence con el vehículo dentro, se notifica al propietario. Si sigue dentro en el día vencimiento + 8 (por ejemplo, vence el 1 y se marca el 9), el administrador (solo él) contacta a las autoridades.
+- Los 8 días se cuentan desde el vencimiento de la mensualidad. Se envía un solo correo automático el día del vencimiento: debe pagar para mantener el vehículo o habrá consecuencias.
+- Correo de retiro: el primero (automático o manual) y como máximo un reenvío con confirmación (RN-22).
+- Un vehículo con la mensualidad vencida puede salir, pero no vuelve a entrar mientras no pague.
+- Al registrar una novedad, el sistema verifica que todos los vehículos involucrados estaban dentro a la hora del hecho.
+- Si el propietario paga dentro de los 8 días, el vehículo sale del proceso de retiro.
+- Las novedades no llevan fotos ni adjuntos en esta versión.
+- Las novedades solo se registran si el hecho ocurrió dentro de las instalaciones. Tienen un identificador propio, pueden vincular varios vehículos, se pueden registrar después de la salida y no tienen estado (son solo documentación).
+- Roles: Administrador (acceso total, crea operadores y les asigna horario) y Operador (registra clientes y pagos, consulta vehículos y mensualidades).
+
+## Datos de la portada (P-21, dados por el equipo el 2026-11-15)
+- Institución: IU Digital (confirmado por el equipo).
+- Asignatura: Ingeniería de Software. Profesor: Reinaldo Rojas Lopez.
+- Integrantes: Juan Sebastian Lopez Gallo y Andres Miguel Hernandez.
+- Fecha: la actual. Semestre: sexto.
+
+## Pendientes
+- Revisión del primer PDF LaTeX.
+
+## Próximas actividades
+1. ~~Aprobar los requerimientos de la iteración 1~~ (hecho 2026-11-15).
+2. ~~Aprobar las historias de usuario de la iteración 1~~ (hecho 2026-11-15).
+3. ~~Aprobar la arquitectura v1~~ (hecho 2026-11-15).
+4. ~~Crear el documento LaTeX inicial~~ (hecho 2026-11-15; pendiente la revisión del equipo).
+5. MER completo (DEC-001), MR, modelo físico, casos de uso, clases, paquetes y mockups de la iteración 1.

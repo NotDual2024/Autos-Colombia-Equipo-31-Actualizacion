@@ -1,0 +1,28 @@
+\chapter{Entregables}\label{cap:entregables}
+
+\section{Entregables de la iteración 1}
+\begin{longtable}{>{\raggedright\arraybackslash}p{5.2cm}>{\raggedright\arraybackslash}p{6.6cm}>{\raggedright\arraybackslash}p{2.6cm}}
+\toprule
+\textbf{Entregable} & \textbf{Contenido} & \textbf{Estado}\\
+\midrule\endhead
+Documento técnico (este PDF) & Todos los artefactos de análisis y diseño de la iteración. & En elaboración\\
+Requerimientos & Reglas de negocio, RF y RNF (capítulo~\ref{cap:requerimientos}). & Aprobado\\
+Historias de usuario & HU-001 a HU-011 con criterios de aceptación (capítulo~\ref{cap:historias}). & Aprobado\\
+Arquitectura del sistema & Vistas de contexto, contenedores, componentes, capas y despliegue (capítulo~\ref{cap:arquitectura}). & Aprobado\\
+Registro de decisiones & DEC-001 a DEC-012 (capítulo~\ref{cap:decisiones}). & Aprobado\\
+Mockups & Pantallas de las historias de usuario (capítulo~\ref{cap:mockups}). & Pendiente\\
+Modelo de datos & MER, modelo relacional y modelo físico (capítulo~\ref{cap:datos}). & Pendiente\\
+Diagramas UML & Casos de uso, clases y paquetes (capítulos~\ref{cap:casos} a~\ref{cap:paquetes}). & Pendiente\\
+Código fuente & Aplicación Django en el repositorio de GitHub, con \texttt{README.md}. & Pendiente\\
+Datos de demostración & Comando \texttt{cargar\_datos\_demo} con usuarios de prueba (RNF-014). & Pendiente\\
+Pruebas automatizadas & Pruebas de las reglas de negocio y de los criterios de aceptación. & Pendiente\\
+\bottomrule
+\end{longtable}
+
+\section{Herramientas}
+\begin{itemize}
+  \item Documentación: \LaTeX{} (MiKTeX, compilación con \texttt{latexmk}) y Markdown como documentos de trabajo.
+  \item Diagramas y mockups: PlantUML 1.2026.10. Los archivos fuente \texttt{.puml} se conservan junto a las imágenes.
+  \item Implementación: Python 3.12 o superior, Django 5.2 LTS, SQLite y APScheduler.
+  \item Control de versiones: Git y GitHub.
+\end{itemize}

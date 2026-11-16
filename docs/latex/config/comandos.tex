@@ -1,0 +1,8 @@
+% Figura de diagrama: \diagrama{ruta}{pie}{etiqueta}{ancho relativo}
+\newcommand{\diagrama}[4]{%
+  \begin{figure}[H]\centering
+  \includegraphics[width=#4\textwidth,height=0.8\textheight,keepaspectratio]{#1}
+  \caption{#2}\label{#3}\end{figure}}
+% Recuadro de capítulo pendiente
+\newcommand{\pendiente}[1]{%
+  \begin{center}\fcolorbox{black!30}{gris}{\parbox{0.9\textwidth}{\textbf{Capítulo en elaboración.} #1}}\end{center}}

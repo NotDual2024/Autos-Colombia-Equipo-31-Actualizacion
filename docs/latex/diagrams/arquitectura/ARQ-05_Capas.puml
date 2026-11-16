@@ -1,0 +1,31 @@
+@startuml ARQ-05_Capas
+' ARQ-05 - Capas dentro de cada módulo (DEC-004) - Iteración 1 - v1
+title Capas de cada módulo funcional
+
+package "Presentación" as P {
+  [urls.py / views.py] as V
+  [forms.py] as F
+  [templates/*.html] as T
+}
+package "Lógica de negocio" as L {
+  [services.py\n(reglas RN, transacciones)] as S
+}
+package "Acceso a datos" as D {
+  [models.py\n(entidades, restricciones)] as M
+  [selectors.py\n(consultas)] as Q
+}
+database "SQLite" as DB
+
+V --> F
+V --> T
+V --> S : comandos (registrar, enviar...)
+V --> Q : consultas de solo lectura
+S --> M
+S --> Q
+M --> DB
+Q --> DB
+note right of S
+  Las vistas no contienen reglas de negocio.
+  Los servicios no conocen HTTP ni plantillas.
+end note
+@enduml

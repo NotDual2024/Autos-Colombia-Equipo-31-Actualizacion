@@ -1,0 +1,43 @@
+# --- Python / Django ---
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+*.sqlite3
+db.sqlite3-journal
+/staticfiles/
+/media/
+
+# --- Configuración local y secretos (RNF-012) ---
+.env
+.env.*
+!.env.ejemplo
+
+# --- Correos simulados generados en local ---
+correos_enviados/
+
+# --- LaTeX: archivos auxiliares de compilación ---
+*.aux
+*.log
+*.out
+*.toc
+*.lof
+*.lot
+*.fls
+*.fdb_latexmk
+*.synctex.gz
+*.bbl
+*.blg
+*.bcf
+*.run.xml
+*.xdv
+
+# --- Herramientas descargadas (no se versionan) ---
+tools/
+
+# --- Sistema operativo / editores ---
+Thumbs.db
+desktop.ini
+.DS_Store
+.vscode/
+.idea/

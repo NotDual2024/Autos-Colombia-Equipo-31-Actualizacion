@@ -1,0 +1,121 @@
+% ARCHIVO GENERADO por scripts/generar_capitulos.py. No editar a mano.
+
+\chapter{Registro de decisiones}\label{cap:decisiones}
+
+Cada decisión significativa se presentó con su problema, alternativas, ventajas, desventajas y una recomendación, y se registró solo después de la aprobación explícita del equipo del proyecto.
+
+\section{Resumen}
+\begin{longtable}{>{\raggedright\arraybackslash}p{1.8cm}>{\raggedright\arraybackslash}p{7.0cm}>{\raggedright\arraybackslash}p{5.6cm}}
+\toprule
+\textbf{ID} & \textbf{Tema} & \textbf{Estado}\\
+\midrule\endhead
+DEC-001 & Alcance del modelo de datos frente a la entrega por módulos & \textbf{Aprobada}\\
+DEC-002 & Mecanismo de notificación al propietario (mensualidad vencida con el vehículo dentro) & \textbf{Aprobada} (B: correo automático)\\
+DEC-003 & Tipo de aplicación & \textbf{Aprobada} (A: web local)\\
+DEC-004 & Estilo arquitectónico & \textbf{Aprobada} (A: monolito modular en capas)\\
+DEC-005 & Lenguaje, framework y forma de construir la interfaz & \textbf{Aprobada} (A: Python + Django, plantillas en el servidor)\\
+DEC-006 & Motor de base de datos & \textbf{Aprobada} (A: SQLite)\\
+DEC-007 & Envío de correo simulado (dummy) para la demostración & \textbf{Aprobada} (A: automático + botón, ambos simulados)\\
+DEC-008 & Mecanismo del proceso diario de avisos & \textbf{Aprobada} (B: APScheduler; P-19 sí)\\
+DEC-009 & Documentación LaTeX y herramienta de diagramas & \textbf{Aprobada} (estructura con 13 capítulos, MiKTeX, PlantUML local)\\
+DEC-010 & Versiones de Python y Django & \textbf{Aprobada} (Django 5.2 LTS, Python 3.12 o superior)\\
+DEC-011 & Creación de operadores por el administrador desde la iteración 1 & \textbf{Aprobada} (A)\\
+DEC-012 & Algoritmo de hash de contraseñas & \textbf{Aprobada} (A: Argon2 con argon2-cffi)\\
+DEC-002, RF-010, RNF-012, RNF-013 & Envío automático de correo, un proceso diario y credenciales fuera del código. & \\
+\bottomrule
+\end{longtable}
+
+\section{Detalle}
+\subsection{DEC-001 — Alcance del modelo de datos frente a la entrega por módulos}
+\begin{description}[style=nextline]
+  \item[Problema] El módulo 1 (entrada y salida de vehículos) depende de datos que pertenecen a los módulos 2 (usuarios y celdas) y 3 (pagos): propietario del vehículo, vigencia de la mensualidad y celda asignada.
+  \item[Decisión seleccionada] B. Diseñar desde el inicio el modelo de datos completo e implementar solo la funcionalidad de la iteración en curso.
+  \item[Justificación] El dominio es pequeño, el modelo completo cabe en pocas entidades y así se evita rediseñar el MER en cada módulo. La documentación y el código avanzan módulo por módulo.
+  \item[Fecha] 2026-11-15
+  \item[Estado] Aprobada.
+\end{description}
+\subsection{DEC-002 — Mecanismo de notificación al propietario}
+\begin{description}[style=nextline]
+  \item[Problema] RN-11 dice que, si la mensualidad vence con el vehículo dentro, se notifica al propietario. Falta definir quién envía esa notificación y por qué medio.
+  \item[Decisión seleccionada] B. Correo electrónico automático. El equipo no eligió la recomendación del arquitecto (A).
+  \item[Justificación] Decisión del equipo. El aviso no depende de que el personal lo haga.
+  \item[Fecha] 2026-11-15
+  \item[Estado] Aprobada.
+\end{description}
+\subsection{DEC-003 — Tipo de aplicación}
+\begin{description}[style=nextline]
+  \item[Problema] Hay que definir cómo usarán el sistema el administrador y los operadores.
+  \item[Decisión seleccionada] A. Aplicación web local (cliente-servidor en el mismo equipo, usada desde el navegador).
+  \item[Justificación] El equipo aceptó la recomendación del arquitecto. El curso no exige ningún lenguaje ni framework (P-18). El sistema se ejecutará en local, y el profesor también lo ejecutará y probará en su propia máquina.
+  \item[Fecha] 2026-11-15
+  \item[Estado] Aprobada.
+\end{description}
+\subsection{DEC-004 — Estilo arquitectónico}
+\begin{description}[style=nextline]
+  \item[Problema] Hay que organizar el código para que crezca en tres iteraciones sin rehacerse.
+  \item[Decisión seleccionada] A. Monolito modular en capas (presentación, lógica de negocio y acceso a datos).
+  \item[Justificación] El equipo aceptó la recomendación del arquitecto. El curso no exige ningún lenguaje ni framework (P-18). El sistema se ejecutará en local, y el profesor también lo ejecutará y probará en su propia máquina.
+  \item[Fecha] 2026-11-15
+  \item[Estado] Aprobada.
+\end{description}
+\subsection{DEC-005 — Lenguaje, framework y forma de construir la interfaz}
+\begin{description}[style=nextline]
+  \item[Problema] Hay que elegir la tecnología de implementación. Depende de DEC-003 y de lo que el equipo sepa o el curso exija (P-18).
+  \item[Decisión seleccionada] A. Python + Django, con plantillas HTML renderizadas en el servidor.
+  \item[Justificación] El equipo aceptó la recomendación del arquitecto. El curso no exige ningún lenguaje ni framework (P-18). El sistema se ejecutará en local, y el profesor también lo ejecutará y probará en su propia máquina.
+  \item[Fecha] 2026-11-15
+  \item[Estado] Aprobada.
+\end{description}
+\subsection{DEC-006 — Motor de base de datos}
+\begin{description}[style=nextline]
+  \item[Problema] Hay que elegir el motor relacional para el modelo físico.
+  \item[Decisión seleccionada] A. SQLite.
+  \item[Justificación] El equipo aceptó la recomendación del arquitecto. El curso no exige ningún lenguaje ni framework (P-18). El sistema se ejecutará en local, y el profesor también lo ejecutará y probará en su propia máquina.
+  \item[Fecha] 2026-11-15
+  \item[Estado] Aprobada.
+\end{description}
+\subsection{DEC-007 — Envío de correo: simulado para la demostración}
+\begin{description}[style=nextline]
+  \item[Decisión seleccionada] A. El proceso automático (APScheduler) y el botón manual ``Enviar correo'' existen los dos, y ambos \textbf{simulan} el envío: no sale ningún correo real.
+  \item[Justificación] Decisión del equipo. El correo sirve para la demostración y no necesita funcionar de verdad.
+  \item[Fecha] 2026-11-15
+  \item[Estado] Aprobada.
+\end{description}
+\subsection{DEC-008 — Mecanismo del proceso diario de avisos}
+\begin{description}[style=nextline]
+  \item[Problema] RF-010 necesita revisar los vencimientos y enviar los correos sin que nadie lo dispare a mano.
+  \item[Decisión seleccionada] B. APScheduler, que ejecuta el proceso al iniciar el servidor y cada hora.
+  \item[Justificación] El equipo aceptó la recomendación.
+  \item[Fecha] 2026-11-15
+  \item[Estado] Aprobada.
+\end{description}
+\subsection{DEC-009 — Documentación LaTeX y herramienta de diagramas}
+\begin{description}[style=nextline]
+  \item[Problema] Hay que definir el documento técnico (contenido y compilación) y la herramienta para generar los diagramas y los mockups.
+  \item[Decisión seleccionada] estructura propuesta, \textbf{incluidos} los capítulos 03 (requerimientos) y 11 (registro de decisiones), compilación local con MiKTeX (latexmk + pdfLaTeX) y \textbf{PlantUML local (alternativa A)} para diagramas, MER y mockups (Salt). El equipo autorizó usar PlantUML, lo que incluye descargar \texttt{plantuml.jar} a \texttt{tools/}.
+  \item[Fecha] 2026-11-15
+  \item[Estado] Aprobada.
+\end{description}
+\subsection{DEC-010 — Versiones de Python y Django}
+\begin{description}[style=nextline]
+  \item[Decisión seleccionada] A. Django 5.2 LTS con Python 3.12 o superior (probado con 3.14).
+  \item[Justificación] El equipo aceptó la recomendación.
+  \item[Fecha] 2026-11-15
+  \item[Estado] Aprobada.
+\end{description}
+\subsection{DEC-011 — Creación de operadores por el administrador desde la iteración 1}
+\begin{description}[style=nextline]
+  \item[Problema] El equipo indicó (2026-11-15) que el administrador debe poder \textbf{crear operadores nuevos}. En los requerimientos aprobados eso es RF-106, que pertenece a la \textbf{iteración 2}. Hay que decidir si se adelanta.
+  \item[Decisión seleccionada] A. Se adelanta a la iteración 1 una versión básica de RF-106: el administrador crea operadores y los activa o desactiva, con pantalla propia. Los horarios (RF-107) se quedan en la iteración 2.
+  \item[Justificación] El equipo eligió la opción A.
+  \item[Fecha] 2026-11-15
+  \item[Estado] Aprobada.
+\end{description}
+\subsection{DEC-012 — Algoritmo de hash de contraseñas}
+\begin{description}[style=nextline]
+  \item[Problema] RNF-001 (aprobado) exige bcrypt o Argon2, pero Django usa PBKDF2 por defecto. Se detectó al redactar el documento de arquitectura.
+  \item[Decisión seleccionada] A. Argon2 como algoritmo principal (\texttt{PASSWORD\_HASHERS} con \texttt{Argon2PasswordHasher} en primer lugar).
+  \item[Justificación] Respeta RNF-001 tal como se aprobó. El equipo aceptó la recomendación.
+  \item[Fecha] 2026-11-15
+  \item[Estado] Aprobada.
+\end{description}

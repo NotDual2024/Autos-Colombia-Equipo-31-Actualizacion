@@ -1,0 +1,19 @@
+@startuml ARQ-04_Despliegue
+' ARQ-04 - Diagrama de despliegue (local) - Iteración 1 - v1
+title Despliegue local (computador del equipo de desarrollo o del profesor)
+
+node "Computador local (Windows / Linux / macOS)" as pc {
+  node "Navegador web" as nav
+  node "Python 3.12+ (entorno virtual .venv)" as py {
+    artifact "Servidor de desarrollo Django\n(manage.py runserver 127.0.0.1:8000)" as srv
+    component "Aplicación Django 5.2 LTS" as app
+    component "APScheduler\n(hilo dentro del proceso)" as sch
+  }
+  database "db.sqlite3" as db
+}
+
+nav --> srv : HTTP (localhost)
+srv --> app
+app --> sch : inicia al arrancar
+app --> db : archivo local
+@enduml
