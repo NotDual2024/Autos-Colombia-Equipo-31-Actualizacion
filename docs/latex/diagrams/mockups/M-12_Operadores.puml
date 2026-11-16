@@ -1,0 +1,22 @@
+@startsalt M-12_Operadores
+title M-12 Gestión de operadores (HU-010 / UC-15) - solo administrador
+{+
+  {* Ocupación | Entrada | Salida | Novedades | Vencidos | Historial | Operadores | Salir }
+  ==
+  {^"Nuevo operador"
+    Nombre completo | "Pedro Rojas          "
+    Usuario | "operador3            "
+    Contraseña inicial | "********             "
+    . | [Crear operador]
+  }
+  {^"Operadores"
+    {#
+      Usuario | Nombre | Estado | Acción
+      operador1 | María Pérez | Activo | [Desactivar]
+      operador2 | Jorge Díaz | Activo | [Desactivar]
+      operador4 | Laura Gómez | Inactivo | [Reactivar]
+    }
+  }
+  <color:red>El nombre de usuario ya existe.</color>
+}
+@endsalt

@@ -1,0 +1,19 @@
+@startsalt M-10_CorreoSimulado
+title M-10 Correo enviado (simulación) (HU-008, HU-011 / UC-11 a UC-13)
+{+
+  <color:green>Correo enviado (simulación). No se envió ningún correo real.</color>
+  {^"Detalle del envío"
+    Para | ana.gil@correo.co
+    Asunto | Mensualidad vencida - vehículo ABC123
+    Origen | Automático (13/11/2026 06:00)
+    Envío | 1 de 2
+  }
+  {^"Mensaje"
+    Señor(a) Ana Gil:
+    La mensualidad del vehículo ABC123 venció el 13/11/2026.
+    Debe pagar la mensualidad para mantener el vehículo en el parqueadero.
+    Si no lo hace, el 21/11/2026 se contactará a las autoridades para su retiro.
+  }
+  [Volver]
+}
+@endsalt

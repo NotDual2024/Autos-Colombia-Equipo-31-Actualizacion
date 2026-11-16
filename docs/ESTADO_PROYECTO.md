@@ -14,7 +14,7 @@ Se avanza paso a paso, por iteraciones:
 En cada iteración: documentación y diagramas (Arquitecto) → código (Ingeniero) → commit a GitHub.
 
 ## Fase actual
-Iteración 1. Modelo de datos v1.1 aprobado e incorporado al PDF (64 páginas). Siguiente: diagramas UML (casos de uso, clases, paquetes) y mockups.
+Iteración 1. **Diseño completo y aprobado**; PDF de 81 páginas con todos los capítulos salvo conclusiones. Siguiente: implementación con el Ingeniero.
 
 ## Artefactos
 | Artefacto | Archivo | Estado |
@@ -27,7 +27,9 @@ Iteración 1. Modelo de datos v1.1 aprobado e incorporado al PDF (64 páginas). 
 | Registro de decisiones | docs/Registro_Decisiones.md | En uso |
 | Arquitectura v1 | docs/Arquitectura_v1.md + docs/latex/diagrams/arquitectura/ARQ-01 a ARQ-05 | **Aprobado** (2026-11-15) |
 | Modelo de datos v1.1 | docs/Modelo_Datos_v1.md + diagrams/datos (MER-01, MR-01) + docs/sql/ddl_sqlite_v1.sql + validar_ddl.py (42/42) | **Aprobado** (2026-11-15) |
-| Documento LaTeX | docs/latex/main.tex → main.pdf (capítulos 03, 05 y 11 generados con scripts/generar_capitulos.py) | Compilado (64 páginas); capítulos 06, 08, 09, 10 y 12 pendientes |
+| Diseño UML v1 | docs/Diseno_UML_v1.md + diagrams/uml (UC-01, CL-01, CL-02, PK-01) | **Aprobado** (2026-11-15) |
+| Mockups v1 | docs/Mockups_v1.md + diagrams/mockups (M-01 a M-12) | **Aprobado** (2026-11-15) |
+| Documento LaTeX | docs/latex/main.tex → main.pdf (capítulos 03, 05 y 11 generados con scripts/generar_capitulos.py) | Compilado (81 páginas); solo falta el capítulo 12 (conclusiones), que se escribe al cerrar la iteración |
 
 ## Decisiones
 | ID | Decisión | Estado |
@@ -72,7 +74,7 @@ Iteración 1. Modelo de datos v1.1 aprobado e incorporado al PDF (64 páginas). 
 - Fecha: la actual. Semestre: sexto.
 
 ## Pendientes
-- Ninguna decisión abierta. Siguiente: casos de uso, clases, paquetes y mockups.
+- Ninguna decisión abierta. Siguiente: plan de implementación del Ingeniero para la iteración 1.
 - Revisión del primer PDF LaTeX.
 
 ## Próximas actividades
@@ -81,4 +83,6 @@ Iteración 1. Modelo de datos v1.1 aprobado e incorporado al PDF (64 páginas). 
 3. ~~Aprobar la arquitectura v1~~ (hecho 2026-11-15).
 4. ~~Crear el documento LaTeX inicial~~ (hecho 2026-11-15; pendiente la revisión del equipo).
 5. ~~Aprobar el modelo de datos e incorporarlo al capítulo 7~~ (hecho 2026-11-15).
-6. Casos de uso, diagrama de clases, diagrama de paquetes y mockups de la iteración 1.
+6. ~~Aprobar UML y mockups e incorporarlos al PDF~~ (hecho 2026-11-15).
+7. Implementación (Ingeniero): plan, código, pruebas, README y datos de demostración.
+8. Conclusiones (capítulo 12) y cierre de la iteración 1 con commit.

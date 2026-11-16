@@ -1,0 +1,18 @@
+@startsalt M-06_Novedad
+title M-06 Registrar novedad (HU-005 / UC-08)
+{+
+  {* Ocupación | Entrada | Salida | Novedades | Vencidos | Historial | Operadores | Salir }
+  ==
+  {^"Registrar novedad"
+    Vehículos involucrados | { "ABC123  " | [Agregar] }
+    . | { [X] ABC123 (Carro) | [X] DEF456 (Camioneta) }
+    Tipo | ^Rayón^
+    Fecha y hora del hecho | "15/11/2026 10:20"
+    Descripción | "La camioneta DEF456 rayó la puerta trasera del carro ABC123 al parquear.   "
+  }
+  [Registrar novedad] | [Cancelar]
+  --
+  <color:red>DEF456 no estaba dentro del parqueadero a la hora indicada.</color>
+  <color:green>Novedad N-0007 registrada y vinculada a 2 vehículos.</color>
+}
+@endsalt

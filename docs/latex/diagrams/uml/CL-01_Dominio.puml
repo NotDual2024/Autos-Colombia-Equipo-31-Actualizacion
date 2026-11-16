@@ -1,0 +1,145 @@
+@startuml CL-01_Dominio
+' CL-01 - Diagrama de clases de dominio (modelos Django) - v1
+!pragma layout smetana
+skinparam classAttributeIconSize 0
+skinparam class {
+  BackgroundColor #FDFDFD
+  BorderColor #0B3D91
+}
+title Clases de dominio (entidades persistentes)
+
+package cuentas {
+  enum Rol {
+    ADMINISTRADOR
+    OPERADOR
+  }
+  class Usuario {
+    - username : str
+    - first_name : str
+    - last_name : str
+    - rol : Rol
+    - is_active : bool
+    + es_administrador() : bool
+    + nombre_completo() : str
+  }
+  class HorarioOperador <<provisional>> {
+    - dia_semana : int
+    - hora_inicio : time
+    - hora_fin : time
+  }
+}
+
+package usuarios_celdas {
+  enum TipoVehiculo {
+    MOTO
+    CARRO
+    CAMIONETA
+  }
+  enum Categoria {
+    MOTO
+    CARRO_CAMIONETA
+  }
+  class Propietario {
+    - nombre_completo : str
+    - numero_documento : str
+    - telefono : str
+    - correo : str
+    - direccion : str
+    - activo : bool
+  }
+  class Vehiculo {
+    - placa : str
+    - tipo : TipoVehiculo
+    - marca : str
+    - nombre : str
+    - modelo : int
+    - color : str
+    - activo : bool
+    + categoria() : Categoria
+  }
+  class Celda {
+    - codigo : str
+    - tipo : Categoria
+    - activa : bool
+    + admite(v : Vehiculo) : bool
+  }
+}
+
+package pagos {
+  class Tarifa {
+    - categoria : Categoria
+    - valor : int
+    - vigente_desde : date
+  }
+  class Pago {
+    - periodo_inicio : date
+    - periodo_fin : date
+    - valor : int
+    - fecha_pago : datetime
+    + cubre(fecha : date) : bool
+  }
+}
+
+package entradas_salidas {
+  class Estadia {
+    - fecha_hora_entrada : datetime
+    - fecha_hora_salida : datetime [0..1]
+    + esta_abierta() : bool
+    + incluye(momento : datetime) : bool
+  }
+}
+
+package novedades {
+  enum TipoNovedad {
+    ACCIDENTE
+    RAYON
+    CAIDA
+    DANO
+    OTRO
+  }
+  class Novedad {
+    - tipo : TipoNovedad
+    - descripcion : str
+    - fecha_hora_ocurrencia : datetime
+    - fecha_hora_registro : datetime
+  }
+}
+
+package notificaciones {
+  enum OrigenAviso {
+    AUTOMATICO
+    MANUAL
+  }
+  enum ResultadoEnvio {
+    ENVIADO_SIMULADO
+    FALLIDO
+  }
+  class AvisoCorreo {
+    - numero_envio : int [0..1]
+    - origen : OrigenAviso
+    - destinatario : str
+    - asunto : str
+    - cuerpo : str
+    - fecha_hora : datetime
+    - resultado : ResultadoEnvio
+  }
+  class ContactoAutoridad {
+    - fecha_hora : datetime
+    - observacion : str
+  }
+}
+
+Usuario "1" *-- "0..*" HorarioOperador
+Propietario "1" -- "0..*" Vehiculo : posee >
+Vehiculo "1" -- "0..*" Pago : paga >
+Vehiculo "1" -- "0..*" Estadia : ingresa >
+Celda "1" -- "0..*" Estadia : ocupa >
+Novedad "0..*" -- "1..*" Estadia : involucra >
+Pago "1" -- "0..2" AvisoCorreo : avisa >
+Pago "1" -- "0..*" ContactoAutoridad : escala >
+Usuario "1" -- "0..*" Estadia : registra >
+Usuario "1" -- "0..*" Novedad : registra >
+Usuario "0..1" -- "0..*" AvisoCorreo : envía >
+Usuario "1" -- "0..*" ContactoAutoridad : registra >
+Usuario "1" -- "0..*" Pago : registra >
+@enduml

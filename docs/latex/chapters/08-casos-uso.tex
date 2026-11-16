@@ -1,3 +1,61 @@
 \chapter{Diagramas de casos de uso}\label{cap:casos}
 
-\pendiente{Se agregan el diagrama de casos de uso de la iteración 1 y las especificaciones de cada caso.}
+\section{Diagrama de casos de uso}
+\diagrama{uml/UC-01_CasosUso.png}{UC-01: Casos de uso de la iteración 1}{fig:uc01}{0.95}
+
+\subsection{Actores}
+\begin{description}[style=nextline]
+  \item[Operador] Personal de portería.
+  \item[Administrador] Especializa al Operador (generalización): puede hacer todo lo que hace el operador, y además gestionar operadores y registrar el contacto con autoridades.
+  \item[Planificador (APScheduler)] Actor de sistema que dispara el aviso automático al iniciar el servidor y cada hora (DEC-008). Representa el paso del tiempo.
+\end{description}
+
+\subsection{Relaciones entre casos de uso}
+\begin{itemize}
+  \item UC-02 Registrar entrada \guillemotleft include\guillemotright{} UC-03 Verificar vigencia y UC-04 Asignar celda: siempre forman parte de la entrada.
+  \item UC-11 Aviso automático y UC-12 Correo manual \guillemotleft include\guillemotright{} UC-13 Enviar correo simulado.
+  \item UC-12 Correo manual \guillemotleft extend\guillemotright{} UC-10 Consultar vencidos (punto de extensión: vehículo seleccionado).
+  \item UC-14 Registrar contacto con autoridades \guillemotleft extend\guillemotright{} UC-10 (condición: plazo de 8 días vencido).
+\end{itemize}
+
+\section{Especificaciones}
+
+\newcommand{\casouso}[6]{%
+  \subsection{#1}
+  \begin{description}[style=nextline]
+    \item[Actor y trazabilidad] #2
+    \item[Precondición] #3
+    \item[Flujo principal] #4
+    \item[Alternativos y excepciones] #5
+    \item[Postcondición] #6
+  \end{description}}
+
+\casouso{UC-01 Iniciar sesión}{Operador (y Administrador). RNF-001, RNF-002, RF-106.}{El usuario existe y está activo.}{1. Ingresa usuario y contraseña. 2. El sistema verifica las credenciales (Argon2). 3. Muestra el menú según el rol.}{Credenciales inválidas: ``Usuario o contraseña incorrectos''. Usuario inactivo: no puede iniciar sesión.}{Sesión iniciada.}
+
+\casouso{UC-02 Registrar entrada}{Operador. RF-001, HU-001.}{Sesión iniciada.}{1. Escribe la placa y pulsa Buscar. 2. El sistema muestra el vehículo y la vigencia (incluye UC-03). 3. Ofrece las celdas libres compatibles (incluye UC-04). 4. El operador elige la celda y confirma. 5. En una transacción, crea la estadía con la hora del servidor y el operador; la celda queda ocupada.}{Placa inexistente: ``Vehículo no registrado''. Ya está dentro: ``El vehículo ya se encuentra dentro'' (RN-04). Mensualidad no vigente, también si salió vencido sin pagar (RN-03, RN-13). Sin celdas del tipo. Celda ocupada al mismo tiempo por otra persona: la base de datos la rechaza (RNF-003).}{Estadía abierta y celda ocupada.}
+
+\casouso{UC-03 Verificar vigencia de la mensualidad}{Incluido por UC-02. RF-002, RN-03, RN-10.}{Vehículo identificado.}{Consulta el último pago del vehículo y comprueba que su periodo cubra la fecha actual.}{No vigente: devuelve la fecha de vencimiento para el mensaje.}{Resultado vigente o no vigente.}
+
+\casouso{UC-04 Asignar celda compatible}{Incluido por UC-02. RF-003, RN-05, RN-08, RN-09.}{Vehículo identificado.}{Lista las celdas activas y libres de la categoría del vehículo y valida la elegida.}{Celda incompatible: ``La celda no corresponde al tipo de vehículo''.}{Celda válida para la entrada.}
+
+\casouso{UC-05 Registrar salida}{Operador. RF-004, HU-002.}{Sesión iniciada.}{1. Escribe la placa. 2. El sistema muestra la estadía abierta. 3. Confirma. 4. Se cierra la estadía con la hora del servidor y el operador; la celda queda libre.}{Mensualidad vencida: se informa y se permite (RN-13). Sin estadía abierta: ``El vehículo no se encuentra dentro''.}{Estadía cerrada; el vehículo deja de aparecer en UC-10.}
+
+\casouso{UC-06 Consultar ocupación y celdas}{Operador. RF-005, HU-003.}{Sesión iniciada.}{Lista los vehículos dentro con tipo, celda e ingreso, con filtro por tipo y contadores; permite consultar una celda por su código.}{Celda libre: se indica ``disponible''.}{Ninguna (solo consulta).}
+
+\casouso{UC-07 Consultar historial de movimientos}{Operador / Administrador. RF-006, HU-004.}{Sesión iniciada.}{Filtra por placa y rango de fechas de ingreso; muestra celda, ingreso, salida y usuarios.}{Sin resultados: lista vacía.}{Ninguna (solo consulta).}
+
+\casouso{UC-08 Registrar novedad}{Operador. RF-007, HU-005, RN-14 a RN-16, RN-18.}{Sesión iniciada.}{1. Agrega una o varias placas. 2. Indica tipo, fecha y hora del hecho y descripción. 3. El sistema verifica que cada vehículo estaba dentro a esa hora. 4. Crea la novedad y la vincula a la estadía de cada vehículo. 5. Muestra su identificador.}{Algún vehículo no estaba dentro: se rechaza todo e indica la placa. Sin descripción o sin vehículos: rechazo. Hora del hecho futura: rechazo.}{Novedad registrada, sin estado y sin opción de borrado.}
+
+\casouso{UC-09 Consultar novedades}{Operador / Administrador. RF-008, HU-006.}{Sesión iniciada.}{Filtra por placa, tipo y fechas; ordena de la más reciente a la más antigua; una novedad con varios vehículos aparece al buscar cualquiera.}{Sin resultados: lista vacía.}{Ninguna (solo consulta).}
+
+\casouso{UC-10 Consultar vehículos con mensualidad vencida}{Operador. RF-009, HU-007, RN-11, RN-12, RN-17.}{Sesión iniciada.}{Lista los vehículos con estadía abierta cuyo último pago venció: propietario, vencimiento, días, correos y estado (``Plazo vencido'' desde el día vencimiento + 8).}{Puntos de extensión: vehículo seleccionado (UC-12) y plazo vencido (UC-14).}{Ninguna; la lista se calcula en cada consulta, por eso el vehículo que paga desaparece.}
+
+\casouso{UC-11 Enviar aviso automático}{Planificador. RF-010, HU-008, RN-11, RN-21, DEC-008.}{Servidor en ejecución.}{Al iniciar y cada hora, para cada vencimiento de un vehículo dentro sin primer correo exitoso, ejecuta UC-13 con origen automático.}{Vencimientos pendientes con el servidor apagado: se atienden al iniciar (RN-21).}{Primer correo registrado; el proceso es idempotente.}
+
+\casouso{UC-12 Enviar correo manual}{Operador. Extiende UC-10. RF-012, HU-011, RN-22.}{Vehículo en la lista de UC-10.}{1. Pulsa ``Enviar correo''. 2. Sin correo previo: ejecuta UC-13 como envío 1.}{Con primer correo: pide confirmación y, si confirma, envío 2. Con reenvío ya hecho: ``El correo de este vencimiento ya se reenvió una vez''.}{Envío registrado con origen manual y el usuario.}
+
+\casouso{UC-13 Enviar correo simulado}{Incluido por UC-11 y UC-12. DEC-007, RN-22, RNF-013.}{Vencimiento identificado.}{Arma el mensaje con la placa, el vencimiento, el aviso de pago y la fecha límite; llama a \texttt{ServicioCorreo} (simulado) y registra el aviso con su número de envío.}{Fallo: se registra como FALLIDO sin número; no cuenta para el límite y no afecta otras operaciones.}{Aviso registrado y visible.}
+
+\casouso{UC-14 Registrar contacto con autoridades}{Administrador. Extiende UC-10. RF-011, HU-009.}{Plazo de 8 días vencido.}{Escribe la observación y confirma; se registra con la fecha y el usuario.}{Operador: ``acceso denegado''. Se permiten varios contactos por vencimiento (P-25).}{Contacto registrado.}
+
+\casouso{UC-15 Gestionar operadores}{Administrador. RF-106, HU-010.}{Sesión de administrador.}{Crear operador (nombre, usuario, contraseña inicial); desactivar o reactivar uno existente.}{Usuario repetido: ``El nombre de usuario ya existe''. Operador: ``acceso denegado''.}{Operador creado, desactivado o reactivado; nunca borrado.}

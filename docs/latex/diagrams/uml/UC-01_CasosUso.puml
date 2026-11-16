@@ -1,0 +1,52 @@
+@startuml UC-01_CasosUso
+' UC-01 - Diagrama de casos de uso - Iteración 1 - v1
+left to right direction
+skinparam packageStyle rectangle
+skinparam usecase {
+  BackgroundColor #F4F7FC
+  BorderColor #0B3D91
+}
+title Casos de uso - Iteración 1: Gestión de la entrada y salida de vehículos
+
+actor "Operador" as Op
+actor "Administrador" as Ad
+actor "Planificador\n(APScheduler)" as Pl <<sistema>>
+Ad -up-|> Op
+
+rectangle "Sistema de gestión del parqueadero" {
+  usecase "UC-01 Iniciar sesión" as UC01
+  usecase "UC-02 Registrar entrada" as UC02
+  usecase "UC-03 Verificar vigencia\nde la mensualidad" as UC03
+  usecase "UC-04 Asignar celda\ncompatible" as UC04
+  usecase "UC-05 Registrar salida" as UC05
+  usecase "UC-06 Consultar ocupación\ny celdas" as UC06
+  usecase "UC-07 Consultar historial\nde movimientos" as UC07
+  usecase "UC-08 Registrar novedad" as UC08
+  usecase "UC-09 Consultar novedades" as UC09
+  usecase "UC-10 Consultar vehículos con\nmensualidad vencida" as UC10
+  usecase "UC-11 Enviar aviso\nautomático" as UC11
+  usecase "UC-12 Enviar correo\nmanual" as UC12
+  usecase "UC-13 Enviar correo\nsimulado" as UC13
+  usecase "UC-14 Registrar contacto\ncon autoridades" as UC14
+  usecase "UC-15 Gestionar operadores" as UC15
+}
+
+Op --> UC01
+Op --> UC02
+Op --> UC05
+Op --> UC06
+Op --> UC07
+Op --> UC08
+Op --> UC09
+Op --> UC10
+Ad --> UC14
+Ad --> UC15
+Pl --> UC11
+
+UC02 ..> UC03 : <<include>>
+UC02 ..> UC04 : <<include>>
+UC11 ..> UC13 : <<include>>
+UC12 ..> UC13 : <<include>>
+UC12 .> UC10 : <<extend>>\n(vehículo seleccionado)
+UC14 .> UC10 : <<extend>>\n(plazo de 8 días vencido)
+@enduml

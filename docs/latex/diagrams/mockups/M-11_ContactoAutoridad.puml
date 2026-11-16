@@ -1,0 +1,12 @@
+@startsalt M-11_ContactoAutoridad
+title M-11 Registrar contacto con autoridades (HU-009 / UC-14) - solo administrador
+{+
+  {^"Registrar contacto con autoridades"
+    Vehículo | JKL987 (Camioneta) - Carlos Ruiz
+    Mensualidad vencida desde | 06/11/2026 (hace 9 días)
+    Contactos anteriores | 0
+    Observación | "Se llamó a la Secretaría de Movilidad, radicado 2026-4581.   "
+  }
+  [Registrar contacto] | [Cancelar]
+}
+@endsalt

@@ -1,0 +1,15 @@
+@startsalt M-07_Novedades
+title M-07 Consultar novedades (HU-006 / UC-09)
+{+
+  {* Ocupación | Entrada | Salida | Novedades | Vencidos | Historial | Operadores | Salir }
+  ==
+  {^"Filtros"
+    Placa | "ABC123  " | Tipo | ^Todos^ | Desde | "01/11/2026" | Hasta | "15/11/2026" | [Buscar]
+  }
+  {#
+    N.° | Fecha del hecho | Tipo | Vehículos | Descripción | Registró
+    N-0007 | 15/11/2026 10:20 | Rayón | ABC123, DEF456 | La camioneta rayó la puerta... | operador1
+    N-0003 | 09/11/2026 16:05 | Caída | ABC123 | Se cayó una moto sobre... | operador2
+  }
+}
+@endsalt

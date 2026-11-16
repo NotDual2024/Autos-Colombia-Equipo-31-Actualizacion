@@ -1,0 +1,19 @@
+@startsalt M-03_Salida
+title M-03 Registrar salida (HU-002 / UC-05)
+{+
+  {* Ocupación | Entrada | Salida | Novedades | Vencidos | Historial | Operadores | Salir }
+  ==
+  {^"Registrar salida"
+    Placa | { "ABC123  " | [Buscar] }
+  }
+  {^"Estadía abierta"
+    Placa | ABC123 (Carro)
+    Celda | C-010
+    Ingreso | 15/11/2026 23:30
+    Mensualidad | <color:orange>Vencida hace 2 días (la salida se permite)</color>
+  }
+  [Registrar salida] | [Cancelar]
+  --
+  <color:green>Salida registrada a las 06:00. Celda C-010 liberada.</color>
+}
+@endsalt

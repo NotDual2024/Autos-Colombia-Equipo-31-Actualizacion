@@ -1,3 +1,40 @@
 \chapter{Diagrama de clases}\label{cap:clases}
 
-\pendiente{Se agrega el diagrama de clases de dominio y de servicios.}
+El diseño de clases sigue la arquitectura aprobada. Las \textbf{clases de dominio} son los modelos de Django (capa de acceso a datos) y las \textbf{clases de servicio} contienen las reglas de negocio (capa de lógica). Las vistas y los formularios (capa de presentación) no se modelan como clases, porque solo delegan en los servicios.
+
+\section{Clases de dominio}
+
+\begin{itemize}
+  \item Las clases corresponden una a una a las tablas del modelo de datos aprobado, y sus multiplicidades son las del MER.
+  \item \texttt{Usuario} compone a \texttt{HorarioOperador} (entidad débil, provisional hasta la iteración 2).
+  \item Los enumerados (\texttt{Rol}, \texttt{TipoVehiculo}, \texttt{Categoria}, \texttt{TipoNovedad}, \texttt{OrigenAviso}, \texttt{ResultadoEnvio}) se implementan como \texttt{TextChoices} de Django.
+  \item Métodos de dominio: \texttt{Vehiculo.categoria()}, \texttt{Celda.admite(v)} (RN-08), \texttt{Pago.cubre(fecha)}, \texttt{Estadia.esta\_abierta()} y \texttt{Estadia.incluye(momento)} (RF-007), \texttt{Usuario.es\_administrador()}.
+\end{itemize}
+
+La figura~\ref{fig:cl01} (página horizontal) muestra el diagrama completo.
+\diagramahorizontal{uml/CL-01_Dominio.png}{CL-01: Clases de dominio (entidades persistentes)}{fig:cl01}
+
+\section{Clases de servicio e interfaces}
+
+\begin{longtable}{>{\raggedright\arraybackslash}p{4.4cm}>{\raggedright\arraybackslash}p{7.2cm}>{\raggedright\arraybackslash}p{2.8cm}}
+\toprule
+\textbf{Clase} & \textbf{Responsabilidad} & \textbf{RF}\\
+\midrule\endhead
+\texttt{ServicioEstadias} & Entrada y salida dentro de una transacción; celdas disponibles. & RF-001 a RF-004\\
+\texttt{ConsultasEstadias} & Consultas de solo lectura: vehículos dentro, ocupación de celda, historial, estadía en un momento. & RF-005 a RF-007\\
+\texttt{ServicioVigencia} & Vigencia de la mensualidad y último pago. & RF-002, RF-009\\
+\texttt{ServicioNovedades}, \texttt{ConsultasNovedades} & Registro con validación de presencia; búsqueda. & RF-007, RF-008\\
+\texttt{ServicioAvisos} & Vencidos dentro, avisos automáticos y manuales (RN-22), contacto con autoridades. & RF-009 a RF-012\\
+\texttt{VencimientoDentro} & Fila calculada de la lista de vencidos; no se guarda. & RF-009\\
+\texttt{PlanificadorAvisos} & Inicia APScheduler una sola vez y llama a \texttt{enviar\_automaticos()}. & DEC-008\\
+\texttt{ServicioOperadores} & Crear, desactivar y reactivar operadores. & RF-106\\
+\texttt{Reloj} & Fecha y hora actuales; se sustituye en las pruebas. & ---\\
+\texttt{ServicioCorreo}, \texttt{ServicioCorreoSimulado} & Interfaz de envío de correo y su implementación simulada. & DEC-007\\
+\texttt{ErrorNegocio} & Excepción con un mensaje para el usuario. & ---\\
+\bottomrule
+\end{longtable}
+
+\textbf{Principios aplicados.} Inversión de dependencias (\texttt{ServicioAvisos} depende de la interfaz \texttt{ServicioCorreo}, no de su implementación). Responsabilidad única (comandos en los servicios, consultas en los \emph{selectors}). Testabilidad (el \texttt{Reloj} es sustituible).
+
+La figura~\ref{fig:cl02} (página horizontal) muestra el diagrama completo.
+\diagramahorizontal{uml/CL-02_Servicios.png}{CL-02: Clases de servicio, consultas e interfaces}{fig:cl02}

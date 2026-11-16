@@ -1,0 +1,20 @@
+@startsalt M-04_Ocupacion
+title M-04 Ocupación y consulta de celda (HU-003 / UC-06)
+{+
+  {* Ocupación | Entrada | Salida | Novedades | Vencidos | Historial | Operadores | Salir }
+  ==
+  {^"Consultar celda"
+    Código | { "C-010  " | [Consultar] }
+    Resultado | Ocupada por ABC123 desde 15/11/2026 07:45
+  }
+  {^"Vehículos dentro"
+    Tipo | ^Todos^ | Carro/camioneta: 112 de 150 | Motos: 31 de 50
+    {#
+      Placa | Tipo | Celda | Ingreso
+      ABC123 | Carro | C-010 | 15/11/2026 07:45
+      XYZ12D | Moto | M-004 | 15/11/2026 08:10
+      JKL987 | Camioneta | C-022 | 15/11/2026 08:30
+    }
+  }
+}
+@endsalt

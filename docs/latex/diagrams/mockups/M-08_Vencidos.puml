@@ -1,0 +1,14 @@
+@startsalt M-08_Vencidos
+title M-08 Vehículos dentro con mensualidad vencida (HU-007, HU-009, HU-011 / UC-10, UC-12, UC-14)
+{+
+  {* Ocupación | Entrada | Salida | Novedades | Vencidos | Historial | Operadores | Salir }
+  ==
+  {#
+    Placa | Propietario | Venció | Días | Correos | Estado | Acciones
+    ABC123 | Ana Gil | 13/11/2026 | 2 | 1 enviado (automático) | En plazo | [Enviar correo] | [Ver correos]
+    XYZ12D | Luis Mora | 15/11/2026 | 0 | 0 | En plazo | [Enviar correo] | [Ver correos]
+    JKL987 | Carlos Ruiz | 06/11/2026 | 9 | 2 (máximo) | <color:red>Plazo vencido - contactar autoridades</color> | [Registrar contacto] | [Ver correos]
+  }
+  <i>El botón Registrar contacto solo lo ve el administrador.</i>
+}
+@endsalt

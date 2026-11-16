@@ -1,0 +1,99 @@
+@startuml CL-02_Servicios
+' CL-02 - Diagrama de clases de servicios, interfaces y control - v1
+!pragma layout smetana
+skinparam classAttributeIconSize 0
+skinparam class {
+  BackgroundColor #FDFDFD
+  BorderColor #0B3D91
+}
+title Clases de servicio (lógica de negocio) e interfaces
+
+package core {
+  class Reloj {
+    + ahora() : datetime
+    + hoy() : date
+  }
+  interface ServicioCorreo {
+    + enviar(destinatario : str, asunto : str, cuerpo : str) : ResultadoEnvio
+  }
+  class ServicioCorreoSimulado {
+    + enviar(destinatario : str, asunto : str, cuerpo : str) : ResultadoEnvio
+  }
+  class ErrorNegocio <<exception>> {
+    + mensaje : str
+  }
+}
+
+package cuentas {
+  class ServicioOperadores {
+    + crear_operador(admin : Usuario, nombre : str, usuario : str, clave : str) : Usuario
+    + desactivar(admin : Usuario, operador : Usuario) : void
+    + reactivar(admin : Usuario, operador : Usuario) : void
+  }
+}
+
+package pagos {
+  class ServicioVigencia {
+    + esta_vigente(v : Vehiculo, fecha : date) : bool
+    + ultimo_pago(v : Vehiculo) : Pago [0..1]
+  }
+}
+
+package entradas_salidas {
+  class ServicioEstadias {
+    + registrar_entrada(placa : str, codigo_celda : str, u : Usuario) : Estadia
+    + registrar_salida(placa : str, u : Usuario) : Estadia
+    + celdas_disponibles(v : Vehiculo) : list<Celda>
+  }
+  class ConsultasEstadias <<selectors>> {
+    + vehiculos_dentro(tipo : TipoVehiculo [0..1]) : list<Estadia>
+    + ocupacion_celda(codigo : str) : Estadia [0..1]
+    + historial(placa : str [0..1], desde : date [0..1], hasta : date [0..1]) : list<Estadia>
+    + estadia_en(v : Vehiculo, momento : datetime) : Estadia [0..1]
+  }
+}
+
+package novedades {
+  class ServicioNovedades {
+    + registrar(placas : list<str>, tipo : TipoNovedad, ocurrencia : datetime, descripcion : str, u : Usuario) : Novedad
+  }
+  class ConsultasNovedades <<selectors>> {
+    + buscar(placa : str [0..1], tipo : TipoNovedad [0..1], desde : date [0..1], hasta : date [0..1]) : list<Novedad>
+  }
+}
+
+package notificaciones {
+  class ServicioAvisos {
+    + vencidos_dentro() : list<VencimientoDentro>
+    + enviar_automaticos() : int
+    + enviar_manual(pago : Pago, u : Usuario, confirmar_reenvio : bool) : AvisoCorreo
+    + registrar_contacto(pago : Pago, admin : Usuario, observacion : str) : ContactoAutoridad
+  }
+  class VencimientoDentro <<dto>> {
+    + vehiculo : Vehiculo
+    + pago : Pago
+    + dias_vencido : int
+    + plazo_vencido : bool
+    + envios : int
+  }
+  class PlanificadorAvisos {
+    + iniciar() : void
+  }
+}
+
+ServicioCorreoSimulado ..|> ServicioCorreo
+ServicioEstadias ..> ServicioVigencia : RF-002
+ServicioEstadias ..> Reloj
+ServicioEstadias ..> ErrorNegocio : lanza
+ServicioNovedades ..> ConsultasEstadias : RF-007 presencia
+ServicioNovedades ..> Reloj
+ServicioNovedades ..> ErrorNegocio : lanza
+ServicioAvisos ..> ConsultasEstadias
+ServicioAvisos ..> ServicioVigencia
+ServicioAvisos ..> ServicioCorreo
+ServicioAvisos ..> Reloj
+ServicioAvisos ..> ErrorNegocio : lanza
+ServicioAvisos ..> VencimientoDentro : crea
+PlanificadorAvisos ..> ServicioAvisos : cada hora
+ServicioOperadores ..> ErrorNegocio : lanza
+@enduml

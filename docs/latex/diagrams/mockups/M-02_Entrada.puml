@@ -1,0 +1,24 @@
+@startsalt M-02_Entrada
+title M-02 Registrar entrada (HU-001 / UC-02)
+{+
+  {* Ocupación | Entrada | Salida | Novedades | Vencidos | Historial | Operadores | Salir }
+  ==
+  {^"Registrar entrada"
+    Placa | { "ABC123  " | [Buscar] }
+  }
+  {^"Vehículo encontrado"
+    Placa | ABC123
+    Tipo | Carro
+    Vehículo | Chevrolet Spark 2020, rojo
+    Propietario | Ana Gil
+    Mensualidad | <color:green>Vigente hasta 15/12/2026</color>
+  }
+  {^"Celda donde se estacionó"
+    Celda libre (carro/camioneta) | ^C-010^
+    Disponibles | 148 de 150
+  }
+  [Registrar entrada] | [Cancelar]
+  --
+  <color:red>Mensualidad no vigente / El vehículo ya se encuentra dentro / La celda está ocupada</color>
+}
+@endsalt

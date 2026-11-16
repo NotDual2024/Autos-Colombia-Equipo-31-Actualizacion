@@ -1,0 +1,13 @@
+@startsalt M-01_Login
+title M-01 Inicio de sesión (UC-01)
+{+
+  .
+  {^"Parqueadero Autos Colombia"
+    Usuario      | "operador1         "
+    Contraseña   | "****              "
+    .            | [Iniciar sesión]
+  }
+  .
+  <color:red>Usuario o contraseña incorrectos.</color>
+}
+@endsalt

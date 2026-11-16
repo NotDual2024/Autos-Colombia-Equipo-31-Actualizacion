@@ -1,0 +1,80 @@
+@startuml PK-01_Paquetes
+' PK-01 - Diagrama de paquetes - v1
+skinparam packageStyle folder
+skinparam package {
+  BackgroundColor #F4F7FC
+  BorderColor #0B3D91
+}
+title Paquetes del sistema y sus dependencias
+
+package "config" as config <<proyecto Django>> {
+}
+package "apps" {
+  package "demo" as demo {
+  }
+  package "notificaciones" as notif {
+  }
+  package "novedades" as nov {
+  }
+  package "entradas_salidas" as es {
+  }
+  package "pagos" as pagos {
+  }
+  package "usuarios_celdas" as uc {
+  }
+  package "cuentas" as cuentas {
+  }
+  package "core" as core {
+  }
+}
+package "Django 5.2 LTS" as django <<externo>> {
+}
+package "APScheduler" as aps <<externo>> {
+}
+package "argon2-cffi" as argon <<externo>> {
+}
+
+config ..> notif : registra URLs
+config ..> nov
+config ..> es
+config ..> cuentas
+demo ..> cuentas
+demo ..> uc
+demo ..> pagos
+demo ..> es
+notif ..> es
+notif ..> pagos
+notif ..> uc
+notif ..> core
+notif ..> aps
+nov ..> es
+nov ..> uc
+nov ..> core
+es ..> pagos
+es ..> uc
+es ..> core
+pagos ..> uc
+pagos ..> core
+uc ..> core
+cuentas ..> core
+es ..> cuentas : usuario que registra
+nov ..> cuentas
+notif ..> cuentas
+pagos ..> cuentas
+cuentas ..> argon
+core ..> django
+
+note right of core
+  Base: no depende de ningún
+  otro módulo de la aplicación.
+end note
+note right of demo
+  Solo para RNF-014.
+  Ningún módulo depende de él.
+end note
+note bottom of es
+  Cada módulo tiene las capas:
+  presentación (views, forms, templates),
+  lógica (services) y datos (models, selectors).
+end note
+@enduml

@@ -1,3 +1,21 @@
 \chapter{Diagrama de paquetes}\label{cap:paquetes}
 
-\pendiente{Se agrega el diagrama de paquetes basado en los módulos de la arquitectura.}
+\diagrama{uml/PK-01_Paquetes.png}{PK-01: Paquetes del sistema y sus dependencias}{fig:pk01}{0.95}
+
+\section{Organización}
+\begin{itemize}
+  \item \texttt{config} es el proyecto Django (ajustes y URLs raíz) y registra las URLs de los módulos.
+  \item \texttt{apps} agrupa los ocho módulos funcionales de la arquitectura (capítulo~\ref{cap:arquitectura}). Cada uno tiene las capas de presentación (\texttt{views}, \texttt{forms}, \texttt{templates}), lógica (\texttt{services}) y datos (\texttt{models}, \texttt{selectors}).
+  \item \texttt{core} es la base y no depende de otros módulos de la aplicación.
+  \item \texttt{demo} solo existe para los datos de demostración (RNF-014); ningún módulo depende de él.
+\end{itemize}
+
+\section{Dependencias}
+\begin{itemize}
+  \item \textbf{No hay dependencias circulares.} El orden es: \texttt{notificaciones} y \texttt{novedades} $\rightarrow$ \texttt{entradas\_salidas} $\rightarrow$ \texttt{pagos} $\rightarrow$ \texttt{usuarios\_celdas} $\rightarrow$ \texttt{core}; y los módulos que guardan el usuario que registra $\rightarrow$ \texttt{cuentas} $\rightarrow$ \texttt{core}.
+  \item \texttt{entradas\_salidas}, \texttt{novedades}, \texttt{notificaciones} y \texttt{pagos} dependen de \texttt{cuentas} porque cada registro guarda el usuario responsable (RNF-004). Esta dependencia no aparecía dibujada en ARQ-03 para no saturarlo; no crea ciclos ni cambia decisiones aprobadas.
+  \item Dependencias externas: Django 5.2 LTS (base de todo), APScheduler (solo \texttt{notificaciones}) y argon2-cffi (solo \texttt{cuentas}).
+\end{itemize}
+
+\section{Acoplamiento y cohesión}
+Cada paquete agrupa una sola área funcional (alta cohesión). Los paquetes se comunican solo por sus servicios y consultas públicas, nunca modificando directamente los modelos de otro paquete (bajo acoplamiento). Gracias a esto, las iteraciones 2 y 3 agregan pantallas a \texttt{usuarios\_celdas} y \texttt{pagos} sin modificar los demás paquetes.

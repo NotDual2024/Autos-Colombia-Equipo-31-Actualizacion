@@ -1,0 +1,16 @@
+@startsalt M-09_ConfirmarReenvio
+title M-09 Confirmar reenvío del correo (HU-011 / UC-12, RN-22)
+{+
+  {^"Reenviar correo"
+    Ya se envió un correo para este vencimiento el 13/11/2026 06:00.
+    ¿Desea reenviarlo? Solo se permite un reenvío.
+    .
+    [Sí, reenviar] | [Cancelar]
+  }
+  .
+  {^"Cuando ya se reenvió"
+    <color:red>El correo de este vencimiento ya se reenvió una vez.</color>
+    [Aceptar]
+  }
+}
+@endsalt

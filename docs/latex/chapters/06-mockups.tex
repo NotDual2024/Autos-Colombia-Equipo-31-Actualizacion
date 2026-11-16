@@ -1,3 +1,69 @@
 \chapter{Mockups de las historias de usuario}\label{cap:mockups}
 
-\pendiente{Se agregan los mockups (PlantUML Salt) de las pantallas de HU-001 a HU-011.}
+Los mockups son bocetos de baja fidelidad hechos con PlantUML Salt. Muestran qué información y qué acciones tiene cada pantalla, no el diseño visual final. Fueron aprobados por el equipo el 2026-11-15.
+
+Todas las pantallas comparten un menú superior: Ocupación, Entrada, Salida, Novedades, Vencidos, Historial, Operadores y Salir. La opción \emph{Operadores} solo la ve el administrador (RNF-002). Los nombres, placas y fechas son ficticios, pero coherentes entre sí.
+
+\begin{longtable}{>{\raggedright\arraybackslash}p{1.6cm}>{\raggedright\arraybackslash}p{6.4cm}>{\raggedright\arraybackslash}p{6.4cm}}
+\toprule
+\textbf{Mockup} & \textbf{Pantalla} & \textbf{HU / UC}\\
+\midrule\endhead
+M-01 & Inicio de sesión & UC-01\\
+M-02 & Registrar entrada & HU-001 / UC-02 a UC-04\\
+M-03 & Registrar salida & HU-002 / UC-05\\
+M-04 & Ocupación y consulta de celda & HU-003 / UC-06\\
+M-05 & Historial de movimientos & HU-004 / UC-07\\
+M-06 & Registrar novedad & HU-005 / UC-08\\
+M-07 & Consultar novedades & HU-006 / UC-09\\
+M-08 & Vehículos dentro con mensualidad vencida & HU-007, HU-009, HU-011 / UC-10, UC-12, UC-14\\
+M-09 & Confirmar reenvío del correo & HU-011 / UC-12\\
+M-10 & Correo enviado (simulación) & HU-008, HU-011 / UC-11 a UC-13\\
+M-11 & Registrar contacto con autoridades & HU-009 / UC-14\\
+M-12 & Gestión de operadores & HU-010 / UC-15\\
+\bottomrule
+\end{longtable}
+
+\section{Inicio de sesión}
+\diagrama{mockups/M-01_Login.png}{M-01: Inicio de sesión}{fig:m01}{0.45}
+Si las credenciales fallan, el mensaje no indica si el error está en el usuario o en la contraseña (RNF-001).
+
+\section{Registrar entrada}
+\diagrama{mockups/M-02_Entrada.png}{M-02: Registrar entrada (HU-001)}{fig:m02}{0.7}
+Flujo: escribir la placa, Buscar, elegir la celda y Registrar entrada; son dos acciones después de la placa (RNF-005). La lista solo ofrece celdas libres del tipo correcto (RN-08). La zona roja muestra los errores de HU-001.
+
+\section{Registrar salida}
+\diagrama{mockups/M-03_Salida.png}{M-03: Registrar salida (HU-002)}{fig:m03}{0.65}
+Si la mensualidad está vencida se informa, pero la salida se permite (RN-13). El ejemplo muestra una estadía que cruza la medianoche.
+
+\section{Ocupación y consulta de celda}
+\diagrama{mockups/M-04_Ocupacion.png}{M-04: Ocupación y consulta de celda (HU-003)}{fig:m04}{0.75}
+
+\section{Historial de movimientos}
+\diagrama{mockups/M-05_Historial.png}{M-05: Historial de movimientos (HU-004)}{fig:m05}{0.95}
+
+\section{Registrar novedad}
+\diagrama{mockups/M-06_Novedad.png}{M-06: Registrar novedad (HU-005)}{fig:m06}{0.95}
+Se agregan varias placas a la misma novedad (RN-14) y se indica la fecha y hora del hecho, que puede ser anterior a la salida (RN-16). Si alguna placa no estaba dentro a esa hora, se rechaza la novedad completa. No hay adjuntos (RN-18).
+
+\section{Consultar novedades}
+\diagrama{mockups/M-07_Novedades.png}{M-07: Consultar novedades (HU-006)}{fig:m07}{0.95}
+Las novedades no tienen estado ni opción de borrado (RN-07, RN-15).
+
+\section{Vehículos dentro con mensualidad vencida}
+\diagrama{mockups/M-08_Vencidos.png}{M-08: Vehículos dentro con mensualidad vencida (HU-007, HU-009, HU-011)}{fig:m08}{1.0}
+Desde el día vencimiento + 8 aparece ``Plazo vencido -- contactar autoridades'' (RN-12). Con dos correos enviados ya no aparece el botón ``Enviar correo'' (RN-22). ``Registrar contacto'' solo lo ve el administrador. Un vehículo que paga o sale desaparece de la lista (RN-17).
+
+\section{Confirmar reenvío del correo}
+\diagrama{mockups/M-09_ConfirmarReenvio.png}{M-09: Confirmar reenvío del correo (HU-011)}{fig:m09}{0.5}
+
+\section{Correo enviado (simulación)}
+\diagrama{mockups/M-10_CorreoSimulado.png}{M-10: Correo enviado en modo simulado (HU-008, HU-011)}{fig:m10}{0.6}
+Muestra el contenido completo del correo simulado (DEC-007), con el aviso de pago y la fecha límite.
+
+\section{Registrar contacto con autoridades}
+\diagrama{mockups/M-11_ContactoAutoridad.png}{M-11: Registrar contacto con autoridades (HU-009)}{fig:m11}{0.75}
+Solo para el administrador. Se permiten varios contactos por vencimiento (P-25).
+
+\section{Gestión de operadores}
+\diagrama{mockups/M-12_Operadores.png}{M-12: Gestión de operadores (HU-010)}{fig:m12}{0.6}
+Crear, desactivar y reactivar operadores; no hay borrado (RN-07). Los horarios llegan en la iteración 2 (RF-107).
