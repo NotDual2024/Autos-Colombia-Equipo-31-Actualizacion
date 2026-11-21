@@ -1,0 +1,386 @@
+# Historias de usuario — Iteración 3: Gestión de pagos
+
+**Proyecto:** Parqueadero "Autos Colombia"
+**Versión:** 1
+**Fecha:** 2026-11-20
+**Base:** Requerimientos de la iteración 3 v1.2 (aprobados el 2026-11-20): RN-38 a RN-47 y RF-201 a RF-209.
+**Estado:** **Aprobado** por el equipo del proyecto el 2026-11-20.
+
+| Versión | Cambios |
+|---|---|
+| 1 | Borrador inicial. Aprobado por el equipo el 2026-11-20, con los 4 puntos de revisión tal como se propusieron. |
+
+La numeración continúa la de la iteración 2 (HU-012 a HU-023). En los ejemplos, hoy es el 20/11/2026, el carro "ABC123" es de "Laura Méndez" y la tarifa de carro es 150 000 COP.
+
+## Resumen
+
+| ID | Título | Actor | RF | Prioridad |
+|---|---|---|---|---|
+| HU-024 | Registrar el pago de una mensualidad | Operador | RF-201 | Must |
+| HU-025 | Consultar la vigencia de una mensualidad | Operador | RF-202 | Must |
+| HU-026 | Consultar el historial de pagos e imprimir la factura | Operador | RF-203 | Must |
+| HU-027 | Gestionar las tarifas | Administrador | RF-204 | Must |
+| HU-028 | Inactivar con motivo y reactivar al pagar | Operador | RF-205 | Must |
+| HU-029 | Corregir un pago mal registrado | Operador, Administrador | RF-206 | Must |
+| HU-030 | Ver las mensualidades por vencer | Operador | RF-207 | Should |
+| HU-031 | Gestionar los descuentos | Administrador | RF-208 | Must |
+| HU-032 | Consultar los ingresos por mes | Administrador | RF-209 | Could |
+
+---
+
+## HU-024 — Registrar el pago de una mensualidad
+
+**Historia:** Como **operador**, quiero registrar el pago de uno o varios meses de un vehículo, con el valor calculado por el sistema, para que el vehículo quede al día y el cliente reciba su factura.
+
+**Requerimientos:** RF-201 · **Reglas:** RN-03, RN-17, RN-38 a RN-43, RN-46, RN-47 · **Prioridad:** Must
+
+```gherkin
+Escenario: Primer pago de un vehículo
+  Dado que "ABC123" no tiene pagos
+  Cuando el operador registra 1 mes en efectivo el 20/11/2026
+  Entonces el pago cubre del 20/11/2026 al 20/12/2026 por 150 000 COP
+  Y el día de cobro del vehículo queda en 20
+  Y la bitácora muestra que el operador registró el pago
+
+Escenario: Antes de confirmar, el sistema muestra el resumen
+  Cuando el operador escribe la placa "ABC123", 1 mes y el medio de pago
+  Entonces el sistema muestra el propietario, la tarifa, el periodo que cubrirá y el valor
+  Y el pago solo se guarda cuando el operador confirma
+
+Escenario: Pagar tarde no mueve el día de cobro
+  Dado que la mensualidad de "ABC123" venció el 18/11/2026
+  Cuando el operador registra 1 mes el 20/11/2026
+  Entonces el pago cubre del 18/11/2026 al 18/12/2026
+
+Escenario: Fin de mes
+  Dado que el día de cobro de un vehículo es 31 y su mensualidad vence el 31/01/2027
+  Cuando se registran 2 meses
+  Entonces el pago cubre hasta el 31/03/2027, pasando por el 28/02/2027
+
+Escenario: Varios meses atrasados
+  Dado que la mensualidad de "ABC123" venció el 18/08/2026 y el vehículo no ha vuelto
+  Cuando el operador busca la placa para registrar el pago
+  Entonces el sistema indica que debe 4 meses para quedar al día
+  Y si el operador registra solo 1 mes, el pago cubre del 18/08/2026 al 18/09/2026
+  Y el sistema advierte que el vehículo sigue con la mensualidad vencida
+
+Escenario: Varios meses en un solo pago
+  Cuando el operador registra 3 meses para "ABC123"
+  Entonces el valor es 450 000 COP
+  Y el número de meses debe estar entre 1 y 12
+
+Escenario: Aplicar un descuento
+  Dado un descuento habilitado "Cliente frecuente" de 10 %
+  Cuando el operador registra 3 meses con ese descuento
+  Entonces el valor es 405 000 COP
+  Y el pago guarda el valor sin descuento, el descuento y el valor final
+
+Escenario: El valor no se escribe a mano
+  Cuando el operador registra un pago
+  Entonces el valor lo calcula el sistema y no se puede editar
+
+Escenario: Medio de pago obligatorio
+  Cuando el operador no elige efectivo, transferencia o tarjeta
+  Entonces el sistema no guarda e indica el campo con error
+
+Escenario: Vehículo dentro con la mensualidad vencida
+  Dado que "ABC123" está dentro con la mensualidad vencida hace 3 días
+  Cuando el operador registra el pago y el vehículo queda al día
+  Entonces el vehículo sale del proceso de retiro y no se envían más avisos
+
+Escenario: Confirmación al propietario
+  Cuando se registra el pago
+  Entonces se envía un correo simulado a "laura@correo.co" con el periodo y el valor
+  Y el operador puede abrir la factura para imprimirla
+```
+
+---
+
+## HU-025 — Consultar la vigencia de una mensualidad
+
+**Historia:** Como **operador**, quiero ver si la mensualidad de un vehículo está al día y hasta cuándo, para saber si puede entrar y cuánto debe.
+
+**Requerimientos:** RF-202 · **Reglas:** RN-03, RN-38, RN-39 · **Prioridad:** Must
+
+```gherkin
+Escenario: Al día
+  Dado que la mensualidad de "ABC123" vence el 18/12/2026
+  Cuando el operador consulta el vehículo
+  Entonces ve "Al día", el vencimiento 18/12/2026, el día de cobro 18 y el último pago
+
+Escenario: Vence hoy
+  Dado que la mensualidad vence el 20/11/2026
+  Cuando el operador consulta el vehículo
+  Entonces ve "Vence hoy" y el vehículo todavía puede entrar
+
+Escenario: Vencida
+  Dado que la mensualidad venció el 15/11/2026
+  Cuando el operador consulta el vehículo
+  Entonces ve "Vencida hace 5 días" y que debe 1 mes
+
+Escenario: Sin pagos
+  Dado un vehículo registrado que nunca ha pagado
+  Cuando el operador lo consulta
+  Entonces ve "Sin pagos" y el vehículo no puede entrar
+```
+
+---
+
+## HU-026 — Consultar el historial de pagos e imprimir la factura
+
+**Historia:** Como **operador**, quiero ver todos los pagos de un vehículo o de un propietario y abrir la factura de cada uno, para responder las preguntas del cliente.
+
+**Requerimientos:** RF-203 · **Reglas:** RN-44, RN-47 · **Prioridad:** Must
+
+```gherkin
+Escenario: Historial de un vehículo
+  Cuando el operador abre el historial de pagos de "ABC123"
+  Entonces ve cada pago, del más reciente al más antiguo, con periodo, meses, valor, descuento, medio, fecha y quién lo registró
+
+Escenario: Historial de un propietario
+  Dado que "Laura Méndez" tiene dos vehículos
+  Cuando el operador abre su historial de pagos
+  Entonces ve los pagos de ambos vehículos, con la placa de cada uno
+
+Escenario: Pago corregido en el historial
+  Dado un pago que fue corregido
+  Cuando el operador abre el historial
+  Entonces ese pago aparece marcado como "Corregido", con el motivo y el pago que lo reemplaza
+
+Escenario: Imprimir la factura
+  Cuando el operador abre la factura de un pago
+  Entonces ve una página lista para imprimir con número consecutivo, fecha, datos del parqueadero, propietario y cédula, vehículo, periodo, meses, tarifa, descuento, total, medio de pago y quién lo registró
+  Y la página lleva la marca "Simulación – sin validez fiscal"
+  Y el navegador la puede guardar como PDF
+```
+
+---
+
+## HU-027 — Gestionar las tarifas
+
+**Historia:** Como **administrador**, quiero registrar una tarifa nueva por tipo de vehículo con la fecha desde la que rige, para cambiar los precios sin afectar los pagos anteriores.
+
+**Requerimientos:** RF-204 · **Reglas:** RN-41, RN-45, DM-04 · **Prioridad:** Must
+
+```gherkin
+Escenario: Tarifa nueva con fecha futura
+  Dado que la tarifa de carro es 150 000 COP
+  Cuando el administrador registra 160 000 COP para carro vigente desde el 01/01/2027
+  Entonces los pagos registrados antes del 01/01/2027 usan 150 000 COP
+  Y los registrados desde el 01/01/2027 usan 160 000 COP
+
+Escenario: Los pagos anteriores no cambian
+  Cuando el administrador registra una tarifa nueva
+  Entonces los pagos ya registrados conservan su valor
+
+Escenario: Las tarifas no se editan
+  Cuando el administrador consulta las tarifas
+  Entonces ve la tarifa actual y el historial por tipo
+  Pero no puede editar ni borrar una tarifa registrada
+
+Escenario: Fecha repetida
+  Dado una tarifa de moto vigente desde el 01/01/2027
+  Cuando el administrador registra otra tarifa de moto con la misma fecha
+  Entonces el sistema la rechaza con "Ya existe una tarifa de moto desde esa fecha"
+
+Escenario: Solo el administrador
+  Cuando un operador intenta registrar una tarifa
+  Entonces el sistema responde "acceso denegado"
+```
+
+---
+
+## HU-028 — Inactivar con motivo y reactivar al pagar
+
+**Historia:** Como **operador**, quiero indicar por qué inactivo un vehículo o un propietario, para que el sistema lo reactive solo cuando el motivo era la falta de pago.
+
+**Requerimientos:** RF-205 · **Reglas:** RN-46 · **Prioridad:** Must
+
+```gherkin
+Escenario: Motivo obligatorio
+  Cuando el operador inactiva un vehículo
+  Entonces debe elegir "Falta de pago" u "Otro"
+  Y si elige "Otro", debe escribir la descripción
+
+Escenario: El motivo se ve en la ficha
+  Dado un vehículo inactivo por "Falta de pago"
+  Cuando el operador abre su ficha
+  Entonces ve el motivo, quién lo inactivó y la fecha
+
+Escenario: Reactivación al pagar
+  Dado que "ABC123" está inactivo por "Falta de pago"
+  Cuando el operador registra un pago que lo deja al día
+  Entonces el vehículo queda activo
+  Y la bitácora registra la reactivación automática
+
+Escenario: Propietario inactivo por falta de pago
+  Dado que "Laura Méndez" está inactiva por "Falta de pago"
+  Cuando se registra un pago de uno de sus vehículos
+  Entonces la propietaria también queda activa
+
+Escenario: Inactivo por otro motivo
+  Dado que "ABC123" está inactivo por "Otro: vehículo vendido"
+  Cuando el operador registra un pago
+  Entonces el vehículo sigue inactivo
+  Y el sistema advierte que debe activarse a mano
+
+Escenario: El sistema no inactiva por su cuenta
+  Dado que la mensualidad de un vehículo lleva meses vencida
+  Entonces el vehículo sigue activo hasta que un usuario lo inactive
+```
+
+---
+
+## HU-029 — Corregir un pago mal registrado
+
+**Historia:** Como **operador**, quiero corregir un pago que registré mal, sin borrarlo, para que la vigencia y los ingresos queden bien y quede constancia del error.
+
+**Requerimientos:** RF-206 · **Reglas:** RN-07, RN-44 · **Prioridad:** Must
+
+```gherkin
+Escenario: Corrección dentro de las 24 horas
+  Dado un pago de 1 mes registrado por el operador hace 2 horas, que debía ser de 2 meses
+  Cuando el operador lo corrige con el motivo "Eran 2 meses" y registra los datos correctos
+  Entonces el pago original queda marcado como "Corregido" con el motivo
+  Y se registra un pago nuevo de 2 meses que lo reemplaza
+  Y la vigencia se calcula solo con el pago nuevo
+  Y la bitácora registra la corrección
+
+Escenario: Motivo obligatorio
+  Cuando el operador intenta corregir un pago sin escribir el motivo
+  Entonces el sistema no guarda e indica el campo con error
+
+Escenario: El operador después de 24 horas
+  Dado un pago registrado hace 25 horas
+  Cuando un operador intenta corregirlo
+  Entonces el sistema se lo impide con "Este pago solo lo puede corregir el administrador"
+
+Escenario: El administrador en cualquier momento
+  Dado un pago registrado hace 10 días
+  Cuando el administrador lo corrige con un motivo
+  Entonces la corrección se guarda
+
+Escenario: Un pago corregido no se vuelve a corregir
+  Dado un pago marcado como "Corregido"
+  Entonces no muestra la opción de corregir; se corrige el pago que lo reemplazó
+
+Escenario: Factura del pago corregido
+  Cuando se abre la factura de un pago corregido
+  Entonces la página muestra "Anulada – reemplazada por la factura N.º" y el número de la nueva
+```
+
+---
+
+## HU-030 — Ver las mensualidades por vencer
+
+**Historia:** Como **operador**, quiero ver qué mensualidades vencen en los próximos 5 días, para recordarles a los clientes que deben pagar.
+
+**Requerimientos:** RF-207 · **Prioridad:** Should
+
+```gherkin
+Escenario: Lista de por vencer
+  Dado que "ABC123" vence el 23/11/2026 y "XYZ789" vence el 30/11/2026
+  Cuando el operador abre "Por vencer"
+  Entonces ve "ABC123" con su propietario, su celular y la fecha de vencimiento
+  Pero no ve "XYZ789"
+
+Escenario: Incluye las que vencen hoy
+  Dado un vehículo que vence el 20/11/2026
+  Cuando el operador abre "Por vencer"
+  Entonces lo ve marcado como "Vence hoy"
+
+Escenario: Solo vehículos activos
+  Dado un vehículo inactivo que vence el 22/11/2026
+  Cuando el operador abre "Por vencer"
+  Entonces no lo ve
+```
+
+---
+
+## HU-031 — Gestionar los descuentos
+
+**Historia:** Como **administrador**, quiero crear descuentos con una descripción y un porcentaje y habilitarlos o deshabilitarlos, para que los operadores puedan aplicarlos al cobrar.
+
+**Requerimientos:** RF-208 · **Reglas:** RN-42 · **Prioridad:** Must
+
+```gherkin
+Escenario: Crear un descuento
+  Cuando el administrador crea "Cliente frecuente" con 10 %
+  Entonces el descuento queda habilitado
+  Y la bitácora muestra que el administrador lo creó
+
+Escenario: Porcentaje inválido
+  Cuando el administrador escribe 0 % o 120 %
+  Entonces el sistema lo rechaza con "El porcentaje debe estar entre 1 y 100"
+
+Escenario: Deshabilitar
+  Dado el descuento "Cliente frecuente" habilitado
+  Cuando el administrador lo deshabilita
+  Entonces el operador ya no lo ve al registrar un pago
+  Y los pagos que ya lo usaron no cambian
+
+Escenario: No se edita
+  Cuando el administrador consulta un descuento
+  Entonces no puede cambiar su porcentaje; para otro valor crea un descuento nuevo
+
+Escenario: El operador solo aplica
+  Cuando un operador intenta crear o deshabilitar un descuento
+  Entonces el sistema responde "acceso denegado"
+  Pero al registrar un pago puede elegir uno habilitado
+```
+
+---
+
+## HU-032 — Consultar los ingresos por mes
+
+**Historia:** Como **administrador**, quiero ver cuánto se recaudó cada mes, para conocer los ingresos del parqueadero.
+
+**Requerimientos:** RF-209 · **Reglas:** RN-44 · **Prioridad:** Could
+
+```gherkin
+Escenario: Ingresos de un mes
+  Dado que en noviembre de 2026 se registraron pagos por 1 200 000 COP
+  Cuando el administrador consulta los ingresos de noviembre de 2026
+  Entonces ve el total y el detalle por tipo de vehículo y por medio de pago
+
+Escenario: Sin pagos corregidos
+  Dado un pago de 150 000 COP corregido y reemplazado por uno de 300 000 COP
+  Cuando el administrador consulta los ingresos del mes
+  Entonces solo cuenta los 300 000 COP
+
+Escenario: Se cuenta por fecha de pago
+  Dado un pago registrado el 20/11/2026 que cubre 3 meses
+  Cuando el administrador consulta los ingresos
+  Entonces todo el valor se cuenta en noviembre de 2026
+
+Escenario: Solo el administrador
+  Cuando un operador intenta abrir el informe de ingresos
+  Entonces el sistema responde "acceso denegado"
+```
+
+---
+
+## Matriz de trazabilidad RF → HU (iteración 3)
+
+| RF | HU |
+|---|---|
+| RF-201 Registrar pago | HU-024 |
+| RF-202 Vigencia | HU-025 |
+| RF-203 Historial de pagos | HU-026 |
+| RF-204 Tarifas | HU-027 |
+| RF-205 Motivo de inactivación y reactivación | HU-028 |
+| RF-206 Corregir un pago | HU-029 |
+| RF-207 Por vencer | HU-030 |
+| RF-208 Descuentos | HU-031 |
+| RF-209 Ingresos por mes | HU-032 |
+
+Los 9 RF de la iteración 3 tienen una historia.
+
+## Puntos revisados (2026-11-20)
+
+Estos detalles no estaban en los requerimientos; el equipo los aprobó tal como se propusieron:
+
+1. **HU-024:** se permite pagar menos meses de los que se deben; el pago se guarda y el sistema advierte que el vehículo sigue vencido.
+2. **HU-028:** pagar un vehículo reactiva también al propietario si estaba inactivo por falta de pago.
+3. **HU-029:** la factura del pago corregido queda como "Anulada" y remite a la nueva.
+4. **HU-032:** los ingresos se cuentan en el mes en que se registró el pago, no repartidos entre los meses que cubre.
