@@ -1,0 +1,36 @@
+% ARCHIVO GENERADO por scripts/generar_capitulos.py. No editar a mano.
+\section{Clases de la iteración 3}
+
+
+\subsubsection{Dominio (CL-05)}
+
+\diagrama{uml/CL-05_Dominio_It3.png}{CL-05}{fig:CL-05_Dominio_It3}{1.0}
+
+\begin{itemize}
+  \item \texttt{Pago} amplía sus atributos según el modelo v1.4 y agrega \texttt{valor\_descuento()} y \texttt{corregible\_por(usuario, momento)} (RN-44).
+  \item \texttt{Descuento} (nueva) con \texttt{valor\_sobre(bruto)}: redondeo hacia abajo (DM-16).
+  \item \texttt{CorreoConfirmacion} (nueva).
+  \item \texttt{CalendarioCobro}: funciones puras del calendario de cobro (sección 5.1).
+  \item \texttt{Propietario} y \texttt{Vehiculo} agregan el motivo de inactivación.
+\end{itemize}
+
+\subsubsection{Servicios (CL-06)}
+
+\diagrama{uml/CL-06_Servicios_It3.png}{CL-06}{fig:CL-06_Servicios_It3}{1.0}
+
+\begin{longtable}{>{\raggedright\arraybackslash}p{4.2cm}>{\raggedright\arraybackslash}p{10.2cm}}
+\toprule
+\textbf{Clase} & \textbf{Responsabilidad}\\
+\midrule\endhead
+\texttt{ServicioVigencia} (ampliado) & Solo cuenta pagos REGISTRADOS. Día de cobro (DM-12), estado de la mensualidad y meses pendientes. Las funciones \texttt{ultimo\_pago} y \texttt{esta\_vigente} conservan su nombre, así la entrada, los avisos y el mapa siguen funcionando.\\
+\texttt{ServicioPagos} & \texttt{preparar} (resumen sin guardar, para M-26), \texttt{registrar} y \texttt{corregir}, cada uno en una transacción.\\
+\texttt{ServicioTarifas} & Registrar tarifas y obtener la vigente en una fecha.\\
+\texttt{ServicioDescuentos} & Crear, habilitar y deshabilitar descuentos.\\
+\texttt{ServicioConfirmacion} & Enviar el correo simulado con el \texttt{ServicioCorreo} de \texttt{core} y guardarlo.\\
+\texttt{ConsultasPagos} & Historiales, factura, por vencer e ingresos (solo lectura).\\
+\texttt{ServicioPropietarios}, \texttt{ServicioVehiculos} (ampliados) & \texttt{cambiar\_estado} recibe el motivo; \texttt{reactivar\_por\_pago} solo reactiva si el motivo es FALTA\_PAGO.\\
+\bottomrule
+\end{longtable}
+
+
+

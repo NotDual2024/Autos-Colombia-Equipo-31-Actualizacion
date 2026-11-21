@@ -1,0 +1,48 @@
+% ARCHIVO GENERADO por scripts/generar_capitulos.py. No editar a mano.
+\section{Actualización de la iteración 3}
+
+
+\subsubsection{Cálculo del periodo (RN-38, RN-39, DM-12)}
+
+\begin{enumerate}
+  \item \textbf{Día de cobro (ancla):} la fecha \texttt{periodo\_inicio} del primer pago REGISTRADO del vehículo. Si no hay pagos, el ancla es hoy.
+  \item \textbf{Vencimiento número k:} \texttt{sumar\_meses(ancla, k)}, que suma k meses al ancla y, si el mes no tiene ese día, usa el último día del mes. Siempre se calcula desde el ancla, nunca desde el vencimiento anterior. Por eso 31/01 $\rightarrow$ 28/02 $\rightarrow$ 31/03.
+  \item \textbf{Periodo del pago nuevo:} empieza en el vencimiento del último pago REGISTRADO (o en el ancla si es el primero) y termina \texttt{meses} vencimientos después.
+  \item \textbf{Meses pendientes:} cuántos vencimientos, a partir del último, hay que sumar para llegar a una fecha mayor o igual a hoy.
+  \item \textbf{Estado:} SIN\_PAGOS; AL\_DIA si el vencimiento es posterior a hoy; VENCE\_HOY si es hoy; VENCIDA (con los días) si ya pasó.
+\end{enumerate}
+
+Esta lógica va en funciones puras (\texttt{CalendarioCobro}), con pruebas de los casos de fin de mes y de año bisiesto.
+
+
+\subsubsection{Registro y corrección (RN-44, DM-13, DM-17)}
+
+\begin{itemize}
+  \item \texttt{registrar} corre dentro de \texttt{transaction.atomic()}. Calcula de nuevo el resumen en el servidor, así no se confía en lo que muestra la pantalla. Luego asigna el número de factura (mayor + 1), guarda el pago, reactiva (UC-35), envía el correo (UC-36) y registra en la bitácora.
+  \item \textbf{Concurrencia:} SQLite serializa las escrituras, y la restricción UNIQUE de \texttt{numero\_factura} y la de (vehículo, inicio) entre pagos registrados impiden duplicados aunque dos operadores confirmen a la vez. Si falla por esa restricción, el servicio responde ``El pago ya fue registrado; revise el historial''.
+  \item \texttt{corregir} verifica \texttt{corregible\_por} (24 horas para el operador). Después, en una transacción, marca el pago como CORREGIDO con el motivo, quién y cuándo, y llama a \texttt{registrar} con \texttt{corrige\_a}. El pago nuevo se calcula desde el vencimiento anterior al pago corregido, así recupera el mismo inicio.
+  \item Solo se puede corregir el \textbf{último} pago registrado del vehículo. Corregir uno anterior dejaría pagos posteriores con periodos que ya no encadenan. Si el error está en un pago anterior, se corrigen primero los posteriores. Esto lo propongo yo (sección 6).
+\end{itemize}
+
+\subsubsection{Factura para imprimir (RN-47)}
+
+\begin{itemize}
+  \item Es una página propia, sin el menú, con una hoja de estilos \texttt{@media print} que oculta los botones y ajusta la página a tamaño carta.
+  \item El botón ``Imprimir / Guardar como PDF'' llama a \texttt{window.print()}. No se necesita ninguna biblioteca.
+  \item Los datos del parqueadero son ficticios y salen de la configuración (\texttt{settings.DATOS\_FACTURA}).
+\end{itemize}
+
+\subsubsection{Permisos}
+
+\begin{longtable}{>{\raggedright\arraybackslash}p{7.4cm}>{\raggedright\arraybackslash}p{4.4cm}>{\raggedright\arraybackslash}p{2.6cm}}
+\toprule
+\textbf{Acción} & \textbf{Operador} & \textbf{Administrador}\\
+\midrule\endhead
+Registrar pago, ver vigencia, historial, factura y por vencer & Sí & Sí\\
+Corregir pago & Solo dentro de las 24 horas del registro & Siempre\\
+Tarifas, descuentos e ingresos & No (403) & Sí\\
+\bottomrule
+\end{longtable}
+
+
+

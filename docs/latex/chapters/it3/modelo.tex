@@ -1,0 +1,116 @@
+% ARCHIVO GENERADO por scripts/generar_capitulos.py. No editar a mano.
+\section{Cambios del modelo v1.4 (iteración 3)}
+\textbf{Base:} requerimientos de la iteración 3 v1.2 e historias HU-024 a HU-032 (aprobados el 2026-11-20).
+
+\textbf{Estado:} \textbf{Aprobado} por el equipo el 2026-11-20.
+
+\textbf{Validación:} \texttt{docs/sql/validar\_ddl.py} con el DDL v1.4: \textbf{91 comprobaciones, 91 pasan}. Son las 60 anteriores más 31 nuevas.
+
+\textbf{Diagramas:} MER-01 y MR-01 actualizados a v1.4.
+
+
+\subsubsection{Tablas nuevas y modificadas}
+
+\begin{longtable}{>{\raggedright\arraybackslash}p{5.6000000000000005cm}>{\raggedright\arraybackslash}p{7.3cm}>{\raggedright\arraybackslash}p{1.5cm}}
+\toprule
+\textbf{Tabla} & \textbf{Cambio} & \textbf{Origen}\\
+\midrule\endhead
+Pago (\texttt{pagos\_pago}) & Columnas nuevas: meses, tarifa unitaria, valor bruto, descuento, porcentaje del descuento, medio de pago, número de factura, estado, motivo de la corrección, quién corrigió, fecha de la corrección y pago que corrige (\texttt{corrige\_a\_id}) & RN-38 a RN-44, RN-47\\
+Descuento (\texttt{pagos\_descuento}, nueva) & Descripción, porcentaje, habilitado, creado por y fecha de creación & RN-42, RF-208\\
+Correo de confirmación (\texttt{pagos\_correoconfirmacion}, nueva) & Pago, destinatario, asunto, cuerpo, fecha y hora, y resultado & RN-47\\
+Propietario y vehículo & Motivo de la inactivación y su descripción & RN-46, RF-205\\
+Bitácora (\texttt{bitacora\_registrooperacion}) & Acciones nuevas: CORREGIR\_PAGO, HABILITAR y DESHABILITAR. Entidades nuevas: PAGO, TARIFA y DESCUENTO & RN-34\\
+Tarifa (\texttt{pagos\_tarifa}) & Sin cambios & RN-45\\
+\bottomrule
+\end{longtable}
+
+
+Restricciones principales:
+
+
+\begin{itemize}
+  \item \textbf{Pago:}
+  \begin{itemize}\item meses entre 1 y 12;\end{itemize}
+  \begin{itemize}\item \texttt{valor\_bruto = tarifa\_unitaria $\times$ meses};\end{itemize}
+  \begin{itemize}\item \texttt{valor = valor\_bruto $-$ valor\_bruto $\times$ porcentaje / 100};\end{itemize}
+  \begin{itemize}\item el descuento y su porcentaje se guardan juntos o ninguno;\end{itemize}
+  \begin{itemize}\item medio $\in$ \{EFECTIVO, TRANSFERENCIA, TARJETA\};\end{itemize}
+  \begin{itemize}\item \texttt{numero\_factura} única;\end{itemize}
+  \begin{itemize}\item estado $\in$ \{REGISTRADO, CORREGIDO\};\end{itemize}
+  \begin{itemize}\item un pago CORREGIDO tiene motivo, quién y cuándo, y uno REGISTRADO no los tiene;\end{itemize}
+  \begin{itemize}\item \texttt{corrige\_a\_id} única y distinta del propio id;\end{itemize}
+  \begin{itemize}\item \textbf{única parcial}: dos pagos registrados del mismo vehículo no pueden empezar el mismo día.\end{itemize}
+  \item \textbf{Descuento:} porcentaje entre 1 y 100; descripción no vacía.
+  \item \textbf{Correo de confirmación:} resultado $\in$ \{ENVIADO\_SIMULADO, FALLIDO\}.
+  \item \textbf{Propietario y vehículo:}
+  \begin{itemize}\item motivo $\in$ \{FALTA\_PAGO, OTRO\};\end{itemize}
+  \begin{itemize}\item un registro activo no tiene motivo y uno inactivo sí;\end{itemize}
+  \begin{itemize}\item el motivo OTRO exige una descripción no vacía.\end{itemize}
+  \item \textbf{Bitácora:} los CHECK de acción y entidad se amplían con los valores nuevos.
+\end{itemize}
+
+El índice \texttt{idx\_pago\_vehiculo\_fin} pasa a (vehículo, estado, fin del periodo), porque la vigencia solo usa pagos registrados. Se agrega \texttt{idx\_pago\_fecha} para el informe de ingresos (RF-209).
+
+
+\subsubsection{Decisiones de diseño del modelo (aprobadas con esta versión)}
+
+\begin{longtable}{>{\raggedright\arraybackslash}p{1.5cm}>{\raggedright\arraybackslash}p{3.5cm}>{\raggedright\arraybackslash}p{4.2cm}>{\raggedright\arraybackslash}p{5.2cm}}
+\toprule
+\textbf{ID} & \textbf{Decisión} & \textbf{Alternativa descartada} & \textbf{Por qué}\\
+\midrule\endhead
+DM-12 & El \textbf{día de cobro no se guarda}: es el día de \texttt{periodo\_inicio} del primer pago registrado del vehículo. Cada vencimiento se calcula desde ese día (RN-38), no desde el vencimiento anterior, para que 31/01 $\rightarrow$ 28/02 $\rightarrow$ 31/03. & Guardar \texttt{dia\_cobro} en el vehículo. & Como el día de cobro nunca cambia (RN-39), se deriva del primer pago. Guardarlo sería un dato repetido que se podría contradecir.\\
+DM-13 & La corrección se enlaza \textbf{del pago nuevo al corregido} (\texttt{corrige\_a\_id}, única). El motivo, quién y cuándo se guardan en el pago corregido. & Enlazar del corregido al nuevo (\texttt{reemplazado\_por\_id}). & Permite marcar primero el pago como corregido y después insertar el nuevo con el mismo inicio de periodo, sin violar la unicidad de pagos registrados ni dejar un CHECK a medias.\\
+DM-14 & El correo de confirmación va en \textbf{\texttt{pagos}} (\texttt{pagos\_correoconfirmacion}) y usa el servicio de correo de \texttt{core}. & Ponerlo en \texttt{notificaciones}. & \texttt{notificaciones} ya depende de \texttt{pagos}; si \texttt{pagos} llamara a \texttt{notificaciones} se formaría un ciclo. La arquitectura no cambia.\\
+DM-15 & El pago guarda \textbf{copias} de la tarifa (\texttt{tarifa\_unitaria}) y del porcentaje del descuento, y el \textbf{valor bruto}. La base de datos verifica la cuenta con CHECK. & Calcular el valor al consultar, desde la tarifa y el descuento. & Igual que DM-04: si la tarifa o el descuento cambian, los pagos anteriores no cambian. Los CHECK impiden guardar un valor escrito a mano (RN-41).\\
+DM-16 & El descuento se calcula sobre el valor bruto y se \textbf{redondea hacia abajo} al peso (división entera). Por ejemplo, 15 \% de 80 000 $\times$ 7 = 84 000. & Redondear al peso más cercano. & Con las tarifas actuales el resultado es exacto; si no lo fuera, el cliente nunca paga de más.\\
+DM-17 & El \textbf{número de factura} es un consecutivo propio del pago, único, y lo asigna la aplicación (el mayor + 1, dentro de la misma transacción). El pago corregido conserva su número y el nuevo recibe otro. & Usar el \texttt{id} del pago como número. & Separa la numeración de facturas de la clave interna y permite mostrar ``Anulada – reemplazada por la factura N.º'' (HU-029).\\
+DM-18 & Quién inactivó y cuándo \textbf{se lee de la bitácora}; el registro solo guarda el motivo y la descripción. & Columnas \texttt{inactivado\_por} e \texttt{inactivado\_en}. & La bitácora ya guarda el usuario y la fecha de cada inactivación (RN-34).\\
+DM-19 & \texttt{CHECK (periodo\_fin > periodo\_inicio)} reemplaza a \texttt{>=}: un pago cubre al menos un mes. & --- & RN-40.\\
+\bottomrule
+\end{longtable}
+
+
+\subsubsection{Migración de los datos existentes}
+
+\begin{longtable}{>{\raggedright\arraybackslash}p{2.5cm}>{\raggedright\arraybackslash}p{11.9cm}}
+\toprule
+\textbf{Dato} & \textbf{Valor que recibe}\\
+\midrule\endhead
+Pagos existentes & \texttt{meses} = 1, \texttt{tarifa\_unitaria} = \texttt{valor\_bruto} = \texttt{valor}, sin descuento, \texttt{medio} = EFECTIVO, \texttt{estado} = REGISTRADO, \texttt{numero\_factura} = su \texttt{id}.\\
+Propietarios y vehículos inactivos & \texttt{motivo\_inactivacion} = OTRO, \texttt{descripcion\_inactivacion} = ``Inactivado antes de la iteración 3''.\\
+\bottomrule
+\end{longtable}
+
+
+\subsubsection{Normalización}
+
+\begin{itemize}
+  \item Las tablas nuevas están en \textbf{3FN}.
+  \item \texttt{tarifa\_unitaria}, \texttt{porcentaje\_descuento}, \texttt{valor\_bruto} y \texttt{valor} son copias históricas o derivadas que se guardan a propósito (DM-15). No crean anomalías, porque un pago no se modifica después de registrado, salvo para marcarlo como corregido.
+  \item \texttt{pagos\_correoconfirmacion.destinatario} copia el correo del propietario en el momento del envío, como \texttt{avisocorreo}.
+\end{itemize}
+
+\subsubsection{Impacto en el código existente}
+
+\begin{itemize}
+  \item \texttt{pagos.services.ultimo\_pago} y \texttt{esta\_vigente} deben considerar solo los pagos con estado REGISTRADO. Así, los avisos de retiro, la entrada de vehículos y el mapa de celdas dejan de contar los pagos corregidos sin cambiar su propio código.
+  \item La inactivación de propietarios y vehículos (iteración 2) pide ahora el motivo.
+\end{itemize}
+
+\subsubsection{Trazabilidad}
+
+\begin{longtable}{>{\raggedright\arraybackslash}p{2.9cm}>{\raggedright\arraybackslash}p{11.5cm}}
+\toprule
+\textbf{RF} & \textbf{Tablas}\\
+\midrule\endhead
+RF-201 & pago, tarifa, descuento, correoconfirmacion, vehiculo, propietario, bitacora\\
+RF-202 & pago\\
+RF-203 & pago, vehiculo, propietario\\
+RF-204 & tarifa, bitacora\\
+RF-205 & propietario, vehiculo, bitacora\\
+RF-206 & pago, bitacora\\
+RF-207 & pago, vehiculo, propietario\\
+RF-208 & descuento, bitacora\\
+RF-209 & pago, vehiculo\\
+\bottomrule
+\end{longtable}

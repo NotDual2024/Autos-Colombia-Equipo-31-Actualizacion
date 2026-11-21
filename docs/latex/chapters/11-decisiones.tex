@@ -24,6 +24,7 @@ DEC-012 & Algoritmo de hash de contraseñas & \textbf{Aprobada} (A: Argon2 con a
 DEC-013 & Registro de ``qué operador hizo qué operación'' (iteración 2) & \textbf{Aprobada} (B: bitácora de operaciones)\\
 DEC-014 & Modelo de horarios y autorizaciones fuera de turno (iteración 2) & \textbf{Aprobada} (A: franjas por día + autorizaciones)\\
 DEC-015 & Cambio de propietario con solicitud e historial (iteración 2) & \textbf{Aprobada} (A: solicitud + historial)\\
+DEC-016 & Herramienta de los diagramas de la entrega de la iteración 2 & \textbf{Aprobada} (A: proyecto StarUML generado, imágenes con marca de agua)\\
 DEC-002, RF-010, RNF-012, RNF-013 & Envío automático de correo, un proceso diario y credenciales fuera del código. & \\
 \bottomrule
 \end{longtable}
@@ -143,6 +144,14 @@ DEC-002, RF-010, RNF-012, RNF-013 & Envío automático de correo, un proceso dia
   \item[Problema] P-29: el cambio de propietario se pide al administrador y debe quedar el registro del propietario anterior.
   \item[Decisión seleccionada] A.
   \item[Justificación] Cumple con que la petición pase por el administrador y conserva el historial. El equipo aceptó la recomendación.
+  \item[Fecha] 2026-11-15
+  \item[Estado] Aprobada.
+\end{description}
+\subsection{DEC-016 — Herramienta de los diagramas de la entrega de la iteración 2}
+\begin{description}[style=nextline]
+  \item[Problema] La actividad pide los diagramas de casos de uso, de secuencia y de componentes ``en STARUML'', pero el proyecto usa PlantUML (DEC-009). StarUML 7.1.1 está instalado en el equipo, sin registrar: toda imagen que exporta lleva la marca de agua ``UNREGISTERED''.
+  \item[Decisión seleccionada] A, aceptando la marca de agua ``UNREGISTERED'' en las imágenes. El plan de pruebas usa un formato resumido estándar (el profesor no dio una plantilla), y la entrega es un PDF aparte del documento técnico.
+  \item[Justificación] Cumple literalmente lo que pide la actividad y deja un proyecto StarUML que el equipo puede abrir y editar. Decisión expresada por el equipo el 2026-11-15.
   \item[Fecha] 2026-11-15
   \item[Estado] Aprobada.
 \end{description}

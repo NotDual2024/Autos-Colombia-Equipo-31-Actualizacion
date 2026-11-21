@@ -30,6 +30,7 @@ Demostración & Un comando carga usuarios de prueba, 200 celdas y casos de uso l
   \item La prueba de registros simultáneos verifica que la base de datos rechaza el choque y que el usuario ve el mensaje correcto, pero no ejecuta dos procesos reales al mismo tiempo.
   \item El tiempo de respuesta (RNF-006) no se midió formalmente.
   \item El aviso de fin de turno y el cierre por inactividad en el navegador (\texttt{turno.js}) se probaron solo de forma manual. El cierre de sesión en el servidor sí tiene pruebas automatizadas.
+  \item La factura es una simulación sin validez fiscal. Se verificó su contenido y la hoja de estilos de impresión, pero el diálogo de impresión del navegador no tiene pruebas automatizadas.
   \item El sistema usa el servidor de desarrollo de Django, adecuado para la demostración local pero no para un uso real 24/7.
   \item El correo es simulado (DEC-007): conectar un servicio real requiere otra implementación de la interfaz \texttt{ServicioCorreo} y gestionar sus credenciales (RNF-012).
 \end{itemize}
@@ -56,8 +57,29 @@ Arquitectura & El módulo nuevo \texttt{bitacora} depende solo de \texttt{core};
   \item[La regresión protege lo ya entregado] La regla de no ingresar sin horario (RN-36) hizo fallar pruebas de la iteración 1. La suite completa lo detectó de inmediato y se ajustó la base de pruebas sin cambiar el comportamiento aprobado.
 \end{description}
 
+\section{Resultados de la iteración 3}
+La iteración 3 completó la gestión de pagos: el operador registra pagos de uno a doce meses con el valor calculado por el sistema y, si aplica, un descuento habilitado por el administrador; cada pago genera una factura simulada para imprimir y un correo simulado al propietario. Los pagos mal registrados se corrigen sin borrarlos, las tarifas cambian con fecha de vigencia sin afectar los pagos anteriores y el sistema reactiva por sí solo a quien estaba inactivo por falta de pago.
+
+\begin{longtable}{>{\raggedright\arraybackslash}p{4.6cm}>{\raggedright\arraybackslash}p{9.8cm}}
+\toprule
+\textbf{Aspecto} & \textbf{Resultado}\\
+\midrule\endhead
+Requerimientos & RF-201 a RF-209 implementados, con las reglas RN-38 a RN-47.\\
+Historias de usuario & HU-024 a HU-032 implementadas, con pruebas automatizadas de sus escenarios.\\
+Pruebas & 240 pruebas automatizadas, todas aprobadas; las 154 de las iteraciones 1 y 2 siguen pasando. Verificación manual en el navegador del registro de un pago atrasado con descuento, el historial con un pago corregido, la factura anulada y las pantallas del administrador.\\
+Modelo de datos & Versión 1.4. La base de datos verifica la cuenta del valor (tarifa $\times$ meses $-$ descuento), que un pago corregido tenga motivo y que no haya dos pagos válidos iguales. El DDL pasa sus 91 comprobaciones.\\
+Arquitectura & Sin módulos nuevos. El correo de confirmación quedó en \texttt{pagos} (DM-14) para no crear una dependencia circular con \texttt{notificaciones}.\\
+\bottomrule
+\end{longtable}
+
+\section{Aprendizajes de la iteración 3}
+\begin{description}[style=nextline]
+  \item[Las fechas de calendario necesitan reglas explícitas] ``Vence el mismo día del mes siguiente'' parece simple hasta que aparecen el 31 de enero, febrero y los años bisiestos. Calcular cada vencimiento desde el día de cobro, y no desde el vencimiento anterior, evitó que la fecha se corriera mes a mes. Las funciones del calendario se probaron con esos casos antes de usarlas.
+  \item[Corregir sin borrar] La regla de que un pago mal registrado quede en el registro llevó a marcarlo como corregido y enlazarlo con el pago correcto. Así la vigencia y los ingresos solo cuentan pagos válidos, y la factura anulada indica cuál la reemplaza.
+  \item[Las pruebas también revisan la base de datos] Las pruebas del modelo detectaron que en SQLite una restricción sobre un valor vacío (NULL) se da por cumplida, lo que habría permitido un pago corregido sin motivo. El script DDL aprobado ya lo evitaba; el error estaba solo en la traducción al ORM.
+\end{description}
+
 \section{Trabajo futuro}
 \begin{description}[style=nextline]
-  \item[Iteración 3: gestión de pagos] Registro de pagos, consulta de vigencia e historial, y gestión de tarifas (RF-201 a RF-204). La vigencia ya se calcula a partir de la tabla de pagos, así que los pagos registrados desde la interfaz se reflejarán de inmediato en las entradas y en la lista de vencidos. También queda pendiente el motivo de inactivación y la reactivación automática al registrar el pago (P-33).
-  \item[Mejoras posibles] Correo real, adjuntos en las novedades (RN-18) y un servidor de aplicaciones para un despliegue fuera del entorno local.
+  \item[Mejoras posibles] Correo real, una pantalla para consultar los correos de confirmación, adjuntos en las novedades (RN-18), facturación electrónica real si el parqueadero la necesitara y un servidor de aplicaciones para un despliegue fuera del entorno local.
 \end{description}

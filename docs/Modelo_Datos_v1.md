@@ -276,14 +276,35 @@ Ejecuté el DDL en SQLite 3.50.4 con `docs/sql/validar_ddl.py`: **42 comprobacio
 
 ### 8.1. Tablas nuevas y modificadas
 
-| Tabla | Cambio | Origen | Restricciones principales |
-|---|---|---|---|
-| `pagos_pago` | Columnas nuevas: `meses`, `tarifa_unitaria`, `valor_bruto`, `descuento_id`, `porcentaje_descuento`, `medio`, `numero_factura`, `estado`, `motivo_correccion`, `corregido_por_id`, `fecha_correccion`, `corrige_a_id` | RN-38 a RN-44, RN-47 | CHECK meses 1..12; CHECK `valor_bruto = tarifa_unitaria × meses`; CHECK `valor = valor_bruto − valor_bruto × porcentaje / 100`; descuento y porcentaje van juntos; medio ∈ {EFECTIVO, TRANSFERENCIA, TARJETA}; `numero_factura` UQ; estado ∈ {REGISTRADO, CORREGIDO}; CORREGIDO ⇔ motivo, quién y cuándo; `corrige_a_id` UQ y distinto del propio id; **UQ parcial** (vehículo, inicio del periodo) entre los pagos registrados |
-| `pagos_descuento` (nueva) | descripción, porcentaje, habilitado, creado por, fecha de creación | RN-42, RF-208 | CHECK porcentaje 1..100; descripción no vacía |
-| `pagos_correoconfirmacion` (nueva) | pago, destinatario, asunto, cuerpo, fecha y hora, resultado | RN-47 | Resultado ∈ {ENVIADO_SIMULADO, FALLIDO} |
-| `usuarios_celdas_propietario` y `usuarios_celdas_vehiculo` | `motivo_inactivacion` y `descripcion_inactivacion` | RN-46, RF-205 | Motivo ∈ {FALTA_PAGO, OTRO}; activo ⇔ sin motivo; OTRO ⇔ descripción no vacía |
-| `bitacora_registrooperacion` | Acciones nuevas: CORREGIR_PAGO, HABILITAR, DESHABILITAR. Entidades nuevas: PAGO, TARIFA, DESCUENTO | RN-34 | Los CHECK se amplían |
-| `pagos_tarifa` | Sin cambios | RN-45 | — |
+| Tabla | Cambio | Origen |
+|---|---|---|
+| Pago (`pagos_pago`) | Columnas nuevas: meses, tarifa unitaria, valor bruto, descuento, porcentaje del descuento, medio de pago, número de factura, estado, motivo de la corrección, quién corrigió, fecha de la corrección y pago que corrige (`corrige_a_id`) | RN-38 a RN-44, RN-47 |
+| Descuento (`pagos_descuento`, nueva) | Descripción, porcentaje, habilitado, creado por y fecha de creación | RN-42, RF-208 |
+| Correo de confirmación (`pagos_correoconfirmacion`, nueva) | Pago, destinatario, asunto, cuerpo, fecha y hora, y resultado | RN-47 |
+| Propietario y vehículo | Motivo de la inactivación y su descripción | RN-46, RF-205 |
+| Bitácora (`bitacora_registrooperacion`) | Acciones nuevas: CORREGIR_PAGO, HABILITAR y DESHABILITAR. Entidades nuevas: PAGO, TARIFA y DESCUENTO | RN-34 |
+| Tarifa (`pagos_tarifa`) | Sin cambios | RN-45 |
+
+Restricciones principales:
+
+- **Pago:**
+  - meses entre 1 y 12;
+  - `valor_bruto = tarifa_unitaria × meses`;
+  - `valor = valor_bruto − valor_bruto × porcentaje / 100`;
+  - el descuento y su porcentaje se guardan juntos o ninguno;
+  - medio ∈ {EFECTIVO, TRANSFERENCIA, TARJETA};
+  - `numero_factura` única;
+  - estado ∈ {REGISTRADO, CORREGIDO};
+  - un pago CORREGIDO tiene motivo, quién y cuándo, y uno REGISTRADO no los tiene;
+  - `corrige_a_id` única y distinta del propio id;
+  - **única parcial**: dos pagos registrados del mismo vehículo no pueden empezar el mismo día.
+- **Descuento:** porcentaje entre 1 y 100; descripción no vacía.
+- **Correo de confirmación:** resultado ∈ {ENVIADO_SIMULADO, FALLIDO}.
+- **Propietario y vehículo:**
+  - motivo ∈ {FALTA_PAGO, OTRO};
+  - un registro activo no tiene motivo y uno inactivo sí;
+  - el motivo OTRO exige una descripción no vacía.
+- **Bitácora:** los CHECK de acción y entidad se amplían con los valores nuevos.
 
 El índice `idx_pago_vehiculo_fin` pasa a (vehículo, estado, fin del periodo), porque la vigencia solo usa pagos registrados. Se agrega `idx_pago_fecha` para el informe de ingresos (RF-209).
 

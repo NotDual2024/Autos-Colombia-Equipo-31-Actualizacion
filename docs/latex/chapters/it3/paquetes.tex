@@ -1,0 +1,17 @@
+% ARCHIVO GENERADO por scripts/generar_capitulos.py. No editar a mano.
+\section{Cambios de la iteración 3}
+El diagrama PK-01 (versión 3) de este capítulo ya incluye estos cambios.
+
+
+
+
+
+\begin{itemize}
+  \item \textbf{No hay módulos nuevos.} Todo va en \texttt{pagos}.
+  \item \textbf{Dependencia nueva: \texttt{pagos} $\rightarrow$ \texttt{bitacora}.} No crea ciclos, porque \texttt{bitacora} solo depende de \texttt{core}.
+  \item \texttt{pagos} llama a los servicios de \texttt{usuarios\_celdas} para reactivar (ya dependía de ese módulo).
+  \item La ficha del vehículo (en \texttt{usuarios\_celdas}) enlaza a las páginas de \texttt{pagos} por el nombre de la URL, sin importar el módulo. Así no se forma un ciclo, igual que en la iteración 2 con las estadías.
+  \item ARQ-03 se actualizó con las nuevas responsabilidades de \texttt{pagos} y sus relaciones con \texttt{bitacora} y \texttt{core}.
+\end{itemize}
+
+

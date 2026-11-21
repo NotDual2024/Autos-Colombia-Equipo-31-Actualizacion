@@ -143,7 +143,7 @@ def main() -> None:
     escribir("arquitectura.tex", r"\section{Actualización de la iteración 2}" + "\n"
              + md_a_tex(seccion(dis, "## 5. Mecanismo", "## 6.")).replace(r"\subsection{Mecanismo de control de turno (RN-31, RN-35, RN-36)}", r"\subsection{Mecanismo de control de turno}"))
     escribir("modelo.tex", r"\section{Cambios del modelo v1.3 (iteración 2)}" + "\n"
-             + md_a_tex(seccion(mod, "**Base:** requerimientos de la iteración 2")))
+             + md_a_tex(seccion(mod, "**Base:** requerimientos de la iteración 2", "## 8.")))
     print("Secciones de la iteración 2 generadas en", SALIDA)
 
 

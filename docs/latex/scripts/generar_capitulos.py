@@ -24,7 +24,7 @@ ESPECIALES = {
 }
 UNICODE = {"≥": r"$\geq$", "≤": r"$\leq$", "→": r"$\rightarrow$", "✓": r"$\checkmark$",
            "“": "``", "”": "''", "…": "...", "×": r"$\times$", "≠": r"$\neq$", "⇔": r"$\Leftrightarrow$",
-           "∈": r"$\in$", "✔": r"$\checkmark$", "‹": "<", "›": ">"}
+           "∈": r"$\in$", "✔": r"$\checkmark$", "‹": "<", "›": ">", "−": r"$-$"}
 
 
 def tex(texto: str) -> str:

@@ -100,7 +100,7 @@ Iteración 1 cerrada y subida a GitHub (2026-11-15). **Iteración 2 (gestión de
 
 ## Pendientes
 - Revisión del equipo del PDF de entrega de la iteración 2 (en especial SD-01 a SD-11 y CMP-01). El PDF de entrega y sus archivos **no se suben a GitHub** (indicación del equipo).
-- Iteración 3 (gestión de pagos): iniciada el 2026-11-20. Requerimientos v1.2 aprobados (RN-38 a RN-47, RF-201 a RF-209). Historias HU-024 a HU-032 aprobadas. Modelo de datos v1.4 aprobado. Diseño v1 aprobado. Plan de implementación aprobado. **Implementación terminada y verificada** (240/240 pruebas). Pendiente: revisión del equipo, actualización del PDF y commit.
+- Iteración 3 (gestión de pagos): iniciada el 2026-11-20. Requerimientos v1.2 aprobados (RN-38 a RN-47, RF-201 a RF-209). Historias HU-024 a HU-032 aprobadas. Modelo de datos v1.4 aprobado. Diseño v1 aprobado. Plan de implementación aprobado. **Implementación terminada y verificada** (240/240 pruebas). PDF técnico actualizado con la iteración 3 (150 páginas). Pendiente: revisión del equipo y commit.
 - Revisión del primer PDF LaTeX.
 
 ## Próximas actividades

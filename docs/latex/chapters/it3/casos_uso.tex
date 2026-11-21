@@ -1,0 +1,41 @@
+% ARCHIVO GENERADO por scripts/generar_capitulos.py. No editar a mano.
+\section{Casos de uso de la iteración 3}
+
+
+\diagrama{uml/UC-03_CasosUso_It3.png}{UC-03}{fig:UC-03_CasosUso_It3}{1.0}
+
+\textbf{Actores:} Operador; Administrador (especializa al Operador).
+
+
+\textbf{Relaciones:}
+
+\begin{itemize}
+  \item UC-30 Registrar pago «include» UC-35 Reactivar por pago y UC-36 Enviar confirmación, que a su vez «include» UC-13 Enviar correo simulado (iteración 1).
+  \item UC-34 Corregir pago «include» UC-30, porque registra el pago correcto.
+  \item UC-33 Imprimir factura «extend» UC-30 (al confirmar) y UC-32 (desde el historial). UC-31 «extend» UC-30 (muestra lo que se debe).
+  \item Los casos que modifican datos «include» UC-29 Registrar operación en la bitácora.
+  \item UC-19 (iteración 2) cambia: inactivar pide el motivo.
+\end{itemize}
+
+\subsubsection{Especificaciones}
+
+\begin{longtable}{>{\raggedright\arraybackslash}p{2.4000000000000004cm}>{\raggedright\arraybackslash}p{2.6cm}>{\raggedright\arraybackslash}p{2.8cm}>{\raggedright\arraybackslash}p{4.2cm}>{\raggedright\arraybackslash}p{2.4000000000000004cm}}
+\toprule
+\textbf{UC} & \textbf{Actor} & \textbf{Flujo principal} & \textbf{Alternativos y excepciones} & \textbf{Trazabilidad}\\
+\midrule\endhead
+\textbf{UC-30} Registrar pago & Operador & Busca la placa $\rightarrow$ ve el vehículo, el estado y los meses pendientes $\rightarrow$ elige meses, medio y descuento $\rightarrow$ el sistema muestra el periodo y el valor $\rightarrow$ confirma $\rightarrow$ en una transacción: número de factura, pago, UC-35, UC-36 y UC-29 $\rightarrow$ M-27. & Placa inexistente; meses fuera de 1..12; sin medio de pago; descuento deshabilitado mientras se llenaba; no hay tarifa vigente; pago que no alcanza a dejarlo al día (se guarda y advierte). & RF-201, HU-024\\
+\textbf{UC-31} Consultar vigencia & Operador & Abre la página de pagos del vehículo $\rightarrow$ ve el estado, el vencimiento, el día de cobro y los meses pendientes. & Sin pagos. & RF-202, HU-025\\
+\textbf{UC-32} Consultar historial & Operador & Desde la ficha del vehículo o del propietario $\rightarrow$ lista de pagos, del más reciente al más antiguo, con su estado. & Sin pagos. & RF-203, HU-026\\
+\textbf{UC-33} Imprimir factura & Operador & Abre la factura $\rightarrow$ la página se muestra lista para imprimir $\rightarrow$ el navegador la imprime o la guarda como PDF. & Pago corregido: sello ``Anulada'' con el número de la factura nueva. & RN-47, HU-026\\
+\textbf{UC-34} Corregir pago & Operador, Administrador & Elige el pago $\rightarrow$ escribe el motivo y los datos correctos $\rightarrow$ en una transacción: marca el pago como corregido, UC-30 con \texttt{corrige\_a}, UC-29. & Sin motivo; operador con un pago de más de 24 horas $\rightarrow$ mensaje; pago ya corregido $\rightarrow$ sin opción. & RF-206, HU-029\\
+\textbf{UC-35} Reactivar por pago & Sistema (incluido en UC-30) & Si después del pago el vehículo queda al día: reactiva el vehículo y su propietario si estaban inactivos por falta de pago $\rightarrow$ UC-29. & Inactivo por ``Otro'' $\rightarrow$ advertencia, no se reactiva. Pago que no lo deja al día $\rightarrow$ no se reactiva. & RN-46, HU-028\\
+\textbf{UC-36} Enviar confirmación & Sistema (incluido en UC-30) & Arma el correo con el periodo, el valor y el número de factura $\rightarrow$ UC-13 $\rightarrow$ guarda el resultado. & Fallo del envío $\rightarrow$ se guarda como FALLIDO; el pago no se deshace. & RN-47, HU-024\\
+\textbf{UC-37} Consultar por vencer & Operador & Lista de vehículos activos que vencen hoy o en los próximos 5 días, con el propietario y su celular. & Lista vacía. & RF-207, HU-030\\
+\textbf{UC-38} Gestionar tarifas & Administrador & Registra tipo, valor y fecha ``vigente desde'' $\rightarrow$ UC-29. & Fecha repetida para el tipo; valor $\leq$ 0; acceso de un operador $\rightarrow$ 403. & RF-204, HU-027\\
+\textbf{UC-39} Gestionar descuentos & Administrador & Crea con descripción y porcentaje; habilita o deshabilita $\rightarrow$ UC-29. & Porcentaje fuera de 1..100; descripción vacía; acceso de un operador $\rightarrow$ 403. & RF-208, HU-031\\
+\textbf{UC-40} Consultar ingresos & Administrador & Elige el mes $\rightarrow$ total, por tipo y por medio, sin pagos corregidos. & Mes sin pagos; acceso de un operador $\rightarrow$ 403. & RF-209, HU-032\\
+\bottomrule
+\end{longtable}
+
+
+
