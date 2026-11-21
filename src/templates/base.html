@@ -27,12 +27,18 @@
       <a href="{% url 'usuarios_celdas:propietarios' %}" class="{% if 'usuarios_celdas:propietario' in u %}activo{% endif %}">{% include "core/icono.html" with nombre="usuarios" %} Propietarios</a>
       <a href="{% url 'usuarios_celdas:vehiculos' %}" class="{% if 'usuarios_celdas:vehiculo' in u or u == 'usuarios_celdas:solicitar_cambio' %}activo{% endif %}">{% include "core/icono.html" with nombre="auto" %} Vehículos</a>
       <a href="{% url 'usuarios_celdas:mapa' %}" class="{% if u == 'usuarios_celdas:mapa' %}activo{% endif %}">{% include "core/icono.html" with nombre="celda" %} Mapa de celdas</a>
+      <div class="lateral-titulo">Pagos</div>
+      <a href="{% url 'pagos:registrar' %}" class="{% if u == 'pagos:registrar' or u == 'pagos:registrado' or u == 'pagos:vehiculo' or u == 'pagos:propietario' or u == 'pagos:corregir' %}activo{% endif %}">{% include "core/icono.html" with nombre="check" %} Registrar pago</a>
+      <a href="{% url 'pagos:por_vencer' %}" class="{% if u == 'pagos:por_vencer' %}activo{% endif %}">{% include "core/icono.html" with nombre="calendario" %} Por vencer</a>
       {% if request.user.es_administrador %}
       <div class="lateral-titulo">Administración</div>
       <a href="{% url 'cuentas:operadores' %}" class="{% if u == 'cuentas:operadores' or u == 'cuentas:editar_operador' or u == 'cuentas:horario' %}activo{% endif %}">{% include "core/icono.html" with nombre="usuarios" %} Operadores</a>
       <a href="{% url 'usuarios_celdas:solicitudes' %}" class="{% if u == 'usuarios_celdas:solicitudes' %}activo{% endif %}">{% include "core/icono.html" with nombre="novedad" %} Solicitudes{% if solicitudes_pendientes %} <span class="contador" style="margin-left:auto">{{ solicitudes_pendientes }}</span>{% endif %}</a>
       <a href="{% url 'cuentas:autorizaciones' %}" class="{% if u == 'cuentas:autorizaciones' %}activo{% endif %}">{% include "core/icono.html" with nombre="reloj" %} Autorizaciones</a>
       <a href="{% url 'bitacora:bitacora' %}" class="{% if u == 'bitacora:bitacora' %}activo{% endif %}">{% include "core/icono.html" with nombre="historial" %} Bitácora</a>
+      <a href="{% url 'pagos:tarifas' %}" class="{% if u == 'pagos:tarifas' %}activo{% endif %}">{% include "core/icono.html" with nombre="llave" %} Tarifas</a>
+      <a href="{% url 'pagos:descuentos' %}" class="{% if u == 'pagos:descuentos' %}activo{% endif %}">{% include "core/icono.html" with nombre="mas" %} Descuentos</a>
+      <a href="{% url 'pagos:ingresos' %}" class="{% if u == 'pagos:ingresos' %}activo{% endif %}">{% include "core/icono.html" with nombre="info" %} Ingresos</a>
       {% endif %}
       {% endwith %}
     </nav>

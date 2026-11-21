@@ -1,0 +1,113 @@
+@startuml CL-05_Dominio_It3
+' CL-05 - Clases de dominio nuevas o modificadas en la iteración 3 - v1
+!pragma layout smetana
+skinparam classAttributeIconSize 0
+skinparam class {
+  BackgroundColor #FDFDFD
+  BorderColor #0B3D91
+}
+title Clases de dominio - Iteración 3 (en gris: clases de iteraciones anteriores)
+
+package cuentas {
+  class Usuario #EEEEEE {
+    - rol : Rol
+    + es_administrador() : bool
+  }
+}
+
+package usuarios_celdas {
+  enum MotivoInactivacion {
+    FALTA_PAGO
+    OTRO
+  }
+  class Propietario #EEEEEE {
+    - nombre_completo : str
+    - correo : str
+    - activo : bool
+    - motivo_inactivacion : MotivoInactivacion [0..1]
+    - descripcion_inactivacion : str [0..1]
+  }
+  class Vehiculo #EEEEEE {
+    - placa : str
+    - tipo : TipoVehiculo
+    - activo : bool
+    - motivo_inactivacion : MotivoInactivacion [0..1]
+    - descripcion_inactivacion : str [0..1]
+    + categoria() : Categoria
+  }
+}
+
+package pagos {
+  class Tarifa #EEEEEE {
+    - categoria : Categoria
+    - valor : int
+    - vigente_desde : date
+  }
+  class Descuento {
+    - descripcion : str
+    - porcentaje : int {1..100}
+    - habilitado : bool
+    - fecha_creacion : datetime
+    + valor_sobre(bruto : int) : int
+  }
+  enum MedioPago {
+    EFECTIVO
+    TRANSFERENCIA
+    TARJETA
+  }
+  enum EstadoPago {
+    REGISTRADO
+    CORREGIDO
+  }
+  class Pago {
+    - numero_factura : int {único}
+    - periodo_inicio : date
+    - periodo_fin : date
+    - meses : int {1..12}
+    - tarifa_unitaria : int
+    - valor_bruto : int
+    - porcentaje_descuento : int [0..1]
+    - valor : int
+    - medio : MedioPago
+    - fecha_pago : datetime
+    - estado : EstadoPago
+    - motivo_correccion : str [0..1]
+    - fecha_correccion : datetime [0..1]
+    + cubre(fecha : date) : bool
+    + valor_descuento() : int
+    + corregible_por(usuario, momento) : bool
+  }
+  class CorreoConfirmacion {
+    - destinatario : str
+    - asunto : str
+    - cuerpo : str
+    - fecha_hora : datetime
+    - resultado : str
+  }
+  class CalendarioCobro <<utilidad>> {
+    + {static} vencimiento(ancla : date, meses : int) : date
+    + {static} sumar_meses(fecha : date, meses : int, dia_cobro : int) : date
+  }
+}
+
+Propietario "1" -- "0..*" Vehiculo : posee
+Vehiculo "1" -- "0..*" Pago : paga
+Descuento "0..1" -- "0..*" Pago : se aplica
+Pago "0..1" -- "0..1" Pago : corrige a >
+Pago "1" -- "0..*" CorreoConfirmacion
+Usuario "1" -- "0..*" Pago : registra
+Usuario "0..1" -- "0..*" Pago : corrige
+Usuario "1" -- "0..*" Descuento : crea
+Pago ..> CalendarioCobro : RN-38
+
+note bottom of CalendarioCobro
+  RN-38: el vencimiento se calcula desde el día de cobro,
+  no desde el vencimiento anterior. Si el mes no tiene
+  ese día, se usa el último día del mes (31/01 → 28/02 → 31/03).
+end note
+note right of Pago
+  corregible_por: el administrador siempre;
+  el operador solo si pasaron menos de 24 horas
+  desde fecha_pago y el estado es REGISTRADO (RN-44).
+end note
+@enduml

@@ -1,6 +1,7 @@
 -- =====================================================================
 -- Parqueadero "Autos Colombia" - Modelo físico v1 (SQLite 3)
 -- Estado: v1.3 APROBADO el 2026-11-15 (iteración 2: bitácora, horarios, autorizaciones, cambio de propietario).
+-- v1.4 APROBADO el 2026-11-20 (iteración 3: pagos, descuentos, corrección, motivo de inactivación).
 --
 -- Este script documenta y valida el diseño. En la implementación, las
 -- tablas las crean las migraciones de Django a partir de los modelos, que
@@ -64,7 +65,12 @@ CREATE TABLE usuarios_celdas_propietario (
     correo            VARCHAR(254) NOT NULL,             -- obligatorio (DEC-002)
     direccion         VARCHAR(200) NOT NULL,
     activo            BOOLEAN      NOT NULL DEFAULT 1,
-    fecha_registro    DATETIME     NOT NULL
+    -- RN-46: motivo de la inactivación (nulo si está activo)
+    motivo_inactivacion      VARCHAR(12)  NULL CHECK (motivo_inactivacion IN ('FALTA_PAGO', 'OTRO')),
+    descripcion_inactivacion VARCHAR(200) NULL,
+    fecha_registro    DATETIME     NOT NULL,
+    CHECK ((activo = 1) = (motivo_inactivacion IS NULL)),
+    CHECK ((motivo_inactivacion = 'OTRO') = (coalesce(length(trim(descripcion_inactivacion)), 0) > 0))
 );
 
 CREATE TABLE usuarios_celdas_vehiculo (
@@ -80,7 +86,11 @@ CREATE TABLE usuarios_celdas_vehiculo (
     color           VARCHAR(30)  NOT NULL,
     propietario_id  INTEGER      NOT NULL REFERENCES usuarios_celdas_propietario (id) ON DELETE RESTRICT,
     activo          BOOLEAN      NOT NULL DEFAULT 1,
-    fecha_registro  DATETIME     NOT NULL
+    motivo_inactivacion      VARCHAR(12)  NULL CHECK (motivo_inactivacion IN ('FALTA_PAGO', 'OTRO')),   -- RN-46
+    descripcion_inactivacion VARCHAR(200) NULL,
+    fecha_registro  DATETIME     NOT NULL,
+    CHECK ((activo = 1) = (motivo_inactivacion IS NULL)),
+    CHECK ((motivo_inactivacion = 'OTRO') = (coalesce(length(trim(descripcion_inactivacion)), 0) > 0))
 );
 CREATE INDEX idx_vehiculo_propietario ON usuarios_celdas_vehiculo (propietario_id);
 
@@ -136,17 +146,68 @@ CREATE TABLE pagos_tarifa (
     UNIQUE (categoria, vigente_desde)
 );
 
-CREATE TABLE pagos_pago (
-    id                INTEGER    PRIMARY KEY AUTOINCREMENT,
-    vehiculo_id       INTEGER    NOT NULL REFERENCES usuarios_celdas_vehiculo (id) ON DELETE RESTRICT,
-    periodo_inicio    DATE       NOT NULL,
-    periodo_fin       DATE       NOT NULL,                -- fecha de vencimiento
-    valor             INTEGER    NOT NULL CHECK (valor > 0),  -- copia de la tarifa al pagar
-    fecha_pago        DATETIME   NOT NULL,
-    registrado_por_id INTEGER    NOT NULL REFERENCES cuentas_usuario (id) ON DELETE RESTRICT,
-    CHECK (periodo_fin >= periodo_inicio)
+-- Descuentos (RN-42, RF-208). Solo el administrador los crea (control en la aplicación).
+-- No se editan: para otro porcentaje se deshabilita y se crea otro.
+CREATE TABLE pagos_descuento (
+    id              INTEGER      PRIMARY KEY AUTOINCREMENT,
+    descripcion     VARCHAR(100) NOT NULL CHECK (length(trim(descripcion)) > 0),
+    porcentaje      SMALLINT     NOT NULL CHECK (porcentaje BETWEEN 1 AND 100),
+    habilitado      BOOLEAN      NOT NULL DEFAULT 1,
+    creado_por_id   INTEGER      NOT NULL REFERENCES cuentas_usuario (id) ON DELETE RESTRICT,
+    fecha_creacion  DATETIME     NOT NULL
 );
-CREATE INDEX idx_pago_vehiculo_fin ON pagos_pago (vehiculo_id, periodo_fin);
+
+-- Pago de mensualidad (RF-201, RN-38 a RN-44, RN-47). Nunca se borra ni se edita, salvo
+-- para marcarlo como CORREGIDO (RN-44). El pago nuevo apunta al que corrige (corrige_a_id).
+CREATE TABLE pagos_pago (
+    id                   INTEGER     PRIMARY KEY AUTOINCREMENT,
+    vehiculo_id          INTEGER     NOT NULL REFERENCES usuarios_celdas_vehiculo (id) ON DELETE RESTRICT,
+    periodo_inicio       DATE        NOT NULL,
+    periodo_fin          DATE        NOT NULL,                       -- fecha de vencimiento
+    meses                SMALLINT    NOT NULL CHECK (meses BETWEEN 1 AND 12),        -- RN-40
+    tarifa_unitaria      INTEGER     NOT NULL CHECK (tarifa_unitaria > 0),           -- copia (DM-04)
+    valor_bruto          INTEGER     NOT NULL,
+    descuento_id         INTEGER     NULL REFERENCES pagos_descuento (id) ON DELETE RESTRICT,
+    porcentaje_descuento SMALLINT    NULL CHECK (porcentaje_descuento BETWEEN 1 AND 100),  -- copia
+    valor                INTEGER     NOT NULL CHECK (valor >= 0),    -- 0 solo con descuento del 100 %
+    medio                VARCHAR(13) NOT NULL CHECK (medio IN ('EFECTIVO', 'TRANSFERENCIA', 'TARJETA')),
+    numero_factura       INTEGER     NOT NULL UNIQUE CHECK (numero_factura > 0),   -- consecutivo
+    fecha_pago           DATETIME    NOT NULL,
+    registrado_por_id    INTEGER     NOT NULL REFERENCES cuentas_usuario (id) ON DELETE RESTRICT,
+    estado               VARCHAR(10) NOT NULL DEFAULT 'REGISTRADO' CHECK (estado IN ('REGISTRADO', 'CORREGIDO')),
+    motivo_correccion    TEXT        NULL,
+    corregido_por_id     INTEGER     NULL REFERENCES cuentas_usuario (id) ON DELETE RESTRICT,
+    fecha_correccion     DATETIME    NULL,
+    corrige_a_id         INTEGER     NULL UNIQUE REFERENCES pagos_pago (id) ON DELETE RESTRICT,
+    CHECK (periodo_fin > periodo_inicio),
+    -- RN-41: el valor lo calcula el sistema; la base de datos verifica la cuenta
+    CHECK (valor_bruto = tarifa_unitaria * meses),
+    CHECK (valor = valor_bruto - (valor_bruto * coalesce(porcentaje_descuento, 0)) / 100),
+    CHECK ((descuento_id IS NULL) = (porcentaje_descuento IS NULL)),
+    -- RN-44: un pago corregido tiene motivo, quién y cuándo; uno registrado no
+    CHECK ((estado = 'CORREGIDO') = (corregido_por_id IS NOT NULL)),
+    CHECK ((estado = 'CORREGIDO') = (fecha_correccion IS NOT NULL)),
+    CHECK ((estado = 'CORREGIDO') = (coalesce(length(trim(motivo_correccion)), 0) > 0)),
+    CHECK (corrige_a_id IS NULL OR corrige_a_id <> id)
+);
+CREATE INDEX idx_pago_vehiculo_fin ON pagos_pago (vehiculo_id, estado, periodo_fin);
+CREATE INDEX idx_pago_fecha ON pagos_pago (fecha_pago);                 -- RF-209
+-- Dos pagos válidos del mismo vehículo no pueden empezar el mismo día (pago repetido).
+CREATE UNIQUE INDEX uq_pago_vehiculo_inicio
+    ON pagos_pago (vehiculo_id, periodo_inicio) WHERE estado = 'REGISTRADO';
+
+-- Correo simulado de confirmación de pago (RN-47). Va en 'pagos' para no crear un ciclo
+-- con 'notificaciones', que ya depende de 'pagos' (DM-14).
+CREATE TABLE pagos_correoconfirmacion (
+    id            INTEGER      PRIMARY KEY AUTOINCREMENT,
+    pago_id       INTEGER      NOT NULL REFERENCES pagos_pago (id) ON DELETE RESTRICT,
+    destinatario  VARCHAR(254) NOT NULL,                 -- copia del correo al momento del envío
+    asunto        VARCHAR(200) NOT NULL,
+    cuerpo        TEXT         NOT NULL,
+    fecha_hora    DATETIME     NOT NULL,
+    resultado     VARCHAR(20)  NOT NULL CHECK (resultado IN ('ENVIADO_SIMULADO', 'FALLIDO'))
+);
+CREATE INDEX idx_confirmacion_pago ON pagos_correoconfirmacion (pago_id);
 
 -- ------------------------------------------------------- entradas_salidas
 CREATE TABLE entradas_salidas_estadia (
@@ -234,10 +295,12 @@ CREATE TABLE bitacora_registrooperacion (
                      'CREAR', 'MODIFICAR', 'ACTIVAR', 'INACTIVAR',
                      'SOLICITAR_CAMBIO', 'APROBAR_CAMBIO', 'RECHAZAR_CAMBIO',
                      'RESTABLECER_CLAVE', 'ASIGNAR_HORARIO', 'QUITAR_HORARIO',
-                     'AUTORIZAR_FUERA_TURNO')),
+                     'AUTORIZAR_FUERA_TURNO',
+                     'CORREGIR_PAGO', 'HABILITAR', 'DESHABILITAR')),     -- v1.4
     entidad      VARCHAR(20)  NOT NULL CHECK (entidad IN (
                      'PROPIETARIO', 'VEHICULO', 'OPERADOR', 'HORARIO',
-                     'AUTORIZACION', 'SOLICITUD_CAMBIO')),
+                     'AUTORIZACION', 'SOLICITUD_CAMBIO',
+                     'PAGO', 'TARIFA', 'DESCUENTO')),                     -- v1.4
     entidad_id   INTEGER      NOT NULL,
     descripcion  VARCHAR(255) NOT NULL,
     detalle      TEXT         NULL

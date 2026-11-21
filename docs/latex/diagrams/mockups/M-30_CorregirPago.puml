@@ -1,0 +1,25 @@
+@startsalt M-30_CorregirPago
+title M-30 Corregir un pago mal registrado (HU-029)
+{+
+  {* Entrada | Salida | Dentro | Historial | Novedades | Vencidos | Propietarios | Vehículos | Celdas | Pagos | Por vencer | Admin }
+  ==
+  <b>Corregir pago · Factura N.º 000125</b>
+  {^"Pago que se corrige"
+    ABC123 · 18/11/2026 – 18/12/2026 · 1 mes · 150 000 COP · Efectivo
+    Registrado por María Rodríguez el 20/11/2026 10:15 (hace 25 minutos)
+  }
+  {^"Motivo de la corrección (obligatorio)"
+    "Eran 2 meses, no 1                    "
+  }
+  {^"Datos correctos"
+    Meses | ^2^
+    Medio de pago | ^Efectivo^
+    Descuento | ^Sin descuento^
+    Periodo que cubre | 18/11/2026 → 18/01/2027
+    <b>Total</b> | <b>300 000 COP</b>
+  }
+  { [Guardar corrección] | [Cancelar] }
+  ..
+  Operador con un pago de más de 24 horas: "Este pago solo lo puede corregir el administrador"
+}
+@endsalt

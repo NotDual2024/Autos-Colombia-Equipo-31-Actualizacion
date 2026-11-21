@@ -6,12 +6,12 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_http_methods, require_POST
 
 from apps.bitacora import services as bitacora
-from apps.bitacora.models import Entidad
+from apps.bitacora.models import Accion, Entidad
 from apps.core.errores import ErrorNegocio
 from apps.cuentas.permisos import solo_administrador
 
 from . import selectors, services
-from .models import EstadoSolicitud, Propietario, TipoVehiculo, Vehiculo
+from .models import EstadoSolicitud, MotivoInactivacion, Propietario, TipoVehiculo, Vehiculo
 
 
 def _entero(valor, defecto=1):
@@ -60,6 +60,8 @@ def propietario_ficha(request, propietario_id: int):
     return render(request, "usuarios_celdas/propietario_ficha.html", {
         "propietario": propietario, "vehiculos": vehiculos,
         "operaciones": bitacora.de_entidad(Entidad.PROPIETARIO, propietario.pk)[:30],
+        "motivos": MotivoInactivacion.choices,
+        "inactivacion": bitacora.de_entidad(Entidad.PROPIETARIO, propietario.pk).filter(accion=Accion.INACTIVAR).first(),
     })
 
 
@@ -68,8 +70,12 @@ def propietario_ficha(request, propietario_id: int):
 def propietario_estado(request, propietario_id: int):
     propietario = get_object_or_404(Propietario, pk=propietario_id)
     activo = request.POST.get("activo") == "1"
-    services.cambiar_estado_propietario(propietario, activo, request.user)
-    messages.success(request, f"Propietario {'activado' if activo else 'inactivado'}.")
+    try:
+        services.cambiar_estado_propietario(propietario, activo, request.user, request.POST.get("motivo"),
+                                            request.POST.get("descripcion"))
+        messages.success(request, f"Propietario {'activado' if activo else 'inactivado'}.")
+    except ErrorNegocio as e:
+        messages.error(request, e.mensaje)
     return redirect("usuarios_celdas:propietario", propietario_id=propietario.pk)
 
 
@@ -121,6 +127,8 @@ def vehiculo_ficha(request, vehiculo_id: int):
         "historial": vehiculo.historial_propiedad.select_related("propietario"),
         "pendiente": vehiculo.solicitudes_cambio.filter(estado=EstadoSolicitud.PENDIENTE).select_related("propietario_nuevo").first(),
         "operaciones": bitacora.de_entidad(Entidad.VEHICULO, vehiculo.pk)[:30],
+        "motivos": MotivoInactivacion.choices,
+        "inactivacion": bitacora.de_entidad(Entidad.VEHICULO, vehiculo.pk).filter(accion=Accion.INACTIVAR).first(),
     })
 
 
@@ -129,8 +137,12 @@ def vehiculo_ficha(request, vehiculo_id: int):
 def vehiculo_estado(request, vehiculo_id: int):
     vehiculo = get_object_or_404(Vehiculo, pk=vehiculo_id)
     activo = request.POST.get("activo") == "1"
-    services.cambiar_estado_vehiculo(vehiculo, activo, request.user)
-    messages.success(request, f"Vehículo {'activado' if activo else 'inactivado'}.")
+    try:
+        services.cambiar_estado_vehiculo(vehiculo, activo, request.user, request.POST.get("motivo"),
+                                         request.POST.get("descripcion"))
+        messages.success(request, f"Vehículo {'activado' if activo else 'inactivado'}.")
+    except ErrorNegocio as e:
+        messages.error(request, e.mensaje)
     return redirect("usuarios_celdas:vehiculo", vehiculo_id=vehiculo.pk)
 
 

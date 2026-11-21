@@ -8,12 +8,15 @@
     {% if ubicacion %}Dentro ({{ ubicacion }}){% else %}Fuera{% endif %}</div></div>
   <div style="display:flex;gap:8px;flex-wrap:wrap">
     <a class="boton secundario" href="{% url 'usuarios_celdas:vehiculo_editar' vehiculo.pk %}">Editar</a>
-    <form method="post" action="{% url 'usuarios_celdas:vehiculo_estado' vehiculo.pk %}">{% csrf_token %}
-      {% if vehiculo.activo %}<input type="hidden" name="activo" value="0"><button class="boton peligro" type="submit">Inactivar</button>
-      {% else %}<input type="hidden" name="activo" value="1"><button class="boton" type="submit">Activar</button>{% endif %}</form>
+    {% url 'usuarios_celdas:vehiculo_estado' vehiculo.pk as url_estado %}
+    {% if vehiculo.activo %}{% include "usuarios_celdas/_inactivar.html" with accion=url_estado etiqueta="el vehículo" %}
+    {% else %}<form method="post" action="{{ url_estado }}">{% csrf_token %}<input type="hidden" name="activo" value="1"><button class="boton" type="submit">Activar</button></form>{% endif %}
+    <a class="boton secundario" href="{% url 'pagos:vehiculo' vehiculo.pk %}">Pagos y vigencia</a>
+    <a class="boton" href="{% url 'pagos:registrar' %}?placa={{ vehiculo.placa }}">Registrar pago</a>
     {% if not pendiente %}<a class="boton" href="{% url 'usuarios_celdas:solicitar_cambio' vehiculo.pk %}">Solicitar cambio de propietario</a>{% endif %}
   </div>
 </div>
+{% if not vehiculo.activo %}<div class="alerta aviso" id="motivo-inactivacion">{% include "core/icono.html" with nombre="alerta" %}<div><strong>Inactivo: {{ vehiculo.texto_inactivacion }}</strong>{% if inactivacion %}{{ inactivacion.usuario.nombre_completo }}, {{ inactivacion.fecha_hora|date:"d/m/Y H:i" }}. {% endif %}{% if vehiculo.motivo_inactivacion == "FALTA_PAGO" %}Al registrar un pago que lo deje al día se reactiva automáticamente.{% else %}Debe activarse a mano.{% endif %}</div></div>{% endif %}
 {% if pendiente %}<div class="alerta aviso">{% include "core/icono.html" with nombre="reloj" %}<div><strong>Solicitud de cambio pendiente</strong>Pasaría a {{ pendiente.propietario_nuevo.nombre_completo }}. Motivo: {{ pendiente.motivo }}. La resuelve el administrador.</div></div>{% endif %}
 <div class="rejilla-mitades">
   <div class="tarjeta"><h2>Propietario actual</h2>

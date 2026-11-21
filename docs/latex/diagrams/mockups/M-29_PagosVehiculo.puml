@@ -1,0 +1,21 @@
+@startsalt M-29_PagosVehiculo
+title M-29 Vigencia e historial de pagos (HU-025, HU-026)
+{+
+  {* Entrada | Salida | Dentro | Historial | Novedades | Vencidos | Propietarios | Vehículos | Celdas | Pagos | Por vencer | Admin }
+  ==
+  { <b>Pagos de ABC123</b> · Laura Méndez | . | [Registrar pago] | [Ver todos los vehículos de la propietaria] }
+  {^"Vigencia"
+    Estado: <b>Al día</b> · Vence: 18/01/2027 · Día de cobro: 18 · Meses pendientes: 0
+    Otros estados: "Vence hoy", "Vencida hace N días", "Sin pagos"
+  }
+  {^"Historial de pagos (más reciente primero)"
+    {#
+      Factura | Placa | Periodo | Meses | Valor | Desc. | Medio | Fecha | Registró | Estado | . | .
+      000126 | ABC123 | 18/11/2026 – 18/01/2027 | 2 | 300 000 | — | Efectivo | 20/11/2026 10:40 | M. Rodríguez | Registrado | [Factura] | [Corregir]
+      000125 | ABC123 | 18/11/2026 – 18/12/2026 | 1 | 150 000 | — | Efectivo | 20/11/2026 10:15 | M. Rodríguez | Corregido → 000126 | [Factura] | .
+      000098 | ABC123 | 18/10/2026 – 18/11/2026 | 1 | 135 000 | 10 % | Tarjeta | 17/10/2026 08:05 | J. Pérez | Registrado | [Factura] | .
+    }
+  }
+  Motivo de la corrección de 000125: "Eran 2 meses"
+}
+@endsalt

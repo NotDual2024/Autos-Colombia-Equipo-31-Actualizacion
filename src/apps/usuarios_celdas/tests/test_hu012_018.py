@@ -70,7 +70,7 @@ class HU013RegistrarVehiculo(PruebaConReloj):
             services.registrar_vehiculo("JTR625", DATOS_VEHICULO, self.laura, self.operador)
 
     def test_propietario_inactivo(self):
-        services.cambiar_estado_propietario(self.laura, False, self.operador)
+        services.cambiar_estado_propietario(self.laura, False, self.operador, "OTRO", "Solicitud del cliente")
         with self.assertRaisesMessage(ErrorNegocio, "El propietario está inactivo"):
             services.registrar_vehiculo("JTR625", DATOS_VEHICULO, self.laura, self.operador)
 
@@ -133,7 +133,7 @@ class HU015Modificar(PruebaConReloj):
         self.assertContains(r, 'value="JTR625" readonly')
 
     def test_placa_mal_escrita_se_inactiva_y_se_registra_otra(self):
-        services.cambiar_estado_vehiculo(self.v, False, self.operador)
+        services.cambiar_estado_vehiculo(self.v, False, self.operador, "OTRO", "Placa mal escrita")
         nuevo = services.registrar_vehiculo("JTR626", DATOS_VEHICULO, self.laura, self.operador)
         self.assertEqual(self.laura.vehiculos.count(), 2)
         self.assertFalse(self.laura.vehiculos.get(placa="JTR625").activo)
@@ -142,7 +142,7 @@ class HU015Modificar(PruebaConReloj):
     def test_rn29_inactivo_dentro_sale_pero_no_entra(self):
         f.crear_pago(self.v, self.hoy + timedelta(days=10), self.admin)
         estadias.registrar_entrada("JTR625", "A-001", self.operador)
-        services.cambiar_estado_propietario(self.laura, False, self.operador)
+        services.cambiar_estado_propietario(self.laura, False, self.operador, "OTRO", "Solicitud del cliente")
         self.AHORA = fh("2026-11-15 15:00")
         self.assertIsNotNone(estadias.registrar_salida("JTR625", self.operador).fecha_hora_salida)
         with self.assertRaisesMessage(ErrorNegocio, "INACTIVO"):

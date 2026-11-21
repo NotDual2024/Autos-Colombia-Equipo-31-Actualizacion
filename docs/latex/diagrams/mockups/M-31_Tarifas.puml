@@ -1,0 +1,29 @@
+@startsalt M-31_Tarifas
+title M-31 Tarifas (administrador) (HU-027)
+{+
+  {* Entrada | Salida | Dentro | Historial | Novedades | Vencidos | Propietarios | Vehículos | Celdas | Pagos | Por vencer | Admin }
+  ==
+  <b>Tarifas</b>
+  {^"Tarifas actuales"
+    {#
+      Tipo | Valor mensual | Vigente desde
+      Carro o camioneta | 150 000 COP | 01/01/2026
+      Moto | 80 000 COP | 01/01/2026
+    }
+  }
+  {^"Registrar tarifa nueva"
+    Tipo | ^Carro o camioneta^
+    Valor (COP) | "160000    "
+    Vigente desde | "01/01/2027"
+    [Registrar tarifa] | .
+  }
+  {^"Historial (no se edita ni se borra)"
+    {#
+      Tipo | Valor | Vigente desde | Estado
+      Carro o camioneta | 160 000 | 01/01/2027 | Programada
+      Carro o camioneta | 150 000 | 01/01/2026 | Vigente
+      Moto | 80 000 | 01/01/2026 | Vigente
+    }
+  }
+}
+@endsalt

@@ -17,6 +17,7 @@ class Glob(Lookup):
 
 
 CharField.register_lookup(Length)
+CharField.register_lookup(Trim)
 # Texto no vacío: campo__trim__length__gt=0  ->  length(trim(campo)) > 0
 TextField.register_lookup(Trim)
 TextField.register_lookup(Length)

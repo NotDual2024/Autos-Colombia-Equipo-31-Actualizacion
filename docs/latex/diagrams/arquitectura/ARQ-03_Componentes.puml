@@ -1,5 +1,5 @@
 @startuml ARQ-03_Componentes
-' ARQ-03 - Diagrama de componentes (C4 nivel 3) - v2 (iteración 2: módulo bitacora)
+' ARQ-03 - Diagrama de componentes (C4 nivel 3) - v3 (iteración 3: gestión de pagos)
 !include <C4/C4_Component>
 LAYOUT_TOP_DOWN()
 title Componentes de la aplicación web (módulos Django)
@@ -11,7 +11,7 @@ Container_Boundary(web, "Aplicación web Django") {
   Component(notif, "notificaciones", "Módulo Django", "Vencimientos dentro, avisos simulados, plazo de 8 días y autoridades (RF-009 a RF-012). Contiene el planificador.")
   Component(uc, "usuarios_celdas", "Módulo Django", "Propietarios, vehículos, celdas, cambio de propietario e historial (iteración 2).")
   Component(bit, "bitacora", "Módulo Django", "Bitácora de operaciones (RF-111, DEC-013, DM-08).")
-  Component(pagos, "pagos", "Módulo Django", "Pagos y vigencia de la mensualidad. Iteración 1: modelo, servicio de vigencia y datos de demostración.")
+  Component(pagos, "pagos", "Módulo Django", "Pagos y vigencia de la mensualidad: registro y corrección de pagos, tarifas, descuentos, factura simulada, correo de confirmación, por vencer e ingresos (iteración 3).")
   Component(core, "core", "Módulo Django", "Plantilla base, reloj del sistema, interfaz ServicioCorreo y correo simulado.")
   Component(demo, "demo", "Módulo Django", "Comando cargar_datos_demo (RNF-014). Depende de todos; nadie depende de él.")
 }
@@ -26,7 +26,9 @@ Rel(notif, pagos, "Consulta vencimientos")
 Rel(notif, uc, "Consulta propietario y correo")
 Rel(notif, core, "Usa ServicioCorreo y reloj")
 Rel(es, core, "Usa reloj")
-Rel(pagos, uc, "Pagos por vehículo")
+Rel(pagos, uc, "Pagos por vehículo; reactiva por pago (RN-46)")
+Rel(pagos, bit, "Registra pagos, correcciones, tarifas y descuentos")
+Rel(pagos, core, "Usa ServicioCorreo y reloj")
 Rel(cuentas, core, "Plantilla base")
 Rel(uc, bit, "Registra operaciones")
 Rel(cuentas, bit, "Registra operaciones")

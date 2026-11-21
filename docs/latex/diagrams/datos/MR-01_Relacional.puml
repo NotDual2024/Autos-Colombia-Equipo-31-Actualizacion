@@ -1,5 +1,5 @@
 @startuml MR-01_Relacional
-' MR-01 - Modelo relacional / físico (notación pata de gallo) - SQLite - v1.3
+' MR-01 - Modelo relacional / físico (notación pata de gallo) - SQLite - v1.4
 !pragma layout smetana
 hide circle
 skinparam linetype ortho
@@ -38,6 +38,8 @@ entity "usuarios_celdas_propietario" as propietario {
   * correo : VARCHAR(254)
   * direccion : VARCHAR(200)
   * activo : BOOLEAN
+    motivo_inactivacion : VARCHAR(12) <<CHECK>>
+    descripcion_inactivacion : VARCHAR(200)
   * fecha_registro : DATETIME
 }
 entity "usuarios_celdas_vehiculo" as vehiculo {
@@ -51,6 +53,8 @@ entity "usuarios_celdas_vehiculo" as vehiculo {
   * color : VARCHAR(30)
   * propietario_id : INTEGER <<FK>>
   * activo : BOOLEAN
+    motivo_inactivacion : VARCHAR(12) <<CHECK>>
+    descripcion_inactivacion : VARCHAR(200)
   * fecha_registro : DATETIME
 }
 entity "usuarios_celdas_celda" as celda {
@@ -118,9 +122,40 @@ entity "pagos_pago" as pago {
   * vehiculo_id : INTEGER <<FK>>
   * periodo_inicio : DATE
   * periodo_fin : DATE
-  * valor : INTEGER <<CHECK positivo>>
+  * meses : SMALLINT <<CHECK 1..12>>
+  * tarifa_unitaria : INTEGER
+  * valor_bruto : INTEGER <<CHECK = tarifa x meses>>
+    descuento_id : INTEGER <<FK>>
+    porcentaje_descuento : SMALLINT
+  * valor : INTEGER <<CHECK = bruto - descuento>>
+  * medio : VARCHAR(13) <<CHECK>>
+  * numero_factura : INTEGER <<UQ>>
   * fecha_pago : DATETIME
   * registrado_por_id : INTEGER <<FK>>
+  * estado : VARCHAR(10) <<CHECK>>
+    motivo_correccion : TEXT
+    corregido_por_id : INTEGER <<FK>>
+    fecha_correccion : DATETIME
+    corrige_a_id : INTEGER <<FK, UQ>>
+}
+entity "pagos_descuento" as descuento {
+  * id : INTEGER <<PK>>
+  --
+  * descripcion : VARCHAR(100)
+  * porcentaje : SMALLINT <<CHECK 1..100>>
+  * habilitado : BOOLEAN
+  * creado_por_id : INTEGER <<FK>>
+  * fecha_creacion : DATETIME
+}
+entity "pagos_correoconfirmacion" as confirmacion {
+  * id : INTEGER <<PK>>
+  --
+  * pago_id : INTEGER <<FK>>
+  * destinatario : VARCHAR(254)
+  * asunto : VARCHAR(200)
+  * cuerpo : TEXT
+  * fecha_hora : DATETIME
+  * resultado : VARCHAR(20) <<CHECK>>
 }
 entity "entradas_salidas_estadia" as estadia {
   * id : INTEGER <<PK>>
@@ -193,4 +228,8 @@ vehiculo ||--o{ solicitud
 propietario ||--o{ solicitud : actual / nuevo
 usuario ||--o{ solicitud : solicita / resuelve
 usuario ||--o{ bitacora : realiza
+descuento |o--o{ pago : se aplica
+pago |o--o| pago : corrige a
+pago ||--o{ confirmacion
+usuario ||--o{ descuento : crea
 @enduml

@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% load pagos_extras %}
+{% block titulo %}Ingresos{% endblock %}
+{% block contenido %}
+<div class="migas">P35 / Administración</div>
+<div class="titulo-pagina"><div><h1>Ingresos por mes</h1><div class="suave">Por fecha de pago y sin contar pagos corregidos.</div></div>
+  <form method="get" style="display:flex;gap:8px;align-items:flex-end"><div class="campo" style="margin:0"><label for="mes">Mes</label><input id="mes" type="month" name="mes" value="{{ mes_valor }}"></div>
+    <button class="boton" type="submit">Consultar</button></form></div>
+<div class="metricas">
+  <div class="metrica"><div class="diminuto">Total recaudado</div><div class="valor" id="total-ingresos">{{ informe.total|pesos }} COP</div></div>
+  <div class="metrica"><div class="diminuto">Pagos</div><div class="valor">{{ informe.cantidad }}</div></div>
+  <div class="metrica"><div class="diminuto">Mes</div><div class="valor">{{ informe.mes }}/{{ informe.anio }}</div></div>
+</div>
+<div class="rejilla-mitades">
+  <div class="tarjeta"><h2>Por tipo de vehículo</h2>
+    <table class="tabla" style="margin-top:8px"><thead><tr><th>Tipo</th><th>Pagos</th><th>Total</th></tr></thead>
+    <tbody>{% for f in informe.por_tipo %}<tr><td>{{ f.nombre }}</td><td>{{ f.cantidad }}</td><td>{{ f.total|pesos }}</td></tr>{% endfor %}</tbody></table></div>
+  <div class="tarjeta" style="margin-top:0"><h2>Por medio de pago</h2>
+    <table class="tabla" style="margin-top:8px"><thead><tr><th>Medio</th><th>Pagos</th><th>Total</th></tr></thead>
+    <tbody>{% for f in informe.por_medio %}<tr><td>{{ f.nombre }}</td><td>{{ f.cantidad }}</td><td>{{ f.total|pesos }}</td></tr>{% endfor %}</tbody></table></div>
+</div>
+{% endblock %}

@@ -1,0 +1,14 @@
+@startsalt M-34_PorVencer
+title M-34 Mensualidades por vencer en los próximos 5 días (HU-030)
+{+
+  {* Entrada | Salida | Dentro | Historial | Novedades | Vencidos | Propietarios | Vehículos | Celdas | Pagos | Por vencer | Admin }
+  ==
+  <b>Mensualidades por vencer</b> · hoy y los próximos 5 días · solo vehículos activos
+  {#
+    Placa | Tipo | Propietario | Celular | Vence | .
+    JTR625 | Carro | Laura Méndez | 3001234567 | <b>Vence hoy</b> (20/11/2026) | [Registrar pago]
+    ABC123 | Carro | Laura Méndez | 3001234567 | 23/11/2026 (en 3 días) | [Registrar pago]
+    XYZ12D | Moto | Luis Mora | 3109876543 | 25/11/2026 (en 5 días) | [Registrar pago]
+  }
+}
+@endsalt

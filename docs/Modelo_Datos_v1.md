@@ -8,6 +8,7 @@
 | Versión | Cambios |
 |---|---|
 | 1 | Borrador inicial. |
+| 1.4 | Iteración 3 (sección 8). **Aprobada** por el equipo el 2026-11-20, incluidas DM-12 a DM-19. |
 | 1.3 | Iteración 2 (sección 7). **Aprobada** por el equipo el 2026-11-15, incluidas DM-08 a DM-11. |
 | 1.2 | CHG-002 (aprobado 2026-11-15): el tipo de novedad admite OBSERVACION; por eso la columna `tipo` de la novedad pasa de VARCHAR(10) a VARCHAR(12). |
 | 1.1 | Respuestas del equipo a P-22 a P-25: formato de placa, datos del propietario (nombre completo, cédula, teléfono, correo, dirección) y del vehículo (marca, nombre, modelo, color); los envíos fallidos no cuentan para el límite; se permiten varios contactos con autoridades por vencimiento. |
@@ -263,3 +264,70 @@ Ejecuté el DDL en SQLite 3.50.4 con `docs/sql/validar_ddl.py`: **42 comprobacio
 | RF-109 | solicitudcambiopropietario, historialpropiedad, vehiculo, bitacora |
 | RF-110 | autorizacionfueraturno, bitacora |
 | RF-111 | bitacora |
+
+---
+
+## 8. Cambios del modelo v1.4 — Iteración 3 (aprobado el 2026-11-20)
+
+**Base:** requerimientos de la iteración 3 v1.2 e historias HU-024 a HU-032 (aprobados el 2026-11-20).
+**Estado:** **Aprobado** por el equipo el 2026-11-20.
+**Validación:** `docs/sql/validar_ddl.py` con el DDL v1.4: **91 comprobaciones, 91 pasan**. Son las 60 anteriores más 31 nuevas.
+**Diagramas:** MER-01 y MR-01 actualizados a v1.4.
+
+### 8.1. Tablas nuevas y modificadas
+
+| Tabla | Cambio | Origen | Restricciones principales |
+|---|---|---|---|
+| `pagos_pago` | Columnas nuevas: `meses`, `tarifa_unitaria`, `valor_bruto`, `descuento_id`, `porcentaje_descuento`, `medio`, `numero_factura`, `estado`, `motivo_correccion`, `corregido_por_id`, `fecha_correccion`, `corrige_a_id` | RN-38 a RN-44, RN-47 | CHECK meses 1..12; CHECK `valor_bruto = tarifa_unitaria × meses`; CHECK `valor = valor_bruto − valor_bruto × porcentaje / 100`; descuento y porcentaje van juntos; medio ∈ {EFECTIVO, TRANSFERENCIA, TARJETA}; `numero_factura` UQ; estado ∈ {REGISTRADO, CORREGIDO}; CORREGIDO ⇔ motivo, quién y cuándo; `corrige_a_id` UQ y distinto del propio id; **UQ parcial** (vehículo, inicio del periodo) entre los pagos registrados |
+| `pagos_descuento` (nueva) | descripción, porcentaje, habilitado, creado por, fecha de creación | RN-42, RF-208 | CHECK porcentaje 1..100; descripción no vacía |
+| `pagos_correoconfirmacion` (nueva) | pago, destinatario, asunto, cuerpo, fecha y hora, resultado | RN-47 | Resultado ∈ {ENVIADO_SIMULADO, FALLIDO} |
+| `usuarios_celdas_propietario` y `usuarios_celdas_vehiculo` | `motivo_inactivacion` y `descripcion_inactivacion` | RN-46, RF-205 | Motivo ∈ {FALTA_PAGO, OTRO}; activo ⇔ sin motivo; OTRO ⇔ descripción no vacía |
+| `bitacora_registrooperacion` | Acciones nuevas: CORREGIR_PAGO, HABILITAR, DESHABILITAR. Entidades nuevas: PAGO, TARIFA, DESCUENTO | RN-34 | Los CHECK se amplían |
+| `pagos_tarifa` | Sin cambios | RN-45 | — |
+
+El índice `idx_pago_vehiculo_fin` pasa a (vehículo, estado, fin del periodo), porque la vigencia solo usa pagos registrados. Se agrega `idx_pago_fecha` para el informe de ingresos (RF-209).
+
+### 8.2. Decisiones de diseño del modelo (aprobadas con esta versión)
+
+| ID | Decisión | Alternativa descartada | Por qué |
+|---|---|---|---|
+| DM-12 | El **día de cobro no se guarda**: es el día de `periodo_inicio` del primer pago registrado del vehículo. Cada vencimiento se calcula desde ese día (RN-38), no desde el vencimiento anterior, para que 31/01 → 28/02 → 31/03. | Guardar `dia_cobro` en el vehículo. | Como el día de cobro nunca cambia (RN-39), se deriva del primer pago. Guardarlo sería un dato repetido que se podría contradecir. |
+| DM-13 | La corrección se enlaza **del pago nuevo al corregido** (`corrige_a_id`, única). El motivo, quién y cuándo se guardan en el pago corregido. | Enlazar del corregido al nuevo (`reemplazado_por_id`). | Permite marcar primero el pago como corregido y después insertar el nuevo con el mismo inicio de periodo, sin violar la unicidad de pagos registrados ni dejar un CHECK a medias. |
+| DM-14 | El correo de confirmación va en **`pagos`** (`pagos_correoconfirmacion`) y usa el servicio de correo de `core`. | Ponerlo en `notificaciones`. | `notificaciones` ya depende de `pagos`; si `pagos` llamara a `notificaciones` se formaría un ciclo. La arquitectura no cambia. |
+| DM-15 | El pago guarda **copias** de la tarifa (`tarifa_unitaria`) y del porcentaje del descuento, y el **valor bruto**. La base de datos verifica la cuenta con CHECK. | Calcular el valor al consultar, desde la tarifa y el descuento. | Igual que DM-04: si la tarifa o el descuento cambian, los pagos anteriores no cambian. Los CHECK impiden guardar un valor escrito a mano (RN-41). |
+| DM-16 | El descuento se calcula sobre el valor bruto y se **redondea hacia abajo** al peso (división entera). Por ejemplo, 15 % de 80 000 × 7 = 84 000. | Redondear al peso más cercano. | Con las tarifas actuales el resultado es exacto; si no lo fuera, el cliente nunca paga de más. |
+| DM-17 | El **número de factura** es un consecutivo propio del pago, único, y lo asigna la aplicación (el mayor + 1, dentro de la misma transacción). El pago corregido conserva su número y el nuevo recibe otro. | Usar el `id` del pago como número. | Separa la numeración de facturas de la clave interna y permite mostrar "Anulada – reemplazada por la factura N.º" (HU-029). |
+| DM-18 | Quién inactivó y cuándo **se lee de la bitácora**; el registro solo guarda el motivo y la descripción. | Columnas `inactivado_por` e `inactivado_en`. | La bitácora ya guarda el usuario y la fecha de cada inactivación (RN-34). |
+| DM-19 | `CHECK (periodo_fin > periodo_inicio)` reemplaza a `>=`: un pago cubre al menos un mes. | — | RN-40. |
+
+### 8.3. Migración de los datos existentes
+
+| Dato | Valor que recibe |
+|---|---|
+| Pagos existentes | `meses` = 1, `tarifa_unitaria` = `valor_bruto` = `valor`, sin descuento, `medio` = EFECTIVO, `estado` = REGISTRADO, `numero_factura` = su `id`. |
+| Propietarios y vehículos inactivos | `motivo_inactivacion` = OTRO, `descripcion_inactivacion` = "Inactivado antes de la iteración 3". |
+
+### 8.4. Normalización
+
+- Las tablas nuevas están en **3FN**.
+- `tarifa_unitaria`, `porcentaje_descuento`, `valor_bruto` y `valor` son copias históricas o derivadas que se guardan a propósito (DM-15). No crean anomalías, porque un pago no se modifica después de registrado, salvo para marcarlo como corregido.
+- `pagos_correoconfirmacion.destinatario` copia el correo del propietario en el momento del envío, como `avisocorreo`.
+
+### 8.5. Impacto en el código existente
+
+- `pagos.services.ultimo_pago` y `esta_vigente` deben considerar solo los pagos con estado REGISTRADO. Así, los avisos de retiro, la entrada de vehículos y el mapa de celdas dejan de contar los pagos corregidos sin cambiar su propio código.
+- La inactivación de propietarios y vehículos (iteración 2) pide ahora el motivo.
+
+### 8.6. Trazabilidad
+
+| RF | Tablas |
+|---|---|
+| RF-201 | pago, tarifa, descuento, correoconfirmacion, vehiculo, propietario, bitacora |
+| RF-202 | pago |
+| RF-203 | pago, vehiculo, propietario |
+| RF-204 | tarifa, bitacora |
+| RF-205 | propietario, vehiculo, bitacora |
+| RF-206 | pago, bitacora |
+| RF-207 | pago, vehiculo, propietario |
+| RF-208 | descuento, bitacora |
+| RF-209 | pago, vehiculo |

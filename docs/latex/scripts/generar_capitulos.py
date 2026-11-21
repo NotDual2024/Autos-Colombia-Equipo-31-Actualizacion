@@ -29,6 +29,8 @@ UNICODE = {"≥": r"$\geq$", "≤": r"$\leq$", "→": r"$\rightarrow$", "✓": r
 
 def tex(texto: str) -> str:
     """Convierte texto Markdown en línea (negrita, código) a LaTeX escapado."""
+    # La negrita se marca antes de separar el código, porque puede contenerlo: **solo `core`**
+    texto = re.sub(r"\*\*(.+?)\*\*", "\x01\\1\x02", texto)
     partes = re.split(r"(`[^`]*`)", texto)
     salida = []
     for parte in partes:
@@ -40,11 +42,10 @@ def tex(texto: str) -> str:
         if es_codigo:
             salida.append(r"\texttt{" + contenido + "}")
         else:
-            contenido = re.sub(r"\*\*(.+?)\*\*", r"\\textbf{\1}", contenido)
             contenido = re.sub(r"(?<![\w*])\*(?!\s)(.+?)(?<!\s)\*(?![\w*])", r"\\emph{\1}", contenido)
             contenido = re.sub(r'"([^"]+)"', r"``\1''", contenido)
             salida.append(contenido)
-    return "".join(salida)
+    return "".join(salida).replace("\x01", r"\textbf{").replace("\x02", "}")
 
 
 def filas_tabla(lineas: list[str]) -> list[list[str]]:

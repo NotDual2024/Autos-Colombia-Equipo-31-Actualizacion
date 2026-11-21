@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% load pagos_extras %}
+{% block titulo %}Registrar pago{% endblock %}
+{% block contenido %}
+<div class="migas">P26 / Pagos</div>
+<div class="titulo-pagina"><div><h1>Registrar pago</h1><div class="suave">El sistema calcula el periodo y el valor; se guarda solo al confirmar.</div></div></div>
+{% if error %}<div class="alerta error" role="alert">{% include "core/icono.html" with nombre="alerta" %}<div>{{ error }}</div></div>{% endif %}
+<div class="tarjeta">
+  <form method="get" class="fila-busqueda" style="display:flex;gap:8px;align-items:flex-end">
+    <div class="campo" style="margin:0"><label for="placa">Placa</label><input id="placa" type="text" name="placa" value="{{ datos.placa }}" placeholder="ABC123" autofocus style="text-transform:uppercase"></div>
+    <button class="boton" type="submit">{% include "core/icono.html" with nombre="buscar" %} Buscar</button>
+  </form>
+</div>
+{% if vehiculo %}
+<div class="rejilla-mitades">
+  <div class="tarjeta"><h2>Vehículo</h2>
+    <p style="margin-top:8px"><strong>{{ vehiculo.placa }}</strong> · {{ vehiculo.get_tipo_display }} · {{ vehiculo.descripcion }} ·
+      {% if vehiculo.activo %}<span class="etiqueta-estado">Activo</span>{% else %}<span class="etiqueta-estado amarillo">Inactivo: {{ vehiculo.texto_inactivacion }}</span>{% endif %}</p>
+    <p>Propietario: <strong>{{ vehiculo.propietario.nombre_completo }}</strong> · CC {{ vehiculo.propietario.numero_documento }} · {{ vehiculo.propietario.correo }}
+      {% if not vehiculo.propietario.activo %}<span class="etiqueta-estado amarillo">Inactivo: {{ vehiculo.propietario.texto_inactivacion }}</span>{% endif %}</p>
+    <p id="estado-mensualidad">Mensualidad: <span class="etiqueta-estado {{ estado|etiqueta_vigencia }}">{{ estado.texto }}</span>
+      {% if estado.vencimiento %} · vence el {{ estado.vencimiento|date:"d/m/Y" }} · día de cobro {{ estado.dia_cobro }}{% endif %}</p>
+    {% if estado.meses_pendientes %}<p><strong>Debe {{ estado.meses_pendientes }} mes{{ estado.meses_pendientes|pluralize:"es" }} para quedar al día.</strong></p>
+    {% elif estado.estado == "SIN_PAGOS" %}<p class="suave">Primer pago: el día de hoy será su día de cobro.</p>{% endif %}
+    <p><a href="{% url 'pagos:vehiculo' vehiculo.pk %}">Ver historial de pagos</a></p>
+  </div>
+  <div class="tarjeta" style="margin-top:0"><h2>Pago</h2>
+    <form method="get" id="form-calculo" style="margin-top:10px">
+      <input type="hidden" name="placa" value="{{ vehiculo.placa }}">
+      <div class="campo"><label for="meses">Meses (1 a 12)</label><select id="meses" name="meses" onchange="this.form.submit()">{% for m in meses_opciones %}<option value="{{ m }}" {% if datos.meses == m|stringformat:'s' %}selected{% endif %}>{{ m }}</option>{% endfor %}</select></div>
+      <div class="campo"><label for="medio">Medio de pago</label><select id="medio" name="medio"><option value="">Elige…</option>{% for v, e in medios %}<option value="{{ v }}" {% if datos.medio == v %}selected{% endif %}>{{ e }}</option>{% endfor %}</select></div>
+      <div class="campo"><label for="descuento">Descuento</label><select id="descuento" name="descuento" onchange="this.form.submit()"><option value="">Sin descuento</option>{% for d in descuentos %}<option value="{{ d.pk }}" {% if datos.descuento == d.pk|stringformat:'s' %}selected{% endif %}>{{ d.descripcion }} ({{ d.porcentaje }} %)</option>{% endfor %}</select></div>
+      <noscript><button class="boton secundario" type="submit">Calcular</button></noscript>
+    </form>
+  </div>
+</div>
+{% if resumen %}
+<div class="tarjeta" id="resumen"><h2>Resumen (calculado por el sistema)</h2>
+  <dl class="datos" style="margin-top:12px;grid-template-columns:repeat(4,1fr)">
+    <div><dt>Periodo que cubre</dt><dd class="mono">{{ resumen.periodo_inicio|date:"d/m/Y" }} → {{ resumen.periodo_fin|date:"d/m/Y" }}</dd></div>
+    <div><dt>Tarifa ({{ vehiculo.get_tipo_display|lower }})</dt><dd>{{ resumen.tarifa_unitaria|pesos }} COP × {{ resumen.meses }} mes{{ resumen.meses|pluralize:"es" }} = {{ resumen.valor_bruto|pesos }}</dd></div>
+    <div><dt>Descuento</dt><dd>{% if resumen.porcentaje_descuento %}{{ resumen.porcentaje_descuento }} % · −{{ resumen.valor_descuento|pesos }} COP{% else %}0 COP{% endif %}</dd></div>
+    <div><dt>Total</dt><dd><strong style="font-size:1.2rem">{{ resumen.valor|pesos }} COP</strong></dd></div>
+  </dl>
+  <form method="post" style="margin-top:14px;display:flex;gap:8px">{% csrf_token %}
+    <input type="hidden" name="placa" value="{{ vehiculo.placa }}"><input type="hidden" name="meses" value="{{ resumen.meses }}">
+    <input type="hidden" name="descuento" value="{{ datos.descuento }}"><input type="hidden" name="medio" id="medio-confirmar" value="{{ datos.medio }}">
+    <button class="boton" type="submit">{% include "core/icono.html" with nombre="check" %} Confirmar pago</button>
+    <a class="boton secundario" href="{% url 'pagos:registrar' %}">Cancelar</a>
+  </form>
+</div>
+{% endif %}
+{% endif %}
+{% endblock %}
+{% block scripts %}<script>
+(function () {
+  var medio = document.getElementById("medio"), oculto = document.getElementById("medio-confirmar");
+  if (medio && oculto) { medio.addEventListener("change", function () { oculto.value = medio.value; }); }
+})();
+</script>{% endblock %}

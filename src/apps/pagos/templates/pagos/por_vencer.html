@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block titulo %}Por vencer{% endblock %}
+{% block contenido %}
+<div class="migas">P34 / Pagos</div>
+<div class="titulo-pagina"><div><h1>Mensualidades por vencer</h1><div class="suave">Hoy y los próximos {{ dias }} días · solo vehículos activos.</div></div></div>
+<div class="tarjeta">
+  <table class="tabla"><thead><tr><th>Placa</th><th>Tipo</th><th>Propietario</th><th>Celular</th><th>Vence</th><th></th></tr></thead>
+  <tbody>{% for f in filas %}
+    <tr><td><strong>{{ f.vehiculo.placa }}</strong></td><td>{{ f.vehiculo.get_tipo_display }}</td>
+      <td><a href="{% url 'usuarios_celdas:propietario' f.vehiculo.propietario.pk %}">{{ f.vehiculo.propietario.nombre_completo }}</a></td>
+      <td class="mono">{{ f.vehiculo.propietario.telefono }}</td>
+      <td>{% if f.dias == 0 %}<span class="etiqueta-estado amarillo">Vence hoy</span> ({{ f.vencimiento|date:"d/m/Y" }}){% else %}{{ f.vencimiento|date:"d/m/Y" }} (en {{ f.dias }} día{{ f.dias|pluralize }}){% endif %}</td>
+      <td><a class="boton pequeno" href="{% url 'pagos:registrar' %}?placa={{ f.vehiculo.placa }}">Registrar pago</a></td></tr>
+  {% empty %}<tr><td colspan="6"><div class="vacio"><strong>No hay mensualidades por vencer</strong></div></td></tr>{% endfor %}</tbody></table>
+</div>
+{% endblock %}

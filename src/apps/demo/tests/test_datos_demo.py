@@ -27,6 +27,20 @@ class DatosDemoTests(TestCase):
         self.assertEqual(SolicitudCambioPropietario.objects.filter(estado="PENDIENTE").count(), 1)
         self.assertEqual(HistorialPropiedad.objects.count(), 1)
         self.assertGreaterEqual(RegistroOperacion.objects.count(), 3)
+        # Iteración 3: descuentos, tarifa programada, pago corregido, vencido inactivo por falta de pago y por vencer
+        from apps.core import reloj
+        from apps.pagos import selectors as consultas, services as vigencia
+        from apps.pagos.models import Descuento, Pago, Tarifa
+        from apps.usuarios_celdas.models import Vehiculo
+        self.assertEqual(list(Descuento.objects.order_by("descripcion").values_list("descripcion", "habilitado")),
+                         [("Cliente frecuente", True), ("Promoción apertura", False)])
+        self.assertTrue(Tarifa.objects.filter(vigente_desde__gt=reloj.hoy()).exists())
+        self.assertEqual(Pago.objects.filter(estado="CORREGIDO").count(), 1)
+        self.assertTrue(Pago.objects.filter(porcentaje_descuento=10, meses=3).exists())
+        atrasado = Vehiculo.objects.get(placa="WER74D")
+        self.assertEqual((atrasado.activo, atrasado.motivo_inactivacion), (False, "FALTA_PAGO"))
+        self.assertEqual(vigencia.estado(atrasado, reloj.hoy()).meses_pendientes, 4)
+        self.assertEqual([x.vehiculo.placa for x in consultas.por_vencer(reloj.hoy())], ["ABC123", "GHJ852"])
 
     def test_no_sobrescribe_sin_reiniciar(self):
         call_command("cargar_datos_demo", stdout=StringIO())

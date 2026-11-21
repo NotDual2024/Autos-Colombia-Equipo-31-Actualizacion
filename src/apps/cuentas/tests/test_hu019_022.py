@@ -168,7 +168,6 @@ class HU022Autorizaciones(PruebaConReloj):
 class HU023Bitacora(PruebaConReloj):
     def test_bitacora_completa_con_filtros_y_permisos(self):
         services.editar_nombre(self.admin, self.operador.pk, "María José Rodríguez")
-        f.asignar_horario_24h  # noqa: B018
         self.ingresar(self.admin)
         r = self.client.get(reverse("bitacora:bitacora"), {"usuario": self.admin.pk, "accion": "MODIFICAR"})
         self.assertContains(r, "Editó el nombre del operador operador")

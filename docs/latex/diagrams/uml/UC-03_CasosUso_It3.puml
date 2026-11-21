@@ -1,0 +1,61 @@
+@startuml UC-03_CasosUso_It3
+' UC-03 - Diagrama de casos de uso - Iteración 3 - v1
+left to right direction
+skinparam packageStyle rectangle
+skinparam usecase {
+  BackgroundColor #F4F7FC
+  BorderColor #0B3D91
+}
+title Casos de uso - Iteración 3: Gestión de pagos
+
+actor "Operador" as Op
+actor "Administrador" as Ad
+Ad -up-|> Op
+
+rectangle "Sistema de gestión del parqueadero" {
+  usecase "UC-30 Registrar pago\nde mensualidad" as UC30
+  usecase "UC-31 Consultar vigencia\nde la mensualidad" as UC31
+  usecase "UC-32 Consultar historial\nde pagos" as UC32
+  usecase "UC-33 Imprimir factura\nsimulada" as UC33
+  usecase "UC-34 Corregir pago" as UC34
+  usecase "UC-35 Reactivar por pago" as UC35
+  usecase "UC-36 Enviar confirmación\nde pago" as UC36
+  usecase "UC-37 Consultar mensualidades\npor vencer" as UC37
+  usecase "UC-38 Gestionar tarifas" as UC38
+  usecase "UC-39 Gestionar descuentos" as UC39
+  usecase "UC-40 Consultar ingresos\npor mes" as UC40
+  usecase "UC-19 Modificar, activar e\ninactivar (con motivo)" as UC19
+  usecase "UC-13 Enviar correo\nsimulado" as UC13
+  usecase "UC-29 Registrar operación\nen la bitácora" as UC29
+}
+
+Op --> UC30
+Op --> UC31
+Op --> UC32
+Op --> UC34
+Op --> UC37
+Op --> UC19
+Ad --> UC38
+Ad --> UC39
+Ad --> UC40
+
+UC30 ..> UC35 : <<include>>
+UC30 ..> UC36 : <<include>>
+UC36 ..> UC13 : <<include>>
+UC34 ..> UC30 : <<include>>\n(pago correcto)
+UC33 .> UC32 : <<extend>>\n(desde el historial)
+UC33 .> UC30 : <<extend>>\n(al confirmar)
+UC31 .> UC30 : <<extend>>\n(muestra lo que debe)
+UC30 ..> UC29 : <<include>>
+UC34 ..> UC29 : <<include>>
+UC35 ..> UC29 : <<include>>
+UC38 ..> UC29 : <<include>>
+UC39 ..> UC29 : <<include>>
+UC19 ..> UC29 : <<include>>
+
+note right of UC34
+  Operador: dentro de las 24 horas
+  siguientes al registro.
+  Administrador: en cualquier momento.
+end note
+@enduml

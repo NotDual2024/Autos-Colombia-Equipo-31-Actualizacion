@@ -1,0 +1,24 @@
+@startsalt M-35_Ingresos
+title M-35 Ingresos por mes (administrador) (HU-032)
+{+
+  {* Entrada | Salida | Dentro | Historial | Novedades | Vencidos | Propietarios | Vehículos | Celdas | Pagos | Por vencer | Admin }
+  ==
+  { <b>Ingresos</b> | Mes ^Noviembre 2026^ | [Consultar] }
+  { Total recaudado: <b>1 200 000 COP</b> · sin pagos corregidos · por fecha de pago }
+  {^"Por tipo de vehículo"
+    {#
+      Tipo | Pagos | Total
+      Carro o camioneta | 6 | 960 000
+      Moto | 3 | 240 000
+    }
+  }
+  {^"Por medio de pago"
+    {#
+      Medio | Pagos | Total
+      Efectivo | 5 | 690 000
+      Transferencia | 3 | 390 000
+      Tarjeta | 1 | 120 000
+    }
+  }
+}
+@endsalt

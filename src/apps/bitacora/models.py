@@ -20,6 +20,9 @@ class Accion(models.TextChoices):
     ASIGNAR_HORARIO = "ASIGNAR_HORARIO", "Asignar franja de horario"
     QUITAR_HORARIO = "QUITAR_HORARIO", "Quitar franja de horario"
     AUTORIZAR_FUERA_TURNO = "AUTORIZAR_FUERA_TURNO", "Autorizar ingreso fuera de turno"
+    CORREGIR_PAGO = "CORREGIR_PAGO", "Corregir pago"
+    HABILITAR = "HABILITAR", "Habilitar"
+    DESHABILITAR = "DESHABILITAR", "Deshabilitar"
 
 
 class Entidad(models.TextChoices):
@@ -29,6 +32,9 @@ class Entidad(models.TextChoices):
     HORARIO = "HORARIO", "Horario"
     AUTORIZACION = "AUTORIZACION", "Autorización"
     SOLICITUD_CAMBIO = "SOLICITUD_CAMBIO", "Solicitud de cambio"
+    PAGO = "PAGO", "Pago"
+    TARIFA = "TARIFA", "Tarifa"
+    DESCUENTO = "DESCUENTO", "Descuento"
 
 
 class RegistroOperacion(models.Model):

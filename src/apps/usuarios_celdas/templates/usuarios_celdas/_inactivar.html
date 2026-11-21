@@ -1,0 +1,13 @@
+{# M-33 / HU-028: inactivar con motivo (RN-46). Variables: accion (URL), etiqueta, motivos. #}
+<details class="desplegable-inactivar" style="position:relative">
+  <summary class="boton peligro" style="list-style:none">Inactivar</summary>
+  <form method="post" action="{{ accion }}" class="tarjeta" style="position:absolute;right:0;z-index:5;min-width:320px;margin-top:6px">{% csrf_token %}
+    <input type="hidden" name="activo" value="0">
+    <strong>Inactivar {{ etiqueta }}</strong>
+    <fieldset style="border:none;padding:0;margin:10px 0"><legend class="diminuto">Motivo (obligatorio)</legend>
+      {% for v, e in motivos %}<label style="display:block;margin:4px 0"><input type="radio" name="motivo" value="{{ v }}" {% if forloop.first %}checked{% endif %}> {{ e }}</label>{% endfor %}
+    </fieldset>
+    <div class="campo"><label for="descripcion-inactivar">Descripción (obligatoria si es "Otro")</label><input id="descripcion-inactivar" type="text" name="descripcion" maxlength="200"></div>
+    <button class="boton peligro" type="submit">Inactivar</button>
+  </form>
+</details>

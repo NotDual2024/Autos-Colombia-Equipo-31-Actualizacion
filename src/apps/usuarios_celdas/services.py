@@ -13,8 +13,8 @@ from apps.bitacora.models import Accion, Entidad
 from apps.core import reloj
 from apps.core.errores import ErrorNegocio
 
-from .models import (EstadoSolicitud, HistorialPropiedad, Propietario, SolicitudCambioPropietario,
-                     TipoVehiculo, Vehiculo)
+from .models import (EstadoSolicitud, HistorialPropiedad, MotivoInactivacion, Propietario,
+                     SolicitudCambioPropietario, TipoVehiculo, Vehiculo)
 from .selectors import normalizar_placa
 
 CAMPOS_PROPIETARIO = ["nombre_completo", "numero_documento", "telefono", "correo", "direccion"]
@@ -72,15 +72,55 @@ def modificar_propietario(propietario: Propietario, datos: dict, usuario) -> Pro
     return propietario
 
 
+def _datos_inactivacion(motivo: str | None, descripcion: str | None) -> tuple[str, str | None]:
+    """RN-46: motivo obligatorio; "Otro" exige descripción."""
+    if motivo not in MotivoInactivacion.values:
+        raise ErrorNegocio("Elige el motivo de la inactivación.")
+    descripcion = " ".join((descripcion or "").split())
+    if motivo == MotivoInactivacion.OTRO:
+        if not descripcion:
+            raise ErrorNegocio("Escribe la descripción del motivo.")
+        return motivo, descripcion[:200]
+    return motivo, None
+
+
+def _cambiar_estado(registro, activo: bool, usuario, motivo, descripcion, entidad: str, texto: str, automatico=False):
+    if registro.activo == activo:
+        return registro
+    cambios = None
+    if activo:
+        cambios = {"motivo_inactivacion": [registro.texto_inactivacion(), ""]}
+        registro.activo, registro.motivo_inactivacion, registro.descripcion_inactivacion = True, None, None
+    else:
+        motivo, descripcion = _datos_inactivacion(motivo, descripcion)
+        registro.activo, registro.motivo_inactivacion, registro.descripcion_inactivacion = False, motivo, descripcion
+        cambios = {"motivo_inactivacion": ["", registro.texto_inactivacion()]}
+    registro.save(update_fields=["activo", "motivo_inactivacion", "descripcion_inactivacion"])
+    verbo = "Activó" if activo else "Inactivó"
+    sufijo = " automáticamente al registrar un pago (RN-46)" if automatico else ""
+    bitacora.registrar(usuario, Accion.ACTIVAR if activo else Accion.INACTIVAR, entidad, registro.pk,
+                       f"{verbo} {texto}{sufijo}", cambios)
+    return registro
+
+
 @transaction.atomic
-def cambiar_estado_propietario(propietario: Propietario, activo: bool, usuario) -> Propietario:
-    """Activar o inactivar (RN-07: nunca se borra; RN-29: inactivo no entra)."""
-    if propietario.activo != activo:
-        propietario.activo = activo
-        propietario.save(update_fields=["activo"])
-        bitacora.registrar(usuario, Accion.ACTIVAR if activo else Accion.INACTIVAR, Entidad.PROPIETARIO,
-                           propietario.pk, f"{'Activó' if activo else 'Inactivó'} al propietario {propietario.nombre_completo}")
-    return propietario
+def cambiar_estado_propietario(propietario: Propietario, activo: bool, usuario, motivo: str | None = None,
+                               descripcion: str | None = None) -> Propietario:
+    """Activar o inactivar con motivo (RN-07: nunca se borra; RN-29: inactivo no entra; RN-46)."""
+    return _cambiar_estado(propietario, activo, usuario, motivo, descripcion, Entidad.PROPIETARIO,
+                           f"al propietario {propietario.nombre_completo}")
+
+
+def reactivar_por_pago(registro: Propietario | Vehiculo, usuario) -> bool:
+    """RN-46: reactiva solo lo inactivado por falta de pago. Devuelve True si lo reactivó."""
+    if registro.activo or registro.motivo_inactivacion != MotivoInactivacion.FALTA_PAGO:
+        return False
+    if isinstance(registro, Propietario):
+        _cambiar_estado(registro, True, usuario, None, None, Entidad.PROPIETARIO,
+                        f"al propietario {registro.nombre_completo}", automatico=True)
+    else:
+        _cambiar_estado(registro, True, usuario, None, None, Entidad.VEHICULO, f"el vehículo {registro.placa}", automatico=True)
+    return True
 
 
 # ------------------------------------------------------------------ vehículos
@@ -140,13 +180,9 @@ def modificar_vehiculo(vehiculo: Vehiculo, datos: dict, usuario) -> Vehiculo:
 
 
 @transaction.atomic
-def cambiar_estado_vehiculo(vehiculo: Vehiculo, activo: bool, usuario) -> Vehiculo:
-    if vehiculo.activo != activo:
-        vehiculo.activo = activo
-        vehiculo.save(update_fields=["activo"])
-        bitacora.registrar(usuario, Accion.ACTIVAR if activo else Accion.INACTIVAR, Entidad.VEHICULO, vehiculo.pk,
-                           f"{'Activó' if activo else 'Inactivó'} el vehículo {vehiculo.placa}")
-    return vehiculo
+def cambiar_estado_vehiculo(vehiculo: Vehiculo, activo: bool, usuario, motivo: str | None = None,
+                            descripcion: str | None = None) -> Vehiculo:
+    return _cambiar_estado(vehiculo, activo, usuario, motivo, descripcion, Entidad.VEHICULO, f"el vehículo {vehiculo.placa}")
 
 
 # ------------------------------------------------------------------ cambio de propietario

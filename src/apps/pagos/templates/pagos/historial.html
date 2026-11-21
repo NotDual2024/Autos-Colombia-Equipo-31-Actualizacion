@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% load pagos_extras %}
+{% block titulo %}{{ titulo }}{% endblock %}
+{% block contenido %}
+<div class="migas">P29 / Pagos</div>
+<div class="titulo-pagina">
+  {% if vehiculo %}
+  <div><h1>{{ titulo }}</h1><div class="suave"><a href="{% url 'usuarios_celdas:vehiculo' vehiculo.pk %}">{{ vehiculo.get_tipo_display }} · {{ vehiculo.descripcion }}</a> ·
+    <a href="{% url 'usuarios_celdas:propietario' vehiculo.propietario.pk %}">{{ vehiculo.propietario.nombre_completo }}</a></div></div>
+  <div style="display:flex;gap:8px"><a class="boton" href="{% url 'pagos:registrar' %}?placa={{ vehiculo.placa }}">Registrar pago</a>
+    <a class="boton secundario" href="{% url 'pagos:propietario' vehiculo.propietario.pk %}">Ver todos los vehículos del propietario</a></div>
+  {% else %}
+  <div><h1>{{ titulo }}</h1><div class="suave"><a href="{% url 'usuarios_celdas:propietario' propietario.pk %}">CC {{ propietario.numero_documento }}</a></div></div>
+  {% endif %}
+</div>
+{% if vehiculo %}
+<div class="tarjeta" id="vigencia"><h2>Vigencia</h2>
+  <p style="margin-top:8px">Estado: <span class="etiqueta-estado {{ estado|etiqueta_vigencia }}">{{ estado.texto }}</span>
+  {% if estado.vencimiento %} · Vence: <strong>{{ estado.vencimiento|date:"d/m/Y" }}</strong> · Día de cobro: {{ estado.dia_cobro }}{% endif %}
+  · Meses pendientes: {{ estado.meses_pendientes }}</p>
+</div>
+{% else %}
+<div class="tarjeta" id="vigencia"><h2>Vigencia por vehículo</h2>
+  <table class="tabla" style="margin-top:8px"><thead><tr><th>Placa</th><th>Estado</th><th>Vence</th><th>Meses pendientes</th><th></th></tr></thead>
+  <tbody>{% for v, e in estados %}<tr><td><strong>{{ v.placa }}</strong></td><td><span class="etiqueta-estado {{ e|etiqueta_vigencia }}">{{ e.texto }}</span></td>
+    <td class="mono">{{ e.vencimiento|date:"d/m/Y"|default:"—" }}</td><td>{{ e.meses_pendientes }}</td>
+    <td><a class="boton secundario pequeno" href="{% url 'pagos:vehiculo' v.pk %}">Ver</a> <a class="boton pequeno" href="{% url 'pagos:registrar' %}?placa={{ v.placa }}">Registrar pago</a></td></tr>
+  {% empty %}<tr><td colspan="5" class="suave">Sin vehículos.</td></tr>{% endfor %}</tbody></table>
+</div>
+{% endif %}
+<div class="tarjeta"><h2>Historial de pagos (más reciente primero)</h2>
+  <div style="overflow-x:auto"><table class="tabla" style="margin-top:8px" id="tabla-pagos"><thead><tr><th>Factura</th><th>Placa</th><th>Periodo</th><th>Meses</th><th>Valor</th><th>Descuento</th><th>Medio</th><th>Fecha</th><th>Registró</th><th>Estado</th><th></th></tr></thead>
+  <tbody>{% for p in pagos %}
+    <tr><td class="mono">{{ p.numero_factura_texto }}</td><td><strong>{{ p.vehiculo.placa }}</strong></td>
+      <td class="mono" style="white-space:nowrap">{{ p.periodo_inicio|date:"d/m/Y" }}<br>→ {{ p.periodo_fin|date:"d/m/Y" }}</td><td>{{ p.meses }}</td>
+      <td style="white-space:nowrap">{{ p.valor|pesos }}</td><td>{% if p.porcentaje_descuento %}{{ p.porcentaje_descuento }} %{% else %}—{% endif %}</td>
+      <td>{{ p.get_medio_display }}</td><td class="mono" style="white-space:nowrap">{{ p.fecha_pago|date:"d/m/Y" }}<br>{{ p.fecha_pago|date:"H:i" }}</td><td>{{ p.registrado_por.nombre_completo }}</td>
+      <td>{% if p.esta_corregido %}<span class="etiqueta-estado gris">Corregido</span><div class="diminuto">“{{ p.motivo_correccion }}”{% if p.reemplazo %} → {{ p.reemplazo.numero_factura_texto }}{% endif %}</div>
+          {% else %}<span class="etiqueta-estado">Registrado</span>{% endif %}</td>
+      <td style="white-space:nowrap"><a class="boton secundario pequeno" href="{% url 'pagos:factura' p.numero_factura %}" target="_blank">Factura</a>
+        {% if p.pk in corregibles %}<a class="boton pequeno" href="{% url 'pagos:corregir' p.pk %}">Corregir</a>{% endif %}</td></tr>
+  {% empty %}<tr><td colspan="11"><div class="vacio"><strong>Sin pagos</strong></div></td></tr>{% endfor %}</tbody></table></div>
+</div>
+{% endblock %}

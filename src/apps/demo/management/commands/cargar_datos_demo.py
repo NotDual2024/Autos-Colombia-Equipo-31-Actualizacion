@@ -12,7 +12,10 @@ from django.db import transaction
 from apps.core import reloj
 from apps.cuentas.models import HorarioOperador, Rol, Usuario
 from apps.usuarios_celdas import services as clientes
-from apps.usuarios_celdas.models import HistorialPropiedad
+from apps.pagos import registro, tarifas
+from apps.pagos.calendario import sumar_meses
+from apps.pagos.models import MedioPago
+from apps.usuarios_celdas.models import Categoria, HistorialPropiedad, MotivoInactivacion
 from apps.bitacora import services as bitacora
 from apps.bitacora.models import Accion, Entidad
 from apps.demo import fabricas as f
@@ -63,7 +66,9 @@ class Command(BaseCommand):
             correo = correo.translate(str.maketrans("áéíóúñ", "aeioun"))
             return f.crear_propietario(nombre, cedula, correo, activo)
 
-        andres, laura, carlos = prop("Andrés Gómez", "1012345678"), prop("Laura Méndez", "1023456789"), prop("Carlos Herrera", "1034567890", activo=False)
+        andres, laura = prop("Andrés Gómez", "1012345678"), prop("Laura Méndez", "1023456789")
+        carlos = f.crear_propietario("Carlos Herrera", "1034567890", "carlos.herrera@correo.co", activo=False,
+                                     motivo=MotivoInactivacion.OTRO, descripcion="Solicitud del cliente")
         ana, luis, sofia = prop("Ana Gil", "1045678901"), prop("Luis Mora", "1056789012"), prop("Sofía Ruiz", "1067890123")
         diego, paula = prop("Diego Pardo", "1078901234"), prop("Paula Ríos", "1089012345")
 
@@ -134,3 +139,20 @@ class Command(BaseCommand):
         clientes.modificar_propietario(laura, {"nombre_completo": laura.nombre_completo, "numero_documento": laura.numero_documento,
                                                "telefono": "3009876543", "correo": laura.correo, "direccion": laura.direccion}, op)
         clientes.solicitar_cambio(jtr, andres, "Venta del vehículo", op)
+
+        # Iteración 3 (plan, sección 3): descuentos, tarifa programada, pago con descuento, pago corregido,
+        # vehículo vencido hace 3 meses e inactivo por falta de pago, y vehículos por vencer.
+        frecuente = tarifas.crear_descuento(admin, "Cliente frecuente", 10)
+        apertura = tarifas.crear_descuento(admin, "Promoción apertura", 15)
+        tarifas.cambiar_estado_descuento(admin, apertura, False)
+        tarifas.registrar_tarifa(admin, Categoria.CARRO_CAMIONETA, 160000, hoy.replace(year=hoy.year + 1, month=1, day=1))
+        con_descuento = V(laura, "KJH205", "CARRO", "Kia", "Rio", 2021, "Gris")
+        f.crear_pago(con_descuento, hoy + timedelta(days=40), op, meses=3, medio=MedioPago.TARJETA, descuento=frecuente)
+        corregido = V(andres, "TYU318", "CARRO", "Renault", "Logan", 2020, "Blanco")
+        mal = registro.registrar(corregido, 1, MedioPago.EFECTIVO, None, op).pago
+        registro.corregir(mal.pk, "Eran 2 meses, no 1", 2, MedioPago.EFECTIVO, None, op)  # el operador puede corregir (24 h)
+        atrasado = V(luis, "WER74D", "MOTO", "Bajaj", "Pulsar", 2019, "Negro")
+        f.crear_pago(atrasado, sumar_meses(hoy, -3) - timedelta(days=2), op)
+        clientes.cambiar_estado_vehiculo(atrasado, False, admin, MotivoInactivacion.FALTA_PAGO)
+        por_vencer = V(sofia, "GHJ852", "CARRO", "Suzuki", "Swift", 2023, "Rojo")
+        f.crear_pago(por_vencer, hoy + timedelta(days=3), op)

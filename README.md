@@ -1,8 +1,8 @@
 # Parqueadero "Autos Colombia"
 
-Sistema web local para la gestión de un parqueadero por mensualidad: entradas y salidas de vehículos, novedades, avisos de vencimiento (simulados), propietarios, vehículos, celdas, operadores con horarios y bitácora de operaciones.
+Sistema web local para la gestión de un parqueadero por mensualidad: entradas y salidas de vehículos, novedades, avisos de vencimiento (simulados), propietarios, vehículos, celdas, operadores con horarios, bitácora de operaciones y pagos de mensualidad con factura simulada.
 
-Proyecto académico de Ingeniería de Software (IU Digital). **Iteración 1:** gestión de la entrada y salida de vehículos. **Iteración 2:** gestión de usuarios y celdas.
+Proyecto académico de Ingeniería de Software (IU Digital). **Iteración 1:** gestión de la entrada y salida de vehículos. **Iteración 2:** gestión de usuarios y celdas. **Iteración 3:** gestión de pagos.
 
 - Documentación técnica completa: [`docs/latex/main.pdf`](docs/latex/main.pdf)
 - Requerimientos, decisiones y diseño: carpeta [`docs/`](docs/)
@@ -88,12 +88,23 @@ Las fechas se calculan a partir del día en que se ejecuta el comando.
 | Autorización fuera de turno (HU-022) | Como `admin`: Autorizaciones → `operador2` → hasta dentro de una hora → `operador2` ya puede ingresar |
 | Fin del turno (HU-021, RN-35) | Al terminar el turno aparece un aviso y la sesión se cierra a los 5 minutos; un registro empezado se puede terminar |
 | Bitácora (HU-023) | Como `admin`: Bitácora → filtrar por usuario, acción o fechas |
+| Registrar pago (HU-024) | Pagos → Registrar pago → placa `GHJ852` → meses, medio y descuento → el resumen muestra el periodo y el valor → Confirmar |
+| Meses atrasados y reactivación (HU-024, HU-028) | Registrar pago → placa `WER74D`: vencida hace unos 3 meses, inactiva por falta de pago, debe 4 meses. Al pagarlos se reactiva sola |
+| Vigencia e historial (HU-025, HU-026) | Ficha de un vehículo → Pagos y vigencia; o ficha de un propietario → Pagos y vigencia |
+| Pago con descuento (HU-024, HU-031) | Pagos de `KJH205`: 3 meses con 10 % de descuento |
+| Factura simulada (HU-026) | Historial de pagos → Factura → Imprimir / Guardar como PDF (desde el diálogo del navegador) |
+| Pago corregido (HU-029) | Pagos de `TYU318`: la factura 000017 quedó corregida ("Eran 2 meses, no 1") y anulada; la 000018 la reemplaza. Como `operador` se puede corregir la 000018 durante 24 horas |
+| Por vencer (HU-030) | Pagos → Por vencer: `ABC123` vence hoy y `GHJ852` en 3 días |
+| Tarifas (HU-027) | Como `admin`: Tarifas → tarifa de carro de 160 000 programada para el 1 de enero del año siguiente |
+| Descuentos (HU-031) | Como `admin`: Descuentos → "Cliente frecuente" (10 %) habilitado y "Promoción apertura" (15 %) deshabilitado |
+| Ingresos (HU-032) | Como `admin`: Ingresos → total del mes por tipo de vehículo y por medio de pago, sin pagos corregidos |
+| Inactivar con motivo (HU-028) | Ficha de un vehículo o propietario → Inactivar → "Falta de pago" u "Otro" con descripción |
 
 Para empezar de cero: `python manage.py cargar_datos_demo --reiniciar` (**borra todos los datos**).
 
 ## Correo simulado y planificador
 
-- El correo es **simulado** (DEC-007): no se envía nada. El contenido se ve en *Vencidos → Ver correos*.
+- El correo es **simulado** (DEC-007): no se envía nada. Los avisos de vencimiento se ven en *Vencidos → Ver correos*; los correos de confirmación de pago quedan guardados en la base de datos y en el registro del servidor.
 - El planificador (APScheduler, DEC-008) revisa los vencimientos **al iniciar el servidor y cada hora**. También se puede ejecutar a mano:
 
 ```bash
@@ -109,7 +120,7 @@ cd src
 python manage.py test apps
 ```
 
-Resultado actual: **154 pruebas, todas aprobadas**. Cubren los criterios de aceptación de HU-001 a HU-023, las reglas de negocio y las restricciones del modelo de datos.
+Resultado actual: **240 pruebas, todas aprobadas**. Cubren los criterios de aceptación de HU-001 a HU-032, las reglas de negocio y las restricciones del modelo de datos.
 
 ## Copia de seguridad (RNF-009)
 
@@ -131,5 +142,5 @@ tools/           plantuml.jar (no se versiona; solo para regenerar diagramas)
 ## Limitaciones conocidas
 
 - El servidor de desarrollo de Django es adecuado para la demostración local, no para producción.
-- Las pantallas de pagos (iteración 3) aún no existen. Los pagos de demostración se cargan con `cargar_datos_demo`.
+- La factura es una página para imprimir con la marca "Simulación – sin validez fiscal"; no es una factura electrónica. El diálogo de impresión del navegador se probó solo de forma manual.
 - El aviso de fin de turno y el cierre por inactividad en el navegador (`turno.js`) se probaron solo de forma manual. El servidor aplica el cierre de sesión aunque el script no funcione.

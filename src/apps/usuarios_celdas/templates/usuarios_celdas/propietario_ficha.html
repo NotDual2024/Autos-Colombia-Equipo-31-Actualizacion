@@ -6,12 +6,13 @@
   <div><h1>{{ propietario.nombre_completo }}</h1><div class="suave">CC {{ propietario.numero_documento }} · {% if propietario.activo %}<span class="etiqueta-estado">Activo</span>{% else %}<span class="etiqueta-estado amarillo">Inactivo</span>{% endif %}</div></div>
   <div class="grupo" style="display:flex;gap:8px">
     <a class="boton secundario" href="{% url 'usuarios_celdas:propietario_editar' propietario.pk %}">Editar</a>
-    <form method="post" action="{% url 'usuarios_celdas:propietario_estado' propietario.pk %}">{% csrf_token %}
-      {% if propietario.activo %}<input type="hidden" name="activo" value="0"><button class="boton peligro" type="submit">Inactivar</button>
-      {% else %}<input type="hidden" name="activo" value="1"><button class="boton" type="submit">Activar</button>{% endif %}</form>
+    {% url 'usuarios_celdas:propietario_estado' propietario.pk as url_estado %}
+    {% if propietario.activo %}{% include "usuarios_celdas/_inactivar.html" with accion=url_estado etiqueta="al propietario" %}
+    {% else %}<form method="post" action="{{ url_estado }}">{% csrf_token %}<input type="hidden" name="activo" value="1"><button class="boton" type="submit">Activar</button></form>{% endif %}
+    <a class="boton secundario" href="{% url 'pagos:propietario' propietario.pk %}">Pagos y vigencia</a>
   </div>
 </div>
-{% if not propietario.activo %}<div class="alerta aviso">{% include "core/icono.html" with nombre="alerta" %}<div><strong>Propietario inactivo</strong>Sus vehículos pueden salir, pero no entrar mientras siga inactivo (RN-24, RN-29).</div></div>{% endif %}
+{% if not propietario.activo %}<div class="alerta aviso">{% include "core/icono.html" with nombre="alerta" %}<div><strong>Propietario inactivo: {{ propietario.texto_inactivacion }}</strong>{% if inactivacion %}{{ inactivacion.usuario.nombre_completo }}, {{ inactivacion.fecha_hora|date:"d/m/Y H:i" }}. {% endif %}Sus vehículos pueden salir, pero no entrar mientras siga inactivo (RN-24, RN-29).</div></div>{% endif %}
 <div class="tarjeta">
   <h2>Datos</h2>
   <dl class="datos" style="margin-top:12px;grid-template-columns:repeat(3,1fr)">

@@ -1,0 +1,70 @@
+{% load pagos_extras %}<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Factura {{ pago.numero_factura_texto }} · {{ parqueadero.nombre }}</title>
+  <style>
+    body { font-family: "Segoe UI", Arial, sans-serif; color: #1d2420; background: #eef1ef; margin: 0; padding: 24px; }
+    .hoja { background: #fff; max-width: 760px; margin: 0 auto; padding: 32px 40px; border: 1px solid #d5dbd8; position: relative; overflow: hidden; }
+    .simulacion { text-align: center; font-weight: 700; letter-spacing: .08em; color: #a33; border: 2px dashed #a33; padding: 6px; margin-bottom: 20px; }
+    .marca-agua { position: absolute; top: 45%; left: 50%; transform: translate(-50%, -50%) rotate(-28deg); font-size: 3.4rem; font-weight: 800;
+                  color: rgba(170, 51, 51, .08); white-space: nowrap; pointer-events: none; }
+    .cabeza { display: flex; justify-content: space-between; gap: 16px; border-bottom: 2px solid #1d6b4f; padding-bottom: 12px; }
+    .cabeza h1 { margin: 0; font-size: 1.3rem; color: #1d6b4f; }
+    .numero { text-align: right; }
+    .numero strong { font-size: 1.15rem; }
+    .pequeno { font-size: .85rem; color: #55605a; }
+    table { width: 100%; border-collapse: collapse; margin: 18px 0; font-size: .9rem; }
+    th, td { border: 1px solid #d5dbd8; padding: 7px 9px; text-align: left; }
+    th { background: #f2f5f3; }
+    td.num { text-align: right; }
+    .totales { margin-left: auto; width: 320px; font-size: .92rem; }
+    .totales div { display: flex; justify-content: space-between; padding: 4px 0; }
+    .totales .total { border-top: 2px solid #1d2420; font-weight: 700; font-size: 1.05rem; margin-top: 4px; padding-top: 8px; }
+    .anulada { margin-top: 18px; padding: 10px; border: 2px solid #a33; color: #a33; font-weight: 700; text-align: center; }
+    .acciones { max-width: 760px; margin: 14px auto 0; display: flex; gap: 8px; }
+    .acciones button, .acciones a { font: inherit; padding: 8px 14px; border-radius: 6px; border: 1px solid #1d6b4f; background: #1d6b4f; color: #fff; cursor: pointer; text-decoration: none; }
+    .acciones a { background: #fff; color: #1d2420; border-color: #c9d0cc; }
+    @page { size: letter; margin: 14mm; }
+    @media print {
+      body { background: #fff; padding: 0; }
+      .hoja { border: none; max-width: none; padding: 0; }
+      .acciones { display: none; }
+    }
+  </style>
+</head>
+<body>
+<div class="hoja">
+  <div class="marca-agua">SIMULACIÓN</div>
+  <div class="simulacion">SIMULACIÓN – SIN VALIDEZ FISCAL</div>
+  <div class="cabeza">
+    <div><h1>{{ parqueadero.nombre }}</h1>
+      <div class="pequeno">NIT {{ parqueadero.nit }}<br>{{ parqueadero.direccion }} · Tel. {{ parqueadero.telefono }}</div></div>
+    <div class="numero"><strong>Factura N.º {{ pago.numero_factura_texto }}</strong><br><span class="pequeno">Fecha: {{ pago.fecha_pago|date:"d/m/Y H:i" }}</span></div>
+  </div>
+  <p><strong>Cliente:</strong> {{ pago.vehiculo.propietario.nombre_completo }} · CC {{ pago.vehiculo.propietario.numero_documento }}<br>
+     <strong>Vehículo:</strong> {{ pago.vehiculo.placa }} · {{ pago.vehiculo.get_tipo_display }} · {{ pago.vehiculo.marca }} {{ pago.vehiculo.nombre }}</p>
+  <table>
+    <thead><tr><th>Concepto</th><th>Periodo</th><th>Meses</th><th>Tarifa mensual</th><th>Valor</th></tr></thead>
+    <tbody><tr><td>Mensualidad de parqueadero</td><td>{{ pago.periodo_inicio|date:"d/m/Y" }} – {{ pago.periodo_fin|date:"d/m/Y" }}</td>
+      <td class="num">{{ pago.meses }}</td><td class="num">{{ pago.tarifa_unitaria|pesos }}</td><td class="num">{{ pago.valor_bruto|pesos }}</td></tr></tbody>
+  </table>
+  <div class="totales">
+    <div><span>Subtotal</span><span>{{ pago.valor_bruto|pesos }} COP</span></div>
+    <div><span>Descuento{% if pago.porcentaje_descuento %} ({{ pago.descuento.descripcion }}, {{ pago.porcentaje_descuento }} %){% endif %}</span><span>{% if pago.porcentaje_descuento %}−{% endif %}{{ pago.valor_descuento|pesos }} COP</span></div>
+    <div class="total"><span>Total</span><span>{{ pago.valor|pesos }} COP</span></div>
+    <div><span>Medio de pago</span><span>{{ pago.get_medio_display }}</span></div>
+    <div><span>Registrado por</span><span>{{ pago.registrado_por.nombre_completo }}</span></div>
+  </div>
+  {% if pago.esta_corregido %}<div class="anulada" id="sello-anulada">ANULADA – reemplazada por la factura N.º {{ reemplazo.numero_factura_texto }}
+    <div class="pequeno" style="color:#a33;font-weight:400">Motivo: {{ pago.motivo_correccion }}</div></div>{% endif %}
+  {% if pago.corrige_a %}<p class="pequeno">Reemplaza a la factura N.º {{ pago.corrige_a.numero_factura_texto }}.</p>{% endif %}
+  <p class="pequeno" style="margin-top:24px">Documento generado por el sistema de gestión del parqueadero con fines académicos. No es una factura electrónica ni tiene validez fiscal.</p>
+</div>
+<div class="acciones">
+  <button type="button" onclick="window.print()">Imprimir / Guardar como PDF</button>
+  <a href="{% url 'pagos:vehiculo' pago.vehiculo.pk %}">Volver</a>
+</div>
+</body>
+</html>

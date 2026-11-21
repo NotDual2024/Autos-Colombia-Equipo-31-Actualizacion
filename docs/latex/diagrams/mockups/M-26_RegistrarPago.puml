@@ -1,0 +1,29 @@
+@startsalt M-26_RegistrarPago
+title M-26 Registrar pago de mensualidad (HU-024)
+{+
+  {* Entrada | Salida | Dentro | Historial | Novedades | Vencidos | Propietarios | Vehículos | Celdas | Pagos | Por vencer | Admin }
+  ==
+  <b>Registrar pago</b>
+  {
+    Placa | "ABC123  " | [Buscar]
+  }
+  {^"Vehículo"
+    ABC123 · Carro · Chevrolet Spark 2020, rojo · Activo
+    Propietaria: Laura Méndez · CC 1023456789 · laura@correo.co
+    Mensualidad: <b>Vencida hace 2 días</b> (venció el 18/11/2026) · Día de cobro: 18
+    Debe 1 mes para quedar al día
+  }
+  {^"Pago"
+    Meses (1 a 12) | ^1^
+    Medio de pago | ^Efectivo^
+    Descuento | ^Sin descuento^
+  }
+  {^"Resumen (calculado por el sistema)"
+    Periodo que cubre | 18/11/2026 → 18/12/2026
+    Tarifa (carro) | 150 000 COP × 1 mes
+    Descuento | 0 COP
+    <b>Total</b> | <b>150 000 COP</b>
+  }
+  { [Confirmar pago] | [Cancelar] }
+}
+@endsalt

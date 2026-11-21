@@ -28,13 +28,49 @@ PATRONES_PLACA = {
 PATRON_CELULAR = "3" + "[0-9]" * 9
 
 
-class Propietario(models.Model):
+class MotivoInactivacion(models.TextChoices):
+    """RN-46: motivo de la inactivación de un propietario o vehículo."""
+
+    FALTA_PAGO = "FALTA_PAGO", "Falta de pago"
+    OTRO = "OTRO", "Otro"
+
+
+def _restricciones_inactivacion(prefijo: str) -> list:
+    return [
+        models.CheckConstraint(condition=Q(motivo_inactivacion__isnull=True) | Q(motivo_inactivacion__in=MotivoInactivacion.values),
+                               name=f"ck_{prefijo}_motivo_valor"),
+        models.CheckConstraint(condition=Q(activo=True, motivo_inactivacion__isnull=True)
+                               | Q(activo=False, motivo_inactivacion__isnull=False), name=f"ck_{prefijo}_motivo_estado"),
+        models.CheckConstraint(condition=Q(motivo_inactivacion="OTRO", descripcion_inactivacion__isnull=False,
+                                 descripcion_inactivacion__trim__length__gt=0)
+                               | (~Q(motivo_inactivacion="OTRO") | Q(motivo_inactivacion__isnull=True))
+                               & (Q(descripcion_inactivacion__isnull=True) | Q(descripcion_inactivacion="")),
+                               name=f"ck_{prefijo}_motivo_descripcion"),
+    ]
+
+
+class ConMotivoInactivacion(models.Model):
+    activo = models.BooleanField(default=True)
+    motivo_inactivacion = models.CharField(max_length=12, choices=MotivoInactivacion.choices, null=True, blank=True)
+    descripcion_inactivacion = models.CharField(max_length=200, null=True, blank=True)
+
+    class Meta:
+        abstract = True
+
+    def texto_inactivacion(self) -> str:
+        if self.activo or not self.motivo_inactivacion:
+            return ""
+        if self.motivo_inactivacion == MotivoInactivacion.OTRO:
+            return f"Otro: {self.descripcion_inactivacion}"
+        return self.get_motivo_inactivacion_display()
+
+
+class Propietario(ConMotivoInactivacion):
     nombre_completo = models.CharField(max_length=150)
     numero_documento = models.CharField("cédula", max_length=10, unique=True)
     telefono = models.CharField("celular", max_length=10)
     correo = models.EmailField(max_length=254)
     direccion = models.CharField(max_length=200)
-    activo = models.BooleanField(default=True)
     fecha_registro = models.DateTimeField()
 
     class Meta:
@@ -48,13 +84,14 @@ class Propietario(models.Model):
             ),
             # RN-30: celular colombiano (10 dígitos que empiezan por 3)
             models.CheckConstraint(condition=Q(telefono__glob=PATRON_CELULAR), name="ck_propietario_celular"),
+            *_restricciones_inactivacion("propietario"),
         ]
 
     def __str__(self) -> str:
         return self.nombre_completo
 
 
-class Vehiculo(models.Model):
+class Vehiculo(ConMotivoInactivacion):
     placa = models.CharField(max_length=6, unique=True)
     tipo = models.CharField(max_length=10, choices=TipoVehiculo.choices)
     marca = models.CharField(max_length=50)
@@ -62,7 +99,6 @@ class Vehiculo(models.Model):
     modelo = models.PositiveSmallIntegerField("modelo (año)")
     color = models.CharField(max_length=30)
     propietario = models.ForeignKey(Propietario, on_delete=models.PROTECT, related_name="vehiculos")
-    activo = models.BooleanField(default=True)
     fecha_registro = models.DateTimeField()
 
     class Meta:
@@ -76,6 +112,7 @@ class Vehiculo(models.Model):
             ),
             models.CheckConstraint(condition=Q(tipo__in=TipoVehiculo.values), name="ck_vehiculo_tipo"),
             models.CheckConstraint(condition=Q(modelo__gte=1950, modelo__lte=2100), name="ck_vehiculo_modelo"),
+            *_restricciones_inactivacion("vehiculo"),
         ]
 
     def __str__(self) -> str:

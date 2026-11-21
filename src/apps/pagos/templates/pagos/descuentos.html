@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block titulo %}Descuentos{% endblock %}
+{% block contenido %}
+<div class="migas">P32 / Administración</div>
+<div class="titulo-pagina"><div><h1>Descuentos</h1><div class="suave">Los operadores pueden aplicar un descuento habilitado al registrar un pago. Un descuento no se edita: para otro porcentaje, deshabilítalo y crea uno nuevo.</div></div></div>
+{% if error %}<div class="alerta error" role="alert">{% include "core/icono.html" with nombre="alerta" %}<div>{{ error }}</div></div>{% endif %}
+<div class="rejilla-2">
+  <div class="tarjeta"><h2>Crear descuento</h2>
+    <form method="post" style="margin-top:12px" class="formulario-registro">{% csrf_token %}
+      <div class="campo"><label for="descripcion">Descripción</label><input id="descripcion" type="text" name="descripcion" value="{{ datos.descripcion }}" placeholder="Cliente frecuente" maxlength="100"></div>
+      <div class="campo"><label for="porcentaje">Porcentaje (%)</label><input id="porcentaje" type="text" name="porcentaje" inputmode="numeric" value="{{ datos.porcentaje }}" placeholder="10"></div>
+      <button class="boton" type="submit">Crear descuento</button></form></div>
+  <div class="tarjeta" style="margin-top:0">
+    <table class="tabla" id="tabla-descuentos"><thead><tr><th>Descripción</th><th>Porcentaje</th><th>Estado</th><th>Creado por</th><th>Fecha</th><th></th></tr></thead>
+    <tbody>{% for d in descuentos %}
+      <tr><td>{{ d.descripcion }}</td><td>{{ d.porcentaje }} %</td>
+        <td>{% if d.habilitado %}<span class="etiqueta-estado">Habilitado</span>{% else %}<span class="etiqueta-estado gris">Deshabilitado</span>{% endif %}</td>
+        <td>{{ d.creado_por.nombre_completo }}</td><td class="mono">{{ d.fecha_creacion|date:"d/m/Y" }}</td>
+        <td><form method="post" action="{% url 'pagos:descuento_estado' d.pk %}">{% csrf_token %}
+          {% if d.habilitado %}<input type="hidden" name="habilitado" value="0"><button class="boton peligro pequeno" type="submit">Deshabilitar</button>
+          {% else %}<input type="hidden" name="habilitado" value="1"><button class="boton pequeno" type="submit">Habilitar</button>{% endif %}</form></td></tr>
+    {% empty %}<tr><td colspan="6"><div class="vacio"><strong>Sin descuentos</strong></div></td></tr>{% endfor %}</tbody></table>
+  </div>
+</div>
+{% endblock %}

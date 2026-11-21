@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% load pagos_extras %}
+{% block titulo %}Tarifas{% endblock %}
+{% block contenido %}
+<div class="migas">P31 / Administración</div>
+<div class="titulo-pagina"><div><h1>Tarifas</h1><div class="suave">Una tarifa nueva rige desde su fecha (puede ser futura). Las tarifas registradas no se editan ni se borran, y los pagos anteriores conservan su valor.</div></div></div>
+{% if error %}<div class="alerta error" role="alert">{% include "core/icono.html" with nombre="alerta" %}<div>{{ error }}</div></div>{% endif %}
+<div class="rejilla-2">
+  <div class="tarjeta"><h2>Registrar tarifa nueva</h2>
+    <form method="post" style="margin-top:12px" class="formulario-registro">{% csrf_token %}
+      <div class="campo"><label for="categoria">Tipo</label><select id="categoria" name="categoria">{% for v, e in categorias %}<option value="{{ v }}" {% if datos.categoria == v %}selected{% endif %}>{{ e }}</option>{% endfor %}</select></div>
+      <div class="campo"><label for="valor">Valor mensual (COP)</label><input id="valor" type="text" name="valor" inputmode="numeric" value="{{ datos.valor }}" placeholder="160000"></div>
+      <div class="campo"><label for="vigente_desde">Vigente desde</label><input id="vigente_desde" type="date" name="vigente_desde" value="{{ datos.vigente_desde }}"></div>
+      <button class="boton" type="submit">Registrar tarifa</button></form></div>
+  <div style="display:grid;gap:14px">
+    <div class="tarjeta" style="margin-top:0"><h2>Tarifas actuales</h2>
+      <table class="tabla" style="margin-top:8px"><thead><tr><th>Tipo</th><th>Valor mensual</th><th>Vigente desde</th></tr></thead>
+      <tbody>{% for t in actuales %}<tr><td>{{ t.get_categoria_display }}</td><td>{{ t.valor|pesos }} COP</td><td class="mono">{{ t.vigente_desde|date:"d/m/Y" }}</td></tr>
+      {% empty %}<tr><td colspan="3" class="suave">Sin tarifas vigentes.</td></tr>{% endfor %}</tbody></table></div>
+    <div class="tarjeta" style="margin-top:0"><h2>Historial</h2>
+      <table class="tabla" style="margin-top:8px" id="historial-tarifas"><thead><tr><th>Tipo</th><th>Valor</th><th>Vigente desde</th><th>Estado</th></tr></thead>
+      <tbody>{% for t in historial %}<tr><td>{{ t.get_categoria_display }}</td><td>{{ t.valor|pesos }}</td><td class="mono">{{ t.vigente_desde|date:"d/m/Y" }}</td>
+        <td>{% if t.pk in ids_actuales %}<span class="etiqueta-estado">Vigente</span>{% elif t.vigente_desde > hoy %}<span class="etiqueta-estado amarillo">Programada</span>{% else %}<span class="etiqueta-estado gris">Anterior</span>{% endif %}</td></tr>
+      {% endfor %}</tbody></table></div>
+  </div>
+</div>
+{% endblock %}

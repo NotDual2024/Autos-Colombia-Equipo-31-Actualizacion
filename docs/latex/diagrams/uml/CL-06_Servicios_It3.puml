@@ -1,0 +1,115 @@
+@startuml CL-06_Servicios_It3
+' CL-06 - Clases de servicio de la iteración 3 - v1
+!pragma layout smetana
+skinparam classAttributeIconSize 0
+skinparam class {
+  BackgroundColor #FDFDFD
+  BorderColor #0B3D91
+}
+title Clases de servicio - Iteración 3 (en gris: clases de iteraciones anteriores)
+
+package pagos {
+  class ServicioVigencia {
+    + pagos_validos(vehiculo) : QuerySet<Pago>  {solo REGISTRADO}
+    + ultimo_pago(vehiculo) : Pago [0..1]
+    + esta_vigente(vehiculo, fecha) : bool
+    + dia_cobro(vehiculo) : int [0..1]
+    + estado(vehiculo, hoy) : EstadoVigencia
+    + meses_pendientes(vehiculo, hoy) : int
+  }
+  class EstadoVigencia <<dataclass>> {
+    + estado : str {AL_DIA, VENCE_HOY, VENCIDA, SIN_PAGOS}
+    + vencimiento : date [0..1]
+    + dias_vencida : int
+    + dia_cobro : int [0..1]
+    + meses_pendientes : int
+  }
+  class ServicioPagos {
+    + preparar(vehiculo, meses, descuento, momento) : ResumenPago
+    + registrar(vehiculo, meses, medio, descuento, usuario) : ResultadoPago
+    + corregir(pago, motivo, meses, medio, descuento, usuario) : ResultadoPago
+  }
+  class ResumenPago <<dataclass>> {
+    + periodo_inicio : date
+    + periodo_fin : date
+    + tarifa_unitaria : int
+    + valor_bruto : int
+    + valor_descuento : int
+    + valor : int
+  }
+  class ResultadoPago <<dataclass>> {
+    + pago : Pago
+    + correo_enviado : bool
+    + reactivados : list<str>
+    + advertencias : list<str>
+  }
+  class ServicioTarifas {
+    + registrar(admin, categoria, valor, vigente_desde) : Tarifa
+    + vigente(categoria, fecha) : Tarifa
+    + historial() : list<Tarifa>
+  }
+  class ServicioDescuentos {
+    + crear(admin, descripcion, porcentaje) : Descuento
+    + cambiar_estado(admin, descuento, habilitado) : Descuento
+    + habilitados() : list<Descuento>
+  }
+  class ServicioConfirmacion {
+    + enviar(pago) : CorreoConfirmacion
+  }
+  class ConsultasPagos <<selectors>> {
+    + historial_vehiculo(vehiculo) : list<Pago>
+    + historial_propietario(propietario) : list<Pago>
+    + por_vencer(hoy, dias = 5) : list<FilaPorVencer>
+    + ingresos(anio, mes) : InformeIngresos
+    + factura(numero) : Pago
+  }
+}
+
+package usuarios_celdas {
+  class ServicioPropietarios #EEEEEE {
+    + cambiar_estado(propietario, activo, usuario, motivo, descripcion)
+    + reactivar_por_pago(propietario, usuario) : bool
+  }
+  class ServicioVehiculos #EEEEEE {
+    + cambiar_estado(vehiculo, activo, usuario, motivo, descripcion)
+    + reactivar_por_pago(vehiculo, usuario) : bool
+  }
+}
+
+package bitacora {
+  class ServicioBitacora #EEEEEE {
+    + registrar(usuario, accion, entidad, entidad_id, descripcion, cambios)
+  }
+}
+
+package core {
+  class Reloj #EEEEEE
+  class ServicioCorreo <<interfaz>> #EEEEEE {
+    + enviar(destinatario, asunto, cuerpo) : str
+  }
+  class ErrorNegocio <<exception>> #EEEEEE
+}
+
+ServicioPagos ..> ServicioVigencia : periodo y meses pendientes
+ServicioPagos ..> ServicioTarifas : tarifa vigente
+ServicioPagos ..> ServicioConfirmacion : RN-47
+ServicioPagos ..> ServicioVehiculos : RN-46
+ServicioPagos ..> ServicioPropietarios : RN-46
+ServicioPagos ..> ServicioBitacora
+ServicioPagos ..> Reloj
+ServicioPagos ..> ErrorNegocio : lanza
+ServicioPagos ..> ResumenPago
+ServicioPagos ..> ResultadoPago
+ServicioVigencia ..> EstadoVigencia
+ServicioTarifas ..> ServicioBitacora
+ServicioDescuentos ..> ServicioBitacora
+ServicioConfirmacion ..> ServicioCorreo
+ConsultasPagos ..> ServicioVigencia
+
+note bottom of ServicioPagos
+  registrar y corregir se ejecutan en una transacción:
+  número de factura (mayor + 1), pago, reactivación,
+  correo y bitácora. corregir marca primero el pago como
+  CORREGIDO y luego registra el nuevo con corrige_a (DM-13).
+end note
+@enduml

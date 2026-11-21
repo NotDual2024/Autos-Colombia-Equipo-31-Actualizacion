@@ -1,5 +1,5 @@
 @startuml PK-01_Paquetes
-' PK-01 - Diagrama de paquetes - v2 (iteración 2: módulo bitacora, DM-08)
+' PK-01 - Diagrama de paquetes - v3 (iteración 3: pagos registra en la bitácora y reactiva clientes)
 skinparam packageStyle folder
 skinparam package {
   BackgroundColor #F4F7FC
@@ -40,6 +40,7 @@ config ..> notif : registra URLs
 config ..> nov
 config ..> es
 config ..> cuentas
+config ..> pagos
 demo ..> cuentas
 demo ..> uc
 demo ..> pagos
@@ -62,6 +63,7 @@ cuentas ..> core
 bit ..> core
 uc ..> bit : registra operaciones
 cuentas ..> bit : registra operaciones
+pagos ..> bit : registra operaciones
 uc ..> cuentas
 es ..> cuentas : usuario que registra
 nov ..> cuentas
@@ -75,6 +77,13 @@ note right of bit
   Solo depende de core. El usuario se referencia
   con settings.AUTH_USER_MODEL, sin importar cuentas,
   así cuentas puede registrar operaciones sin ciclo.
+end note
+note left of pagos
+  Iteración 3: pagos, tarifas, descuentos,
+  factura y correo de confirmación (DM-14).
+  Reactiva clientes con los servicios de
+  usuarios_celdas. Ningún módulo inferior
+  depende de pagos.
 end note
 note right of core
   Base: no depende de ningún

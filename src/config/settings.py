@@ -109,6 +109,14 @@ AVISOS_INTERVALO_MINUTOS = 60
 # --- Nombre visible del sistema ---
 NOMBRE_SISTEMA = "Autos Colombia"
 
+# Datos FICTICIOS del parqueadero para la factura simulada (RN-47; diseño iteración 3, sección 5.3)
+DATOS_FACTURA = {
+    "nombre": "Parqueadero Autos Colombia",
+    "nit": "900.000.000-0 (ficticio)",
+    "direccion": "Calle 00 # 00-00, Bogotá D. C.",
+    "telefono": "601 000 0000",
+}
+
 LOGGING = {
     "version": 1,
     "disable_existing_loggers": False,

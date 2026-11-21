@@ -1,0 +1,26 @@
+@startsalt M-28_Factura
+title M-28 Factura simulada para imprimir (HU-026, HU-029)
+{+
+  { <b>SIMULACIÓN – SIN VALIDEZ FISCAL</b> }
+  ==
+  { <b>Parqueadero Autos Colombia</b> | . | <b>Factura N.º 000125</b> }
+  { NIT 900.000.000-0 (ficticio) · Calle 00 # 00-00, Bogotá | . | Fecha: 20/11/2026 10:15 }
+  ..
+  { Cliente: Laura Méndez · CC 1023456789 }
+  { Vehículo: ABC123 · Carro · Chevrolet Spark }
+  {#
+    Concepto | Periodo | Meses | Tarifa | Valor
+    Mensualidad parqueadero | 18/11/2026 – 18/12/2026 | 1 | 150 000 | 150 000
+  }
+  {
+    Subtotal | 150 000 COP
+    Descuento | 0 COP
+    <b>Total</b> | <b>150 000 COP</b>
+    Medio de pago | Efectivo
+    Registrado por | María Rodríguez
+  }
+  ..
+  { Si el pago fue corregido: <b>ANULADA – reemplazada por la factura N.º 000126</b> }
+  { [Imprimir / Guardar como PDF] | [Volver] }
+}
+@endsalt

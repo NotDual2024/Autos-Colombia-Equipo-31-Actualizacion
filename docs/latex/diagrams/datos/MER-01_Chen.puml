@@ -1,5 +1,5 @@
 @startchen MER-01_Chen
-' MER-01 - Modelo Entidad-Relación (notación de Chen) - sistema completo - v1.3
+' MER-01 - Modelo Entidad-Relación (notación de Chen) - sistema completo - v1.4
 title MER - Parqueadero "Autos Colombia" (sistema completo, DEC-001)
 
 entity USUARIO {
@@ -21,6 +21,7 @@ entity PROPIETARIO {
   telefono
   correo
   direccion
+  motivo_inactivacion
 }
 entity VEHICULO {
   id <<key>>
@@ -30,6 +31,7 @@ entity VEHICULO {
   nombre
   modelo
   color
+  motivo_inactivacion
 }
 entity CELDA {
   id <<key>>
@@ -44,10 +46,25 @@ entity TARIFA {
 }
 entity PAGO {
   id <<key>>
+  numero_factura
   periodo_inicio
   periodo_fin
+  meses
   valor
+  medio
+  estado
   fecha_pago
+}
+entity DESCUENTO {
+  id <<key>>
+  descripcion
+  porcentaje
+  habilitado
+}
+entity CORREO_CONFIRMACION {
+  id <<key>>
+  resultado
+  fecha_hora
 }
 entity ESTADIA {
   id <<key>>
@@ -124,6 +141,12 @@ relationship TUVO {
 }
 relationship REALIZA {
 }
+relationship APLICA {
+}
+relationship CORRIGE {
+}
+relationship CONFIRMA {
+}
 
 USUARIO -1- TIENE_HORARIO
 TIENE_HORARIO =N= HORARIO_OPERADOR
@@ -151,4 +174,10 @@ VEHICULO -1- TUVO
 TUVO -N- HISTORIAL_PROPIEDAD
 USUARIO -1- REALIZA
 REALIZA -N- REGISTRO_OPERACION
+DESCUENTO -1- APLICA
+APLICA -N- PAGO
+PAGO -1- CORRIGE
+CORRIGE -1- PAGO
+PAGO -1- CONFIRMA
+CONFIRMA -N- CORREO_CONFIRMACION
 @endchen

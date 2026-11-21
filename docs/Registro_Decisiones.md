@@ -17,6 +17,7 @@
 | DEC-013 | Registro de "qué operador hizo qué operación" (iteración 2) | **Aprobada** (B: bitácora de operaciones) |
 | DEC-014 | Modelo de horarios y autorizaciones fuera de turno (iteración 2) | **Aprobada** (A: franjas por día + autorizaciones) |
 | DEC-015 | Cambio de propietario con solicitud e historial (iteración 2) | **Aprobada** (A: solicitud + historial) |
+| DEC-016 | Herramienta de los diagramas de la entrega de la iteración 2 | **Aprobada** (A: proyecto StarUML generado, imágenes con marca de agua) |
 
 ---
 
@@ -578,5 +579,32 @@ Las alternativas completas están en `Requerimientos_Iteracion2_v1.md`, sección
 **Responsable de aprobación:** Equipo del proyecto.
 
 **Artefactos afectados:** RF-108, RF-109, RN-33, modelo de datos (v1.3: dos tablas nuevas).
+
+**Estado:** Aprobada.
+
+---
+
+## DEC-016 — Herramienta de los diagramas de la entrega de la iteración 2
+
+**Problema:** La actividad pide los diagramas de casos de uso, de secuencia y de componentes "en STARUML", pero el proyecto usa PlantUML (DEC-009). StarUML 7.1.1 está instalado en el equipo, sin registrar: toda imagen que exporta lleva la marca de agua "UNREGISTERED".
+
+**Alternativas:**
+- **A.** Generar un proyecto StarUML (`.mdj`) y exportar las imágenes con StarUML.
+- **B.** Seguir con PlantUML y aclarar la herramienta en el PDF.
+- **C.** Hacer borradores en PlantUML para que el equipo los redibuje en StarUML.
+
+Para la marca de agua: registrar StarUML, aceptar la marca de agua, o usar imágenes de PlantUML y entregar el `.mdj` como evidencia.
+
+**Recomendación del arquitecto:** A.
+
+**Decisión seleccionada:** A, aceptando la marca de agua "UNREGISTERED" en las imágenes. El plan de pruebas usa un formato resumido estándar (el profesor no dio una plantilla), y la entrega es un PDF aparte del documento técnico.
+
+**Justificación:** Cumple literalmente lo que pide la actividad y deja un proyecto StarUML que el equipo puede abrir y editar. Decisión expresada por el equipo el 2026-11-15.
+
+**Fecha:** 2026-11-15
+
+**Responsable de aprobación:** Equipo del proyecto.
+
+**Artefactos afectados:** `docs/staruml/` (generador, exportador y proyecto `.mdj`), `docs/latex/diagrams/staruml/`, `docs/latex/entrega_iteracion2.tex`. PlantUML se mantiene para el documento técnico y los mockups.
 
 **Estado:** Aprobada.

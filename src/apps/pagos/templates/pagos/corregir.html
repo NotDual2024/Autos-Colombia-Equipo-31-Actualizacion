@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% load pagos_extras %}
+{% block titulo %}Corregir pago{% endblock %}
+{% block contenido %}
+<div class="migas">P30 / Pagos</div>
+<div class="titulo-pagina"><div><h1>Corregir pago · Factura N.º {{ pago.numero_factura_texto }}</h1>
+  <div class="suave">El pago no se borra: queda marcado como corregido, con el motivo, y se registra el pago correcto.</div></div></div>
+{% if error %}<div class="alerta error" role="alert">{% include "core/icono.html" with nombre="alerta" %}<div>{{ error }}</div></div>{% endif %}
+<div class="tarjeta"><h2>Pago que se corrige</h2>
+  <p style="margin-top:8px"><strong>{{ pago.vehiculo.placa }}</strong> · {{ pago.periodo_inicio|date:"d/m/Y" }} – {{ pago.periodo_fin|date:"d/m/Y" }} ·
+    {{ pago.meses }} mes{{ pago.meses|pluralize:"es" }} · {{ pago.valor|pesos }} COP · {{ pago.get_medio_display }}{% if pago.porcentaje_descuento %} · descuento {{ pago.porcentaje_descuento }} %{% endif %}</p>
+  <p class="suave">Registrado por {{ pago.registrado_por.nombre_completo }} el {{ pago.fecha_pago|date:"d/m/Y H:i" }}{% if minutos < 1440 %} (hace {% if minutos < 60 %}{{ minutos }} minuto{{ minutos|pluralize }}{% else %}{% widthratio minutos 60 1 %} horas{% endif %}){% endif %}.</p>
+</div>
+{% if puede %}
+<div class="rejilla-mitades">
+  <div class="tarjeta"><h2>Datos correctos</h2>
+    <form method="get" style="margin-top:10px">
+      <input type="hidden" name="motivo" value="{{ datos.motivo }}">
+      <div class="campo"><label for="meses">Meses</label><select id="meses" name="meses" onchange="this.form.submit()">{% for m in meses_opciones %}<option value="{{ m }}" {% if datos.meses == m|stringformat:'s' %}selected{% endif %}>{{ m }}</option>{% endfor %}</select></div>
+      <div class="campo"><label for="medio">Medio de pago</label><select id="medio" name="medio" onchange="this.form.submit()">{% for v, e in medios %}<option value="{{ v }}" {% if datos.medio == v %}selected{% endif %}>{{ e }}</option>{% endfor %}</select></div>
+      <div class="campo"><label for="descuento">Descuento</label><select id="descuento" name="descuento" onchange="this.form.submit()"><option value="">Sin descuento</option>{% for d in descuentos %}<option value="{{ d.pk }}" {% if datos.descuento == d.pk|stringformat:'s' %}selected{% endif %}>{{ d.descripcion }} ({{ d.porcentaje }} %){% if not d.habilitado %} — deshabilitado{% endif %}</option>{% endfor %}</select></div>
+      <noscript><button class="boton secundario" type="submit">Calcular</button></noscript>
+    </form>
+    {% if resumen %}<dl class="datos" style="margin-top:8px;grid-template-columns:1fr 1fr">
+      <div><dt>Periodo que cubre</dt><dd class="mono">{{ resumen.periodo_inicio|date:"d/m/Y" }} → {{ resumen.periodo_fin|date:"d/m/Y" }}</dd></div>
+      <div><dt>Total</dt><dd><strong>{{ resumen.valor|pesos }} COP</strong></dd></div></dl>{% endif %}
+  </div>
+  <div class="tarjeta" style="margin-top:0"><h2>Motivo de la corrección (obligatorio)</h2>
+    <form method="post" style="margin-top:10px">{% csrf_token %}
+      <input type="hidden" name="meses" value="{{ datos.meses }}"><input type="hidden" name="medio" value="{{ datos.medio }}"><input type="hidden" name="descuento" value="{{ datos.descuento }}">
+      <div class="campo"><label for="motivo">Motivo</label><textarea id="motivo" name="motivo" rows="3" placeholder="Ej. Eran 2 meses, no 1">{{ datos.motivo }}</textarea></div>
+      <div style="display:flex;gap:8px"><button class="boton" type="submit">Guardar corrección</button>
+        <a class="boton secundario" href="{% url 'pagos:vehiculo' pago.vehiculo.pk %}">Cancelar</a></div>
+    </form>
+  </div>
+</div>
+{% else %}
+<a class="boton secundario" href="{% url 'pagos:vehiculo' pago.vehiculo.pk %}">Volver a los pagos del vehículo</a>
+{% endif %}
+{% endblock %}

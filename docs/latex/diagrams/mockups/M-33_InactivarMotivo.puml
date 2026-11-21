@@ -1,0 +1,19 @@
+@startsalt M-33_InactivarMotivo
+title M-33 Inactivar con motivo y ficha del vehículo (HU-028)
+{+
+  {* Entrada | Salida | Dentro | Historial | Novedades | Vencidos | Propietarios | Vehículos | Celdas | Pagos | Por vencer | Admin }
+  ==
+  <b>Inactivar vehículo ABC123</b>
+  {^"Motivo (obligatorio)"
+    (X) Falta de pago
+    () Otro
+    Descripción (obligatoria si es "Otro") | "                         "
+  }
+  { [Inactivar] | [Cancelar] }
+  ..
+  {^"Ficha del vehículo"
+    { <b>ABC123</b> · Carro · <b>Inactivo: Falta de pago</b> (María Rodríguez, 20/11/2026 09:00) | [Activar] | [Pagos y vigencia] | [Registrar pago] }
+    Al registrar un pago que lo deje al día se reactiva solo, y también la propietaria si estaba inactiva por falta de pago
+  }
+}
+@endsalt

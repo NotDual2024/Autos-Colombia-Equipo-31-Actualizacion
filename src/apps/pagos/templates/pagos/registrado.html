@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% load pagos_extras %}
+{% block titulo %}Pago registrado{% endblock %}
+{% block contenido %}
+<div class="migas">P27 / Pagos</div>
+<div class="titulo-pagina"><div><h1>Pago registrado · Factura N.º {{ pago.numero_factura_texto }}</h1>
+  {% if corrigio %}<div class="suave">Reemplaza a la factura N.º {{ corrigio }}, que quedó marcada como corregida.</div>{% endif %}</div></div>
+<div class="tarjeta"><h2>Resultado</h2>
+  <ul style="margin-top:10px;line-height:1.9">
+    <li>{{ pago.vehiculo.placa }} {% if estado.puede_entrar %}queda <strong>al día</strong> hasta el {{ estado.vencimiento|date:"d/m/Y" }}{% else %}queda con vencimiento el {{ estado.vencimiento|date:"d/m/Y" }}{% endif %}.</li>
+    <li>Periodo pagado: {{ pago.periodo_inicio|date:"d/m/Y" }} → {{ pago.periodo_fin|date:"d/m/Y" }} ({{ pago.meses }} mes{{ pago.meses|pluralize:"es" }}).</li>
+    <li>Total cobrado: <strong>{{ pago.valor|pesos }} COP</strong> en {{ pago.get_medio_display|lower }} · Registró: {{ pago.registrado_por.nombre_completo }}.</li>
+    <li>{% if correo %}Se envió un correo simulado a {{ pago.vehiculo.propietario.correo }}.{% else %}No se pudo enviar el correo simulado; el pago quedó registrado.{% endif %}</li>
+    {% for r in reactivados %}<li>{{ r|capfirst }} estaba inactivo por falta de pago: se reactivó automáticamente.</li>{% endfor %}
+  </ul>
+</div>
+{% for a in advertencias %}<div class="alerta aviso" role="alert">{% include "core/icono.html" with nombre="alerta" %}<div>{{ a }}</div></div>{% endfor %}
+<div style="display:flex;gap:8px;margin-top:14px">
+  <a class="boton" href="{% url 'pagos:factura' pago.numero_factura %}" target="_blank">Imprimir factura</a>
+  <a class="boton secundario" href="{% url 'pagos:vehiculo' pago.vehiculo.pk %}">Ver pagos del vehículo</a>
+  <a class="boton secundario" href="{% url 'pagos:registrar' %}">Registrar otro pago</a>
+</div>
+{% endblock %}

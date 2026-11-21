@@ -1,0 +1,19 @@
+@startsalt M-27_PagoRegistrado
+title M-27 Pago registrado: confirmación y advertencias (HU-024, HU-028)
+{+
+  {* Entrada | Salida | Dentro | Historial | Novedades | Vencidos | Propietarios | Vehículos | Celdas | Pagos | Por vencer | Admin }
+  ==
+  <b>Pago registrado · Factura N.º 000125</b>
+  {^"Resultado"
+    ABC123 queda <b>al día</b> hasta el 18/12/2026
+    Total cobrado: 150 000 COP en efectivo · Registró: María Rodríguez
+    Se envió un correo simulado a laura@correo.co
+    El vehículo estaba inactivo por falta de pago: se reactivó automáticamente
+  }
+  {^"Advertencias (solo si aplican)"
+    El vehículo sigue con la mensualidad vencida: debe 3 meses más
+    El vehículo está inactivo por otro motivo (Vendido): debe activarse a mano
+  }
+  { [Imprimir factura] | [Ver pagos del vehículo] | [Registrar otro pago] }
+}
+@endsalt

@@ -1,0 +1,20 @@
+@startsalt M-32_Descuentos
+title M-32 Descuentos (administrador) (HU-031)
+{+
+  {* Entrada | Salida | Dentro | Historial | Novedades | Vencidos | Propietarios | Vehículos | Celdas | Pagos | Por vencer | Admin }
+  ==
+  <b>Descuentos</b>
+  {^"Crear descuento"
+    Descripción | "Cliente frecuente           "
+    Porcentaje (%) | "10  "
+    [Crear descuento] | .
+  }
+  {^"Descuentos (no se editan)"
+    {#
+      Descripción | Porcentaje | Estado | Creado por | Fecha | .
+      Cliente frecuente | 10 % | Habilitado | Laura Castillo | 20/11/2026 | [Deshabilitar]
+      Promoción apertura | 15 % | Deshabilitado | Laura Castillo | 02/01/2026 | [Habilitar]
+    }
+  }
+}
+@endsalt

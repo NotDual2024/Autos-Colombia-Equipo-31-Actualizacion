@@ -39,7 +39,11 @@ Iteración 1 cerrada y subida a GitHub (2026-11-15). **Iteración 2 (gestión de
 | Plan de implementación iteración 2 | docs/Plan_Implementacion_Iteracion2.md | **Aprobado** (2026-11-15) |
 | Requerimientos iteración 3 v1.2 | docs/Requerimientos_Iteracion3_v1.md | **Aprobado** (2026-11-20) |
 | Historias de usuario iteración 3 v1 | docs/Historias_Usuario_Iteracion3_v1.md | **Aprobado** (2026-11-20) |
-| Modelo de datos v1.4 | docs/Modelo_Datos_v1.md (sección 8) + MER-01/MR-01 v1.4 + docs/sql/ddl_sqlite_v1.sql + validar_ddl.py (91/91) | Borrador (2026-11-20): DM-12 a DM-19; pendiente de aprobación |
+| Modelo de datos v1.4 | docs/Modelo_Datos_v1.md (sección 8) + MER-01/MR-01 v1.4 + docs/sql/ddl_sqlite_v1.sql + validar_ddl.py (91/91) | **Aprobado** (2026-11-20), incluidas DM-12 a DM-19 |
+| Diseño iteración 3 v1 | docs/Diseno_Iteracion3_v1.md + diagrams (mockups M-26 a M-35, uml UC-03/CL-05/CL-06/PK-01 v3, arquitectura ARQ-03 v3) | **Aprobado** (2026-11-20) |
+| Plan de implementación iteración 3 | docs/Plan_Implementacion_Iteracion3.md | **Aprobado** (2026-11-20) |
+| Código de la iteración 3 | src/apps/pagos (registrar, corregir, tarifas, descuentos, factura, por vencer, ingresos) + motivo de inactivación + README.md | Implementado y probado: 240/240 pruebas; verificación manual en el navegador |
+| Informe de implementación iteración 3 | docs/Informe_Implementacion_Iteracion3.md | Hecho |
 | Código de la iteración 2 | src/ (módulo nuevo `bitacora`, pantallas de clientes y administración, control de turno) + README.md | Implementado y probado: 154/154 pruebas |
 | Informe de implementación iteración 2 | docs/Informe_Implementacion_Iteracion2.md | Hecho |
 | Proyecto StarUML (iteraciones 1 y 2) | docs/staruml/ (generar_staruml.py, exportar_imagenes.py, .mdj) + docs/latex/diagrams/staruml/ | Casos de uso UC-02a/UC-02b (contenido de UC-02 aprobado). Secuencias SD-01 a SD-11 y componentes CMP-01: **pendientes de revisión del equipo** |
@@ -96,7 +100,7 @@ Iteración 1 cerrada y subida a GitHub (2026-11-15). **Iteración 2 (gestión de
 
 ## Pendientes
 - Revisión del equipo del PDF de entrega de la iteración 2 (en especial SD-01 a SD-11 y CMP-01). El PDF de entrega y sus archivos **no se suben a GitHub** (indicación del equipo).
-- Iteración 3 (gestión de pagos): iniciada el 2026-11-20. Requerimientos v1.2 aprobados (RN-38 a RN-47, RF-201 a RF-209). Historias HU-024 a HU-032 aprobadas. Modelo de datos v1.4 en borrador, pendiente de aprobación.
+- Iteración 3 (gestión de pagos): iniciada el 2026-11-20. Requerimientos v1.2 aprobados (RN-38 a RN-47, RF-201 a RF-209). Historias HU-024 a HU-032 aprobadas. Modelo de datos v1.4 aprobado. Diseño v1 aprobado. Plan de implementación aprobado. **Implementación terminada y verificada** (240/240 pruebas). Pendiente: revisión del equipo, actualización del PDF y commit.
 - Revisión del primer PDF LaTeX.
 
 ## Próximas actividades

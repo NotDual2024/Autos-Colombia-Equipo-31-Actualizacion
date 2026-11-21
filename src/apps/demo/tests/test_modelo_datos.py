@@ -42,7 +42,7 @@ class ModeloDatosTests(TestCase):
         cls.moto = Vehiculo.objects.create(placa="XYZ12D", tipo="MOTO", marca="Yamaha", nombre="NMAX", modelo=2023, color="Negro", propietario=cls.prop, fecha_registro=D)
         cls.c1 = Celda.objects.create(codigo="A-001", tipo="CARRO_CAMIONETA")
         cls.c2 = Celda.objects.create(codigo="A-002", tipo="CARRO_CAMIONETA")
-        cls.pago = Pago.objects.create(vehiculo=cls.carro, periodo_inicio=date(2026, 10, 16), periodo_fin=date(2026, 11, 15), valor=150000, fecha_pago=D, registrado_por=cls.admin)
+        cls.pago = Pago.objects.create(vehiculo=cls.carro, periodo_inicio=date(2026, 10, 15), periodo_fin=date(2026, 11, 15), tarifa_unitaria=150000, valor_bruto=150000, valor=150000, medio="EFECTIVO", numero_factura=1, fecha_pago=D, registrado_por=cls.admin)
 
     def vehiculo(self, **kw):
         datos = dict(placa="QQQ111", tipo="CARRO", marca="M", nombre="N", modelo=2020, color="Azul", propietario=self.prop, fecha_registro=D)
@@ -90,7 +90,7 @@ class ModeloDatosTests(TestCase):
         self.falla(lambda: Tarifa.objects.create(categoria="MOTO", valor=90000, vigente_desde=date(2026, 1, 1)))
 
     def test_pago_periodo_invertido(self):
-        self.falla(lambda: Pago.objects.create(vehiculo=self.carro, periodo_inicio=date(2026, 11, 15), periodo_fin=date(2026, 10, 16), valor=150000, fecha_pago=D, registrado_por=self.admin))
+        self.falla(lambda: Pago.objects.create(vehiculo=self.carro, periodo_inicio=date(2026, 11, 15), periodo_fin=date(2026, 10, 15), tarifa_unitaria=150000, valor_bruto=150000, valor=150000, medio="EFECTIVO", numero_factura=2, fecha_pago=D, registrado_por=self.admin))
 
     # --- estadías (RN-04, RN-05)
     def entrada(self, vehiculo, celda, cuando=D):
