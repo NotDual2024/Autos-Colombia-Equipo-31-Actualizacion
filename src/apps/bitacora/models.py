@@ -23,6 +23,7 @@ class Accion(models.TextChoices):
     CORREGIR_PAGO = "CORREGIR_PAGO", "Corregir pago"
     HABILITAR = "HABILITAR", "Habilitar"
     DESHABILITAR = "DESHABILITAR", "Deshabilitar"
+    ELIMINAR = "ELIMINAR", "Eliminar"
 
 
 class Entidad(models.TextChoices):
@@ -35,6 +36,7 @@ class Entidad(models.TextChoices):
     PAGO = "PAGO", "Pago"
     TARIFA = "TARIFA", "Tarifa"
     DESCUENTO = "DESCUENTO", "Descuento"
+    CELDA = "CELDA", "Celda"
 
 
 class RegistroOperacion(models.Model):

@@ -41,6 +41,8 @@ class DatosDemoTests(TestCase):
         self.assertEqual((atrasado.activo, atrasado.motivo_inactivacion), (False, "FALTA_PAGO"))
         self.assertEqual(vigencia.estado(atrasado, reloj.hoy()).meses_pendientes, 4)
         self.assertEqual([x.vehiculo.placa for x in consultas.por_vencer(reloj.hoy())], ["ABC123", "GHJ852"])
+        # CHG-003: una celda inactiva
+        self.assertEqual(list(Celda.objects.filter(activa=False).values_list("codigo", flat=True)), ["A-150"])
 
     def test_no_sobrescribe_sin_reiniciar(self):
         call_command("cargar_datos_demo", stdout=StringIO())

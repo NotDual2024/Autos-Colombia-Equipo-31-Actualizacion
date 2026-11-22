@@ -15,7 +15,8 @@ from apps.usuarios_celdas import services as clientes
 from apps.pagos import registro, tarifas
 from apps.pagos.calendario import sumar_meses
 from apps.pagos.models import MedioPago
-from apps.usuarios_celdas.models import Categoria, HistorialPropiedad, MotivoInactivacion
+from apps.usuarios_celdas import celdas
+from apps.usuarios_celdas.models import Categoria, Celda, HistorialPropiedad, MotivoInactivacion
 from apps.bitacora import services as bitacora
 from apps.bitacora.models import Accion, Entidad
 from apps.demo import fabricas as f
@@ -156,3 +157,6 @@ class Command(BaseCommand):
         clientes.cambiar_estado_vehiculo(atrasado, False, admin, MotivoInactivacion.FALTA_PAGO)
         por_vencer = V(sofia, "GHJ852", "CARRO", "Suzuki", "Swift", 2023, "Rojo")
         f.crear_pago(por_vencer, hoy + timedelta(days=3), op)
+
+        # CHG-003: una celda en mantenimiento para mostrar la gestión de celdas y el mapa
+        celdas.inactivar(admin, Celda.objects.get(codigo="A-150"), "Mantenimiento de la demarcación")

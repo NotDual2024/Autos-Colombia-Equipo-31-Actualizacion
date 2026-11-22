@@ -224,9 +224,19 @@ class HU018MapaCeldas(PruebaConReloj):
         estadias.registrar_entrada("KLM482", "A-003", self.operador)
         mapa = selectors.mapa_celdas("A", 1)
         self.assertEqual((mapa["total"], mapa["ocupadas"], mapa["libres"]), (3, 1, 2))
-        self.assertIn({"codigo": "A-003", "placa": "KLM482"}, mapa["celdas"])
+        self.assertIn({"codigo": "A-003", "placa": "KLM482", "activa": True, "motivo": None}, mapa["celdas"])
         self.ingresar()
         r = self.client.get(reverse("usuarios_celdas:mapa"), {"zona": "M"})
         self.assertContains(r, "M-01")
-        self.assertNotContains(r, "Agregar celda")
         self.assertIsNotNone(v)
+
+    def test_celdas_inactivas_en_el_mapa(self):
+        """HU-018 (CHG-003): la celda inactiva aparece marcada y no cuenta como libre."""
+        from apps.usuarios_celdas import celdas as servicio_celdas
+        from apps.usuarios_celdas.models import Celda
+        servicio_celdas.inactivar(self.admin, Celda.objects.get(codigo="A-002"), "Mantenimiento")
+        mapa = selectors.mapa_celdas("A", 1)
+        self.assertEqual((mapa["total"], mapa["libres"], mapa["inactivas"]), (2, 2, 1))
+        self.ingresar()
+        r = self.client.get(reverse("usuarios_celdas:mapa"), {"zona": "A"})
+        self.assertContains(r, "Inactiva: Mantenimiento")

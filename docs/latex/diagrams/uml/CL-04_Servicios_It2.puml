@@ -1,5 +1,5 @@
 @startuml CL-04_Servicios_It2
-' CL-04 - Clases de servicio de la iteración 2 - v1
+' CL-04 - Clases de servicio de la iteración 2 - v2 (CHG-003: ServicioCeldas)
 !pragma layout smetana
 skinparam classAttributeIconSize 0
 skinparam class {
@@ -37,6 +37,16 @@ package usuarios_celdas {
     + buscar_vehiculos(placa) : list<Vehiculo>
     + mapa_celdas(zona, bloque) : list<EstadoCelda>
   }
+  class ServicioCeldas {
+    + listar(tipo, estado, texto) : list<FilaCelda>
+    + siguiente_codigo(tipo) : str
+    + validar_codigo(codigo, tipo) : str  {RN-49}
+    + crear(admin, tipo, codigo) : Celda
+    + cambiar_tipo(admin, celda, tipo, codigo) : Celda  {RN-50, RN-52}
+    + inactivar(admin, celda, motivo) : Celda  {RN-50, RN-51}
+    + reactivar(admin, celda) : Celda
+    + eliminar(admin, celda) : str  {RN-52}
+  }
 }
 
 package cuentas {
@@ -71,6 +81,8 @@ package core {
 }
 
 ServicioPropietarios ..> ServicioBitacora
+ServicioCeldas ..> ServicioBitacora : RN-53
+ServicioCeldas ..> ErrorNegocio : lanza
 ServicioVehiculos ..> ServicioBitacora
 ServicioCambioPropietario ..> ServicioBitacora
 ServicioOperadores ..> ServicioBitacora

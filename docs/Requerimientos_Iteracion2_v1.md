@@ -1,10 +1,10 @@
 # Requerimientos — Iteración 2: Gestión de usuarios y gestión de celdas
 
 **Proyecto:** Parqueadero "Autos Colombia"
-**Versión:** 1.4
+**Versión:** 1.5
 **Fecha:** 2026-11-15
 **Base:** Anexo A de `Requerimientos_v2.md` (v2.11), modelo de datos v1.2 y RN-01 a RN-24 aprobadas.
-**Estado:** **Aprobado** por el equipo del proyecto el 2026-11-15.
+**Estado:** **Aprobado** por el equipo del proyecto el 2026-11-15. Versión 1.5 por la solicitud de cambio CHG-003, aprobada el 2026-11-22.
 
 | Versión | Cambios |
 |---|---|
@@ -14,6 +14,7 @@
 | 1.3 | P-37 y P-38 resueltas; DEC-013, DEC-014 y DEC-015 aprobadas. Sin preguntas abiertas. |
 | 1.3 | **Aprobada** por el equipo el 2026-11-15. |
 | 1.4 | Aclaraciones del equipo al revisar las historias (2026-11-15): RN-35 precisa la inactividad en un registro en curso; RN-37: las franjas del mismo día no pueden cruzarse; RF-107: el encabezado muestra las horas del turno, sin nombre. No cambia el alcance. |
+| 1.5 | **CHG-003** (observación del profesor, aprobada el 2026-11-22): el administrador crea y administra las celdas. RF-103 pasa a *Must* como "Gestionar celdas"; RN-27 se reemplaza por RN-48 a RN-53; RF-104 muestra las celdas inactivas. |
 
 Etiquetas de origen: **[E]** enunciado · **[U]** equipo · **[I]** inferido, por confirmar.
 
@@ -25,7 +26,7 @@ Etiquetas de origen: **[E]** enunciado · **[U]** equipo · **[I]** inferido, po
 |---|---|---|
 | P-26 Permisos | El **operador** registra, modifica, inactiva y activa propietarios y vehículos. El administrador hace todo. | Matriz de permisos (sección 3) |
 | P-27 Horarios | Son **fijos**: el operador **no puede iniciar sesión fuera de su turno**, salvo que el administrador lo autorice desde su sesión. | RN-31, RN-32, RF-107, RF-110 |
-| P-28 Celdas | Las celdas son **fijas**: no se agregan ni cambian de tipo. | RF-103 pasa a *Won't*; RN-20 sin cambios |
+| P-28 Celdas | Las celdas son **fijas**: no se agregan ni cambian de tipo. **Reemplazada por CHG-003 (2026-11-22):** el administrador crea y administra las celdas. | RF-103 (*Must*), RN-48 a RN-53 |
 | P-29 Vehículos | Placa mal escrita: se **inactiva** y se crea un **registro nuevo**. Cambio de propietario: **petición al administrador**, y debe quedar el registro del propietario anterior. | RN-26, RN-33, RF-109 |
 | P-30 Teléfono | **Celular colombiano.** | RN-30 |
 | P-31 Operadores | El administrador puede editar el nombre y restablecer la contraseña ("control sobre todo el sistema"). | RF-106 |
@@ -39,7 +40,13 @@ Etiquetas de origen: **[E]** enunciado · **[U]** equipo · **[I]** inferido, po
 |---|---|---|
 | RN-25 | No se registran dos propietarios con la misma cédula ni dos vehículos con la misma placa. | [I] (ya lo garantiza el modelo) |
 | RN-26 | La placa no se modifica. Si se registró mal, el vehículo se inactiva y se registra de nuevo con la placa correcta. | [U] P-29 |
-| RN-27 | Las celdas son fijas: no se agregan, no cambian de tipo y no se borran. | [U] P-28 |
+| RN-27 (reemplazada) | *Reemplazada por CHG-003:* las celdas ya no son fijas (ver RN-48 a RN-53). | [U] P-28 |
+| RN-48 | Solo el **administrador** crea, modifica, inactiva, reactiva y elimina celdas. El operador solo las consulta en el mapa. | [E] CHG-003, P-52 |
+| RN-49 | **Código de celda:** único y con el formato de su tipo: `A-` y 3 dígitos para carro/camioneta (`A-001` a `A-999`) y `M-` y 2 dígitos para moto (`M-01` a `M-99`). Se escribe en mayúsculas; el sistema sugiere el siguiente código libre. El código no se modifica, salvo al cambiar el tipo de una celda que nunca se usó (RN-52): como el formato depende del tipo, recibe un código del tipo nuevo. | [E] CHG-003, P-53, P-55 |
+| RN-50 | **Celda ocupada:** no se puede inactivar, cambiar de tipo ni eliminar mientras tenga un vehículo dentro. | [E] CHG-003 |
+| RN-51 | **Celda inactiva** (por ejemplo, en mantenimiento): se inactiva con un motivo obligatorio; no se ofrece al registrar una entrada; en el mapa aparece marcada como inactiva. Se puede reactivar. | [U] P-54 |
+| RN-52 | **Modificar y eliminar:** solo se cambia el tipo de una celda libre que nunca se ha usado. Solo se elimina una celda que nunca se ha usado; si ya tuvo estadías, se inactiva (RN-07). | [U] P-52, P-55 |
+| RN-53 | Cada creación, modificación, inactivación, reactivación o eliminación de una celda queda en la **bitácora** (RN-34). No hay un número máximo de celdas fuera del límite del formato del código. | [U] P-56 |
 | RN-29 | Al inactivar un propietario o un vehículo, si está dentro puede salir, pero no puede volver a entrar mientras siga inactivo (RN-24). | [I] |
 | RN-30 | El teléfono del propietario es un celular colombiano: 10 dígitos que empiezan por 3 (por ejemplo, 3001234567). | [U] P-30 |
 | RN-31 | Un operador solo puede iniciar sesión dentro de su turno. El administrador no tiene restricción de horario. | [U] P-27 |
@@ -60,6 +67,7 @@ Etiquetas de origen: **[E]** enunciado · **[U]** equipo · **[I]** inferido, po
 | Solicitar un cambio de propietario | ✔ | ✔ |
 | Aprobar o rechazar un cambio de propietario | — | ✔ |
 | Consultar propietarios, vehículos y el mapa de celdas | ✔ | ✔ |
+| Crear, modificar, inactivar, reactivar y eliminar celdas (CHG-003) | — | ✔ |
 | Gestionar operadores: crear, editar, restablecer contraseña, activar e inactivar | — | ✔ |
 | Definir horarios y autorizar ingresos fuera de turno | — | ✔ |
 | Consultar la bitácora de un vehículo o propietario (en su ficha) | ✔ | ✔ |
@@ -86,12 +94,17 @@ Etiquetas de origen: **[E]** enunciado · **[U]** equipo · **[I]** inferido, po
 - **Prioridad:** Must.
 - **Nota:** para entrar, el vehículo necesita además una mensualidad pagada (RN-03). Los pagos se registran en la iteración 3.
 
-### RF-103 — Agregar celdas → **Won't**
-Las celdas son fijas (RN-27). Queda fuera del alcance.
+### RF-103 — Gestionar celdas (CHG-003)
+- **Actor:** Administrador.
+- **Descripción:** crear una celda (tipo y código, con el siguiente código sugerido), cambiar su tipo, inactivarla con motivo, reactivarla y, si nunca se usó, eliminarla. Ver la lista de celdas con su estado (libre, ocupada o inactiva), filtrar por tipo y estado, y buscar por código.
+- **Validaciones:** código único y con el formato de su tipo (RN-49); una celda ocupada no se inactiva, no cambia de tipo ni se elimina (RN-50); solo se cambia el tipo o se elimina una celda que nunca se usó (RN-52).
+- **Reglas:** RN-48 a RN-53.
+- **Prioridad:** Must.
+- **Historial:** en la versión 1.1 quedó como *Won't* porque las celdas eran fijas (P-28). La solicitud de cambio CHG-003 lo incorporó después de la observación del profesor.
 
 ### RF-104 — Mapa de celdas
 - **Actor:** Operador, Administrador.
-- **Descripción:** todas las celdas por zona (A: carro/camioneta, M: moto), con su estado (libre u ocupada, con la placa) y contadores.
+- **Descripción:** todas las celdas por zona (A: carro/camioneta, M: moto), con su estado (libre, ocupada con la placa, o inactiva) y contadores. El inventario es el que defina el administrador (RF-103).
 - **Prioridad:** Must.
 
 ### RF-105 — Modificar, activar e inactivar propietarios y vehículos

@@ -40,3 +40,15 @@ Clases nuevas: \texttt{AutorizacionFueraTurno}, \texttt{SolicitudCambioPropietar
 
 
 
+
+\subsection{CHG-003: gestión de celdas (clases)}
+Solicitud de cambio aprobada el 2026-11-22, a partir de la observación del profesor.
+
+\paragraph{Clases}
+
+\begin{itemize}
+  \item \textbf{CL-03 (versión 2):} \texttt{Celda} con el código (formato por tipo), el tipo, \texttt{activa} y el motivo de inactivación.
+  \item \textbf{CL-04 (versión 2):} \texttt{ServicioCeldas} en \texttt{usuarios\_celdas}: \texttt{listar}, \texttt{siguiente\_codigo}, \texttt{validar\_codigo}, \texttt{crear}, \texttt{cambiar\_tipo}, \texttt{inactivar}, \texttt{reactivar} y \texttt{eliminar}. Cada operación exige el rol de administrador y registra en la bitácora.
+\end{itemize}
+
+

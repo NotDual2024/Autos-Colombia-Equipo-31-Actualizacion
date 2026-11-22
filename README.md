@@ -99,6 +99,8 @@ Las fechas se calculan a partir del día en que se ejecuta el comando.
 | Descuentos (HU-031) | Como `admin`: Descuentos → "Cliente frecuente" (10 %) habilitado y "Promoción apertura" (15 %) deshabilitado |
 | Ingresos (HU-032) | Como `admin`: Ingresos → total del mes por tipo de vehículo y por medio de pago, sin pagos corregidos |
 | Inactivar con motivo (HU-028) | Ficha de un vehículo o propietario → Inactivar → "Falta de pago" u "Otro" con descripción |
+| Gestionar celdas (HU-033 a HU-036) | Como `admin`: Administración → Celdas → crear una celda (el código se sugiere: `A-151` o `M-51`), filtrar por estado, inactivar con motivo, reactivar, cambiar el tipo de una celda nueva o eliminarla. `A-150` está inactiva por mantenimiento; una celda ocupada (por ejemplo `A-003`) no se puede inactivar |
+| Celdas inactivas en el mapa (HU-018) | Clientes → Mapa de celdas → zona A, último bloque: `A-150` aparece como inactiva |
 
 Para empezar de cero: `python manage.py cargar_datos_demo --reiniciar` (**borra todos los datos**).
 
@@ -120,7 +122,7 @@ cd src
 python manage.py test apps
 ```
 
-Resultado actual: **240 pruebas, todas aprobadas**. Cubren los criterios de aceptación de HU-001 a HU-032, las reglas de negocio y las restricciones del modelo de datos.
+Resultado actual: **263 pruebas, todas aprobadas**. Cubren los criterios de aceptación de HU-001 a HU-036, las reglas de negocio y las restricciones del modelo de datos.
 
 ## Copia de seguridad (RNF-009)
 

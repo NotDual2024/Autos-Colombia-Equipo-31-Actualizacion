@@ -1,0 +1,30 @@
+@startsalt M-36_Celdas
+title M-36 Gestión de celdas (administrador) (HU-033, HU-034, HU-035, HU-036)
+{+
+  {* Entrada | Salida | Dentro | Historial | Novedades | Vencidos | Propietarios | Vehículos | Celdas | Pagos | Por vencer | Admin }
+  ==
+  <b>Celdas</b>
+  {
+    {^"Crear celda"
+      Tipo | ^Carro / camioneta^
+      Código | "A-151     "
+      Vacío = código sugerido (A-151 o M-51)
+      [Crear celda] | .
+    } | . |
+    {
+      { Código | "A-0   " | Tipo | ^Todos^ | Estado | ^Todos^ | [Filtrar] }
+      {#
+        Código | Tipo | Estado | Acciones | . | .
+        A-001 | Carro / camioneta | Ocupada · BGT219 | . | . | .
+        A-002 | Carro / camioneta | Libre | [Inactivar] | . | .
+        A-011 | Carro / camioneta | Inactiva · Mantenimiento | [Reactivar] | . | .
+        A-151 | Carro / camioneta | Libre (nueva) | [Inactivar] | [Cambiar tipo] | [Eliminar]
+        M-01 | Moto | Libre | [Inactivar] | . | .
+      }
+    }
+  }
+  ..
+  Errores: "Ya existe una celda con el código M-05" · "El código de una celda de moto debe tener el formato M-01 a M-99"
+  "La celda está ocupada" · "La celda tiene historial; solo se puede inactivar"
+}
+@endsalt

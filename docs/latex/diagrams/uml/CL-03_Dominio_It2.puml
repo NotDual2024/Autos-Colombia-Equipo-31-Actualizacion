@@ -1,5 +1,5 @@
 @startuml CL-03_Dominio_It2
-' CL-03 - Clases de dominio nuevas o modificadas en la iteración 2 - v1
+' CL-03 - Clases de dominio nuevas o modificadas en la iteración 2 - v2 (CHG-003: Celda)
 !pragma layout smetana
 skinparam classAttributeIconSize 0
 skinparam class {
@@ -33,6 +33,13 @@ package cuentas {
 }
 
 package usuarios_celdas {
+  class Celda {
+    - codigo : str  {único; A-001..A-999 o M-01..M-99}
+    - tipo : Categoria
+    - activa : bool
+    - motivo_inactivacion : str [0..1]
+    + admite(vehiculo) : bool
+  }
   class Propietario #EEEEEE {
     - nombre_completo : str
     - numero_documento : str

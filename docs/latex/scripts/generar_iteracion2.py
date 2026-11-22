@@ -120,11 +120,23 @@ def main() -> None:
     dis = (DOCS / "Diseno_Iteracion2_v1.md").read_text(encoding="utf-8")
     mod = (DOCS / "Modelo_Datos_v1.md").read_text(encoding="utf-8")
 
+    def chg003(desde: str, hasta: str | None, mockups: tuple[int, ...] = ()) -> str:
+        """Subsección de la solicitud de cambio CHG-003 (sección 7 del diseño de la iteración 2)."""
+        titulo = desde.split(". ", 1)[1]
+        cuerpo = md_a_tex(seccion(dis, desde, hasta), ("subsubsection", "paragraph", "paragraph"))
+        cuerpo = cuerpo.replace(r"\subsubsection{" + tex(titulo) + "}", "", 1)
+        imagenes = "\n".join(
+            rf"\diagrama{{mockups/{p.stem}.png}}{{{tex(p.stem.replace('_', ' '))}}}{{fig:{p.stem}}}{{0.8}}"
+            for p in sorted((DOCS / "latex" / "diagrams" / "mockups").glob("M-*.png")) if int(p.stem[2:4]) in mockups)
+        return ("\n" + r"\subsection{CHG-003: gestión de celdas (" + tex(titulo.lower()) + ")}" + "\n"
+                + "Solicitud de cambio aprobada el 2026-11-22, a partir de la observación del profesor.\n\n"
+                + cuerpo + "\n" + imagenes + "\n")
+
     escribir("requerimientos.tex", r"\section{Requerimientos de la iteración 2}" + "\n"
-             "Aprobados por el equipo el 2026-11-15 (versión 1.4). Las reglas RN-01 a RN-24 de la iteración 1 siguen vigentes.\n\n"
+             "Aprobados por el equipo el 2026-11-15 (versión 1.4) y actualizados a la versión 1.5 por la solicitud de cambio CHG-003 (2026-11-22). Las reglas RN-01 a RN-24 de la iteración 1 siguen vigentes.\n\n"
              + md_a_tex(seccion(req, "## 1. Respuestas", "## 5. Decisiones")))
     escribir("historias.tex", r"\section{Historias de usuario de la iteración 2}" + "\n"
-             "Aprobadas por el equipo el 2026-11-15 (versión 1.1).\n\n"
+             "Aprobadas por el equipo el 2026-11-15 (versión 1.1). La versión 1.2 agrega HU-033 a HU-036 por la solicitud de cambio CHG-003 (2026-11-22).\n\n"
              + md_a_tex(seccion(hu, "## Resumen", "## Puntos revisados")))
     escribir("mockups.tex", r"\section{Mockups de la iteración 2}" + "\n"
              + md_a_tex(seccion(dis, "## 1. Mockups", "## 2. Casos de uso"), ("subsection", "subsubsection", "paragraph")).replace(
@@ -132,14 +144,18 @@ def main() -> None:
              + "\n" + "\n".join(
                  rf"\diagrama{{mockups/{p.stem}.png}}{{{tex(p.stem.replace('_', ' '))}}}{{fig:{p.stem}}}{{0.8}}"
                  for p in sorted((DOCS / "latex" / "diagrams" / "mockups").glob("M-*.png"))
-                 if 13 <= int(p.stem[2:4]) <= 25))
+                 if 13 <= int(p.stem[2:4]) <= 25)
+             + "\n" + chg003("### 7.1. Mockups", "### 7.2.", (36, 37)))
     escribir("casos_uso.tex", r"\section{Casos de uso de la iteración 2}" + "\n"
-             + md_a_tex(seccion(dis, "## 2. Casos de uso", "## 3. Clases")).replace(r"\subsection{Casos de uso (UC-02)}", ""))
+             + md_a_tex(seccion(dis, "## 2. Casos de uso", "## 3. Clases")).replace(r"\subsection{Casos de uso (UC-02)}", "")
+             + chg003("### 7.2. Casos de uso", "### 7.3."))
     escribir("clases.tex", r"\section{Clases de la iteración 2}" + "\n"
-             + md_a_tex(seccion(dis, "## 3. Clases", "## 4. Paquetes")).replace(r"\subsection{Clases}", ""))
+             + md_a_tex(seccion(dis, "## 3. Clases", "## 4. Paquetes")).replace(r"\subsection{Clases}", "")
+             + chg003("### 7.3. Clases", "### 7.4."))
     escribir("paquetes.tex", r"\section{Cambios de la iteración 2}" + "\n"
              + md_a_tex(seccion(dis, "## 4. Paquetes", "## 5. Mecanismo")).replace(r"\subsection{Paquetes y componentes (PK-01 v2, ARQ-03 v2)}", "")
-             .replace(r"\diagrama{uml/PK-01_Paquetes.png}{PK-01}{fig:PK-01_Paquetes}{1.0}", ""))
+             .replace(r"\diagrama{uml/PK-01_Paquetes.png}{PK-01}{fig:PK-01_Paquetes}{1.0}", "")
+             + chg003("### 7.4. Paquetes y secuencias", None))
     escribir("arquitectura.tex", r"\section{Actualización de la iteración 2}" + "\n"
              + md_a_tex(seccion(dis, "## 5. Mecanismo", "## 6.")).replace(r"\subsection{Mecanismo de control de turno (RN-31, RN-35, RN-36)}", r"\subsection{Mecanismo de control de turno}"))
     escribir("modelo.tex", r"\section{Cambios del modelo v1.3 (iteración 2)}" + "\n"

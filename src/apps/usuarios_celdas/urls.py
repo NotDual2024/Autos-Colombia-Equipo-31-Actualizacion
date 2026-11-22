@@ -19,4 +19,8 @@ urlpatterns = [
     path("solicitudes/", views.solicitudes, name="solicitudes"),
     path("solicitudes/<int:solicitud_id>/resolver/", views.resolver_solicitud, name="resolver_solicitud"),
     path("celdas/", views.mapa_celdas, name="mapa"),
+    path("celdas/administrar/", views.celdas, name="celdas"),
+    path("celdas/<int:celda_id>/tipo/", views.celda_tipo, name="celda_tipo"),
+    path("celdas/<int:celda_id>/estado/", views.celda_estado, name="celda_estado"),
+    path("celdas/<int:celda_id>/eliminar/", views.celda_eliminar, name="celda_eliminar"),
 ]

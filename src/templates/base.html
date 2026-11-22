@@ -34,6 +34,7 @@
       <div class="lateral-titulo">Administración</div>
       <a href="{% url 'cuentas:operadores' %}" class="{% if u == 'cuentas:operadores' or u == 'cuentas:editar_operador' or u == 'cuentas:horario' %}activo{% endif %}">{% include "core/icono.html" with nombre="usuarios" %} Operadores</a>
       <a href="{% url 'usuarios_celdas:solicitudes' %}" class="{% if u == 'usuarios_celdas:solicitudes' %}activo{% endif %}">{% include "core/icono.html" with nombre="novedad" %} Solicitudes{% if solicitudes_pendientes %} <span class="contador" style="margin-left:auto">{{ solicitudes_pendientes }}</span>{% endif %}</a>
+      <a href="{% url 'usuarios_celdas:celdas' %}" class="{% if u == 'usuarios_celdas:celdas' %}activo{% endif %}">{% include "core/icono.html" with nombre="celda" %} Celdas</a>
       <a href="{% url 'cuentas:autorizaciones' %}" class="{% if u == 'cuentas:autorizaciones' %}activo{% endif %}">{% include "core/icono.html" with nombre="reloj" %} Autorizaciones</a>
       <a href="{% url 'bitacora:bitacora' %}" class="{% if u == 'bitacora:bitacora' %}activo{% endif %}">{% include "core/icono.html" with nombre="historial" %} Bitácora</a>
       <a href="{% url 'pagos:tarifas' %}" class="{% if u == 'pagos:tarifas' %}activo{% endif %}">{% include "core/icono.html" with nombre="llave" %} Tarifas</a>

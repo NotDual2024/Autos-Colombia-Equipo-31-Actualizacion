@@ -22,3 +22,12 @@ def duracion(inicio: datetime, fin: datetime | None = None) -> str:
     if horas:
         return f"{horas} h {mins} min"
     return f"{mins} min"
+
+
+@register.filter
+def get_item(diccionario, clave):
+    """{{ dic|get_item:clave }}: valor de un diccionario por una clave variable."""
+    try:
+        return diccionario.get(clave)
+    except AttributeError:
+        return None

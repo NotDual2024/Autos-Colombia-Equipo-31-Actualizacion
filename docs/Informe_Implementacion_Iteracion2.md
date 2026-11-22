@@ -81,3 +81,12 @@ Después de la verificación se recargaron los datos de demostración (`cargar_d
 ## Estado final
 
 **Completado y verificado**, salvo las limitaciones anteriores. Falta el commit de la iteración 2.
+
+## Corrección CHG-003: gestión de celdas (2026-11-22)
+
+A partir de la observación del profesor, la solicitud de cambio CHG-003 agregó la creación y administración de celdas por el administrador (RF-103, RN-48 a RN-53, HU-033 a HU-036, modelo v1.5).
+
+- **Código:** `usuarios_celdas/celdas.py` (crear con código sugerido y validado, cambiar el tipo de una celda nueva, inactivar con motivo, reactivar y eliminar si nunca se usó); pantalla Administración → Celdas; mapa con celdas inactivas; migraciones `bitacora 0003` y `usuarios_celdas 0004`.
+- **Pruebas:** 23 nuevas (`usuarios_celdas/tests/test_hu033_036.py` y el mapa); suite completa **263/263**. La prueba del mapa que verificaba "celdas fijas" se reemplazó por el escenario de celdas inactivas.
+- **Verificación manual:** crear A-152 con el código sugerido, rechazo de "m-05" repetido, A-003 ocupada sin acciones, inactivar sin motivo (rechazo) y con motivo, reactivar, eliminar una celda nueva y ver A-150 inactiva en el mapa.
+

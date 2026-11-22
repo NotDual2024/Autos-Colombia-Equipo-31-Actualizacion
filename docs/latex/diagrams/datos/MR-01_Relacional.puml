@@ -1,5 +1,5 @@
 @startuml MR-01_Relacional
-' MR-01 - Modelo relacional / físico (notación pata de gallo) - SQLite - v1.4
+' MR-01 - Modelo relacional / físico (notación pata de gallo) - SQLite - v1.5
 !pragma layout smetana
 hide circle
 skinparam linetype ortho
@@ -60,9 +60,10 @@ entity "usuarios_celdas_vehiculo" as vehiculo {
 entity "usuarios_celdas_celda" as celda {
   * id : INTEGER <<PK>>
   --
-  * codigo : VARCHAR(10) <<UQ>>
+  * codigo : VARCHAR(10) <<UQ, CHECK formato por tipo>>
   * tipo : VARCHAR(15) <<CHECK>>
   * activa : BOOLEAN
+    motivo_inactivacion : VARCHAR(100)
 }
 entity "cuentas_autorizacionfueraturno" as autorizacion {
   * id : INTEGER <<PK>>

@@ -52,6 +52,20 @@ Pruebas automatizadas & 240 pruebas en total: criterios de aceptación de HU-024
 \bottomrule
 \end{longtable}
 
+\section{Solicitud de cambio CHG-003: gestión de celdas}
+A partir de la observación del profesor a la entrega de la iteración 2, el equipo aprobó el 2026-11-22 la solicitud de cambio CHG-003: el administrador crea y administra las celdas, con validaciones de código y de ocupación. Reemplaza la regla RN-27 (celdas fijas).
+\begin{longtable}{>{\raggedright\arraybackslash}p{5.2cm}>{\raggedright\arraybackslash}p{6.6cm}>{\raggedright\arraybackslash}p{2.6cm}}
+\toprule
+\textbf{Entregable} & \textbf{Contenido} & \textbf{Estado}\\
+\midrule\endhead
+Requerimientos (iteración 2, v1.5) & RF-103 ``Gestionar celdas'' (\textit{Must}) y RN-48 a RN-53. & Aprobado\\
+Historias de usuario & HU-033 a HU-036; HU-018 con celdas inactivas. & Aprobado\\
+Modelo de datos v1.5 & Motivo de inactivación y formato del código por tipo; DM-20 a DM-22; DDL validado 104/104. & Aprobado\\
+Diseño & Mockups M-36, M-37 y M-20 (v2); casos de uso UC-41 a UC-44; CL-03 y CL-04 (v2). & Aprobado\\
+Código y pruebas & Pantalla de celdas del administrador; 23 pruebas nuevas; 263 pruebas en total. & 263/263 aprobadas\\
+\bottomrule
+\end{longtable}
+
 \section{Herramientas}
 \begin{itemize}
   \item Documentación: \LaTeX{} (MiKTeX, compilación con \texttt{latexmk}) y Markdown como documentos de trabajo.

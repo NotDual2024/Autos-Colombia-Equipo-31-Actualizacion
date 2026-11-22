@@ -51,7 +51,9 @@ def main() -> None:
     escribir("arquitectura.tex", r"\section{Actualización de la iteración 3}" + "\n"
              + md_a_tex(seccion(dis, "## 5. Mecanismos", "## 6.")).replace(r"\subsection{Mecanismos}", ""))
     escribir("modelo.tex", r"\section{Cambios del modelo v1.4 (iteración 3)}" + "\n"
-             + md_a_tex(seccion(mod, "**Base:** requerimientos de la iteración 3")))
+             + md_a_tex(seccion(mod, "**Base:** requerimientos de la iteración 3", "## 9."))
+             + "\n" + r"\section{Cambios del modelo v1.5 (CHG-003, gestión de celdas)}" + "\n"
+             + md_a_tex(seccion(mod, "**Base:** solicitud de cambio CHG-003")))
     print("Secciones de la iteración 3 generadas en", SALIDA)
 
 

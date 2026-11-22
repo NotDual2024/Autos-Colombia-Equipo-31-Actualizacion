@@ -3,6 +3,7 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 from django.shortcuts import get_object_or_404, redirect, render
+from django.utils.http import url_has_allowed_host_and_scheme
 from django.views.decorators.http import require_http_methods, require_POST
 
 from apps.bitacora import services as bitacora
@@ -10,8 +11,8 @@ from apps.bitacora.models import Accion, Entidad
 from apps.core.errores import ErrorNegocio
 from apps.cuentas.permisos import solo_administrador
 
-from . import selectors, services
-from .models import EstadoSolicitud, MotivoInactivacion, Propietario, TipoVehiculo, Vehiculo
+from . import celdas as servicio_celdas, selectors, services
+from .models import Categoria, Celda, EstadoSolicitud, MotivoInactivacion, Propietario, TipoVehiculo, Vehiculo
 
 
 def _entero(valor, defecto=1):
@@ -204,3 +205,76 @@ def mapa_celdas(request):
         "mapa": selectors.mapa_celdas(zona, _entero(request.GET.get("bloque"))),
         "resumen": {z: selectors.mapa_celdas(z, 1) for z in ("A", "M")},
     })
+
+
+# ------------------------------------------------------------------ gestión de celdas (CHG-003)
+@solo_administrador
+@require_http_methods(["GET", "POST"])
+def celdas(request):
+    """M-36 / HU-033, HU-034: lista de celdas con filtros y formulario para crear."""
+    tipo_nuevo = request.POST.get("tipo") or request.GET.get("tipo_nuevo") or Categoria.CARRO_CAMIONETA
+    datos = {"tipo": tipo_nuevo, "codigo": request.POST.get("codigo", "")}
+    error = None
+    if request.method == "POST":
+        try:
+            celda = servicio_celdas.crear(request.user, datos["tipo"], datos["codigo"])
+            messages.success(request, f"Celda {celda.codigo} creada.")
+            return redirect(f"{request.path}?q={celda.codigo}")
+        except ErrorNegocio as e:
+            error = e.mensaje
+    filtros = {"tipo": request.GET.get("tipo", ""), "estado": request.GET.get("estado", ""), "q": request.GET.get("q", "")}
+    filas = servicio_celdas.listar(filtros["tipo"], filtros["estado"], filtros["q"])
+    pagina = Paginator(filas, 25).get_page(request.GET.get("pagina"))
+    sugeridos = {t: servicio_celdas.siguiente_codigo(t) for t in Categoria.values}
+    consulta = request.GET.copy()
+    consulta.pop("pagina", None)
+    return render(request, "usuarios_celdas/celdas.html", {
+        "pagina": pagina, "filtros": filtros, "datos": datos, "error": error, "tipos": Categoria.choices,
+        "sugeridos": sugeridos, "consulta": consulta.urlencode(), "total": len(filas),
+        "estados": [(servicio_celdas.LIBRE, "Libre"), (servicio_celdas.OCUPADA, "Ocupada"), (servicio_celdas.INACTIVA, "Inactiva")],
+    })
+
+
+def _accion_celda(request, celda_id: int, accion):
+    celda = get_object_or_404(Celda, pk=celda_id)
+    try:
+        mensaje = accion(celda)
+        messages.success(request, mensaje)
+    except ErrorNegocio as e:
+        messages.error(request, f"{celda.codigo}: {e.mensaje}")
+    volver = request.POST.get("volver", "")
+    if not url_has_allowed_host_and_scheme(volver, allowed_hosts={request.get_host()}):
+        volver = "usuarios_celdas:celdas"
+    return redirect(volver or "usuarios_celdas:celdas")
+
+
+@solo_administrador
+@require_POST
+def celda_tipo(request, celda_id: int):
+    """HU-034: cambiar el tipo de una celda libre que nunca se usó."""
+    def accion(celda):
+        anterior = celda.codigo
+        celda = servicio_celdas.cambiar_tipo(request.user, celda, request.POST.get("tipo", ""), request.POST.get("codigo"))
+        return f"La celda {anterior} ahora es {celda.codigo} ({celda.get_tipo_display().lower()})."
+    return _accion_celda(request, celda_id, accion)
+
+
+@solo_administrador
+@require_POST
+def celda_estado(request, celda_id: int):
+    """HU-035: inactivar con motivo o reactivar."""
+    def accion(celda):
+        if request.POST.get("activa") == "1":
+            servicio_celdas.reactivar(request.user, celda)
+            return f"Celda {celda.codigo} reactivada."
+        servicio_celdas.inactivar(request.user, celda, request.POST.get("motivo", ""))
+        return f"Celda {celda.codigo} inactivada."
+    return _accion_celda(request, celda_id, accion)
+
+
+@solo_administrador
+@require_POST
+def celda_eliminar(request, celda_id: int):
+    """HU-036: eliminar una celda que nunca se usó."""
+    return _accion_celda(request, celda_id,
+                         lambda celda: f"Celda {servicio_celdas.eliminar(request.user, celda)} eliminada.")

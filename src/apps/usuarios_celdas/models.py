@@ -184,16 +184,32 @@ class HistorialPropiedad(models.Model):
         indexes = [models.Index(fields=["vehiculo", "hasta"], name="idx_historial_vehiculo")]
 
 
+# RN-49 (CHG-003): formato del código de celda según su tipo
+PATRONES_CELDA = {Categoria.CARRO_CAMIONETA: "A-[0-9][0-9][0-9]", Categoria.MOTO: "M-[0-9][0-9]"}
+
+
 class Celda(models.Model):
+    """Celda del parqueadero. CHG-003: el administrador la crea y la administra (RF-103, RN-48 a RN-53)."""
+
     codigo = models.CharField(max_length=10, unique=True)
     tipo = models.CharField(max_length=15, choices=Categoria.choices)
     activa = models.BooleanField(default=True)
+    motivo_inactivacion = models.CharField(max_length=100, null=True, blank=True)
 
     class Meta:
         db_table = "usuarios_celdas_celda"
         ordering = ["codigo"]
         constraints = [
             models.CheckConstraint(condition=Q(tipo__in=Categoria.values), name="ck_celda_tipo"),
+            models.CheckConstraint(
+                condition=Q(tipo=Categoria.CARRO_CAMIONETA, codigo__glob=PATRONES_CELDA[Categoria.CARRO_CAMIONETA])
+                & ~Q(codigo="A-000")
+                | Q(tipo=Categoria.MOTO, codigo__glob=PATRONES_CELDA[Categoria.MOTO]) & ~Q(codigo="M-00"),
+                name="ck_celda_codigo"),
+            models.CheckConstraint(condition=Q(activa=True, motivo_inactivacion__isnull=True)
+                                   | Q(activa=False, motivo_inactivacion__isnull=False,
+                                       motivo_inactivacion__trim__length__gt=0),
+                                   name="ck_celda_motivo"),
         ]
         indexes = [models.Index(fields=["tipo", "activa"], name="idx_celda_tipo")]
 

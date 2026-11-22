@@ -1,0 +1,22 @@
+@startsalt M-37_InactivarCelda
+title M-37 Inactivar, cambiar tipo y eliminar una celda (HU-034, HU-035, HU-036)
+{+
+  {* Entrada | Salida | Dentro | Historial | Novedades | Vencidos | Propietarios | Vehículos | Celdas | Pagos | Por vencer | Admin }
+  ==
+  {^"Inactivar A-002"
+    Motivo (obligatorio) | "Mantenimiento          "
+    [Inactivar A-002] | .
+  }
+  {^"Cambiar tipo de A-151 (libre, nunca usada)"
+    Pasar a <b>moto</b>.
+    Código nuevo | "M-51      "
+    [Cambiar tipo] | .
+  }
+  {^"Eliminar A-151"
+    ¿Eliminar la celda A-151? Esta acción no se puede deshacer.
+    [Cancelar] | [Aceptar]
+  }
+  ..
+  Solo se muestran "Cambiar tipo" y "Eliminar" en celdas libres que nunca se han usado (RN-52).
+}
+@endsalt

@@ -1,6 +1,6 @@
 # Diseño — Iteración 2: Gestión de usuarios y gestión de celdas
 
-**Versión:** 1 · **Fecha:** 2026-11-15 · **Estado:** **Aprobado** por el equipo del proyecto el 2026-11-15 (incluye la corrección de DM-08 y el mecanismo de control de turno).
+**Versión:** 1.1 · **Fecha:** 2026-11-15 (v1.1: 2026-11-22) · **Estado:** **Aprobado** por el equipo del proyecto el 2026-11-15 (incluye la corrección de DM-08 y el mecanismo de control de turno). La versión 1.1 agrega la sección 7, por la solicitud de cambio CHG-003 aprobada el 2026-11-22.
 **Base (aprobado):** Requerimientos iteración 2 v1.4 · HU-012 a HU-023 · Modelo de datos v1.3 · DEC-013 a DEC-015.
 
 Contenido: mockups (M-13 a M-25), casos de uso (UC-16 a UC-29), clases (CL-03, CL-04), paquetes (PK-01 v2), componentes (ARQ-03 v2) y el mecanismo de control de turno. Los diagramas están en `docs/latex/diagrams/` (`mockups/`, `uml/` y `arquitectura/`).
@@ -124,3 +124,43 @@ Clases nuevas: `AutorizacionFueraTurno`, `SolicitudCambioPropietario`, `Historia
 2. Los casos de uso UC-16 a UC-29 y los diagramas CL-03, CL-04, PK-01 v2 y ARQ-03 v2.
 3. **La corrección de DM-08:** `bitacora` solo depende de `core`.
 4. **El mecanismo de control de turno** (sección 5), incluida la duración máxima de 12 horas de la sesión del operador.
+
+---
+
+## 7. CHG-003 — Gestión de celdas (versión 1.1, 2026-11-22)
+
+**Origen:** observación del profesor; solicitud de cambio CHG-003 aprobada el 2026-11-22 (RF-103, RN-48 a RN-53, HU-033 a HU-036, modelo v1.5).
+
+### 7.1. Mockups
+
+| Mockup | Pantalla | HU |
+|---|---|---|
+| M-20 (v2) | Mapa de celdas con las celdas inactivas marcadas | HU-018, HU-035 |
+| M-36 | Gestión de celdas (administrador): crear con código sugerido, lista con estado y filtros, acciones por celda | HU-033 a HU-036 |
+| M-37 | Inactivar con motivo, cambiar el tipo de una celda nueva y confirmar la eliminación | HU-034 a HU-036 |
+
+El menú de Administración agrega **Celdas**.
+
+### 7.2. Casos de uso
+
+UC-02 (versión 2) agrega UC-41 a UC-44, todos del Administrador y con «include» a UC-29 (bitácora). UC-43 y UC-44 «extend» UC-42, porque se hacen desde la lista de celdas.
+
+| UC | Actor | Flujo principal | Alternativos y excepciones | Trazabilidad |
+|---|---|---|---|---|
+| **UC-41** Crear celda | Administrador | Elige el tipo → el sistema sugiere el siguiente código (o el administrador escribe uno) → valida formato y unicidad → guarda la celda activa → UC-29. | Código repetido; formato que no corresponde al tipo; no quedan códigos libres; acceso de un operador → 403. | RF-103, HU-033 |
+| **UC-42** Consultar celdas y cambiar el tipo | Administrador | Filtra por tipo, estado o código → ve cada celda con su estado. Para una celda libre que nunca se usó: elige el otro tipo y un código de ese tipo → UC-29 con los valores anteriores y nuevos. | Celda ocupada; celda con historial (se debe inactivar y crear otra). | RF-103, HU-034 |
+| **UC-43** Inactivar y reactivar celda | Administrador | Inactivar: escribe el motivo → la celda deja de ofrecerse al registrar entradas → UC-29. Reactivar: vuelve a estar disponible → UC-29. | Motivo vacío; celda ocupada. | RF-103, RF-104, HU-035 |
+| **UC-44** Eliminar celda sin historial | Administrador | Confirma la eliminación → la celda se borra → UC-29. | Celda ocupada; celda con historial (solo se puede inactivar). | RF-103, HU-036 |
+
+### 7.3. Clases
+
+- **CL-03 (versión 2):** `Celda` con el código (formato por tipo), el tipo, `activa` y el motivo de inactivación.
+- **CL-04 (versión 2):** `ServicioCeldas` en `usuarios_celdas`: `listar`, `siguiente_codigo`, `validar_codigo`, `crear`, `cambiar_tipo`, `inactivar`, `reactivar` y `eliminar`. Cada operación exige el rol de administrador y registra en la bitácora.
+
+### 7.4. Paquetes y secuencias
+
+- **Sin módulos nuevos.** La gestión de celdas va en `usuarios_celdas`. Para saber si una celda está ocupada o tiene historial usa la relación inversa `estadias`, igual que el mapa, sin importar `entradas_salidas`. Así no se forma un ciclo.
+- **Validación de ocupación:** el servicio consulta si la celda tiene una estadía abierta antes de inactivarla, cambiarle el tipo o eliminarla. Además, la clave foránea de la estadía impide en la base de datos eliminar una celda con historial.
+- **Validación de código:** la aplicación valida el formato y la unicidad para dar un mensaje claro. La base de datos lo repite con un CHECK y la restricción única.
+- **Secuencias:** SD-12 (crear celda) y SD-13 (inactivar celda) se agregaron al proyecto StarUML de la entrega.
+

@@ -1,5 +1,5 @@
 @startuml UC-02_CasosUso_It2
-' UC-02 - Diagrama de casos de uso - Iteración 2 - v1
+' UC-02 - Diagrama de casos de uso - Iteración 2 - v2 (CHG-003: gestión de celdas)
 left to right direction
 skinparam packageStyle rectangle
 skinparam usecase {
@@ -29,6 +29,10 @@ rectangle "Sistema de gestión del parqueadero" {
   usecase "UC-27 Autorizar ingreso\nfuera de turno" as UC27
   usecase "UC-28 Consultar bitácora" as UC28
   usecase "UC-29 Registrar operación\nen la bitácora" as UC29
+  usecase "UC-41 Crear celda" as UC41
+  usecase "UC-42 Consultar celdas y\ncambiar el tipo" as UC42
+  usecase "UC-43 Inactivar y\nreactivar celda" as UC43
+  usecase "UC-44 Eliminar celda\nsin historial" as UC44
 }
 
 Op --> UC01
@@ -43,6 +47,10 @@ Ad --> UC23
 Ad --> UC24
 Ad --> UC27
 Ad --> UC28
+Ad --> UC41
+Ad --> UC42
+Ad --> UC43
+Ad --> UC44
 Re --> UC26
 
 UC01 ..> UC25 : <<include>>
@@ -56,4 +64,10 @@ UC21 ..> UC29 : <<include>>
 UC23 ..> UC29 : <<include>>
 UC24 ..> UC29 : <<include>>
 UC27 ..> UC29 : <<include>>
+UC41 ..> UC29 : <<include>>
+UC42 ..> UC29 : <<include>>
+UC43 ..> UC29 : <<include>>
+UC44 ..> UC29 : <<include>>
+UC43 .> UC42 : <<extend>>\n(desde la lista)
+UC44 .> UC42 : <<extend>>\n(desde la lista)
 @enduml

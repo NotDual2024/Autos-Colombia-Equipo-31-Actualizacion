@@ -64,14 +64,17 @@ def mapa_celdas(zona: str, bloque: int) -> dict:
     categoria = Categoria.MOTO if zona == "M" else Categoria.CARRO_CAMIONETA
     ocupacion = dict(Celda.objects.filter(tipo=categoria, estadias__isnull=False, estadias__fecha_hora_salida__isnull=True)
                      .values_list("id", "estadias__vehiculo__placa"))
-    celdas = list(Celda.objects.filter(tipo=categoria, activa=True).order_by("codigo"))
+    celdas = list(Celda.objects.filter(tipo=categoria).order_by("codigo"))  # incluye las inactivas (RN-51)
+    activas = [c for c in celdas if c.activa]
     total_bloques = max(ceil(len(celdas) / CELDAS_POR_BLOQUE), 1)
     bloque = min(max(bloque, 1), total_bloques)
     inicio = (bloque - 1) * CELDAS_POR_BLOQUE
     return {
         "zona": "M" if categoria == Categoria.MOTO else "A",
         "categoria": Categoria(categoria).label,
-        "celdas": [{"codigo": c.codigo, "placa": ocupacion.get(c.id)} for c in celdas[inicio:inicio + CELDAS_POR_BLOQUE]],
+        "celdas": [{"codigo": c.codigo, "placa": ocupacion.get(c.id), "activa": c.activa, "motivo": c.motivo_inactivacion}
+                   for c in celdas[inicio:inicio + CELDAS_POR_BLOQUE]],
         "bloque": bloque, "total_bloques": total_bloques,
-        "total": len(celdas), "ocupadas": len(ocupacion), "libres": len(celdas) - len(ocupacion),
+        "total": len(activas), "ocupadas": len(ocupacion), "libres": len(activas) - len(ocupacion),
+        "inactivas": len(celdas) - len(activas),
     }

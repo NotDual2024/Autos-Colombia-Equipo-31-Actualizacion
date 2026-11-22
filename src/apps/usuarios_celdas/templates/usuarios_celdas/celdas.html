@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% load formato %}
+{% block titulo %}Celdas{% endblock %}
+{% block contenido %}
+<div class="migas">P36 / Administración</div>
+<div class="titulo-pagina"><div><h1>Celdas</h1><div class="suave">Crea y administra las celdas del parqueadero. Una celda ocupada no se inactiva ni cambia de tipo; una celda que ya se usó no se elimina (solo se inactiva).</div></div></div>
+{% if error %}<div class="alerta error" role="alert">{% include "core/icono.html" with nombre="alerta" %}<div>{{ error }}</div></div>{% endif %}
+<div class="rejilla-2">
+  <div class="tarjeta"><h2>Crear celda</h2>
+    <form method="post" style="margin-top:12px" class="formulario-registro" id="form-crear-celda">{% csrf_token %}
+      <div class="campo"><label for="tipo">Tipo</label><select id="tipo" name="tipo">{% for v, e in tipos %}<option value="{{ v }}" data-sugerido="{{ sugeridos|get_item:v|default:'' }}" {% if datos.tipo == v %}selected{% endif %}>{{ e }}</option>{% endfor %}</select></div>
+      <div class="campo"><label for="codigo">Código</label><input id="codigo" type="text" name="codigo" value="{{ datos.codigo }}" placeholder="{{ sugeridos|get_item:datos.tipo|default:'' }}" maxlength="10" style="text-transform:uppercase">
+        <div class="diminuto">Déjalo vacío para usar el sugerido. Formato: A-001 a A-999 (carro/camioneta) o M-01 a M-99 (moto).</div></div>
+      <button class="boton" type="submit">{% include "core/icono.html" with nombre="mas" %} Crear celda</button></form></div>
+  <div class="tarjeta" style="margin-top:0">
+    <form method="get" class="filtros" style="display:flex;gap:8px;flex-wrap:wrap;align-items:flex-end;margin-bottom:10px">
+      <div class="campo" style="margin:0"><label for="q">Código</label><input id="q" type="text" name="q" value="{{ filtros.q }}" placeholder="A-010"></div>
+      <div class="campo" style="margin:0"><label for="f-tipo">Tipo</label><select id="f-tipo" name="tipo"><option value="">Todos</option>{% for v, e in tipos %}<option value="{{ v }}" {% if filtros.tipo == v %}selected{% endif %}>{{ e }}</option>{% endfor %}</select></div>
+      <div class="campo" style="margin:0"><label for="f-estado">Estado</label><select id="f-estado" name="estado"><option value="">Todos</option>{% for v, e in estados %}<option value="{{ v }}" {% if filtros.estado == v %}selected{% endif %}>{{ e }}</option>{% endfor %}</select></div>
+      <button class="boton secundario" type="submit">Filtrar</button>
+    </form>
+    <div class="diminuto" style="margin-bottom:6px">{{ total }} celda{{ total|pluralize }}</div>
+    <div style="overflow-x:auto"><table class="tabla" id="tabla-celdas"><thead><tr><th>Código</th><th>Tipo</th><th>Estado</th><th>Acciones</th></tr></thead>
+    <tbody>{% for f in pagina %}
+      <tr><td class="mono" style="white-space:nowrap"><strong>{{ f.celda.codigo }}</strong></td><td>{{ f.celda.get_tipo_display }}</td>
+        <td>{% if f.estado == "OCUPADA" %}<span class="etiqueta-estado amarillo">Ocupada · {{ f.placa }}</span>
+            {% elif f.estado == "INACTIVA" %}<span class="etiqueta-estado rojo">Inactiva</span><div class="diminuto">{{ f.celda.motivo_inactivacion }}</div>
+            {% else %}<span class="etiqueta-estado">Libre</span>{% endif %}</td>
+        <td style="display:flex;gap:6px;flex-wrap:wrap">
+          {% url 'usuarios_celdas:celda_estado' f.celda.pk as url_estado %}
+          {% if f.celda.activa %}
+            {% if f.estado == "LIBRE" %}
+            <details style="position:relative"><summary class="boton peligro pequeno" style="list-style:none">Inactivar</summary>
+              <form method="post" action="{{ url_estado }}" class="tarjeta" style="position:absolute;right:0;z-index:5;min-width:260px;margin-top:6px">{% csrf_token %}
+                <input type="hidden" name="activa" value="0"><input type="hidden" name="volver" value="{{ request.get_full_path }}">
+                <div class="campo"><label>Motivo (obligatorio)</label><input type="text" name="motivo" maxlength="100" placeholder="Mantenimiento"></div>
+                <button class="boton peligro pequeno" type="submit">Inactivar {{ f.celda.codigo }}</button></form></details>
+            {% endif %}
+          {% else %}
+            <form method="post" action="{{ url_estado }}">{% csrf_token %}<input type="hidden" name="activa" value="1"><input type="hidden" name="volver" value="{{ request.get_full_path }}"><button class="boton pequeno" type="submit">Reactivar</button></form>
+          {% endif %}
+          {% if not f.usada and f.estado != "OCUPADA" %}
+            <details style="position:relative"><summary class="boton secundario pequeno" style="list-style:none">Cambiar tipo</summary>
+              <form method="post" action="{% url 'usuarios_celdas:celda_tipo' f.celda.pk %}" class="tarjeta" style="position:absolute;right:0;z-index:5;min-width:260px;margin-top:6px">{% csrf_token %}
+                <input type="hidden" name="volver" value="{{ request.get_full_path }}">
+                {% for v, e in tipos %}{% if v != f.celda.tipo %}<input type="hidden" name="tipo" value="{{ v }}"><p>Pasar a <strong>{{ e|lower }}</strong>.</p>
+                <div class="campo"><label>Código nuevo</label><input type="text" name="codigo" maxlength="10" placeholder="{{ sugeridos|get_item:v|default:'' }}" style="text-transform:uppercase"></div>{% endif %}{% endfor %}
+                <button class="boton pequeno" type="submit">Cambiar tipo</button></form></details>
+            <form method="post" action="{% url 'usuarios_celdas:celda_eliminar' f.celda.pk %}" onsubmit="return confirm('¿Eliminar la celda {{ f.celda.codigo }}? Esta acción no se puede deshacer.')">{% csrf_token %}
+              <input type="hidden" name="volver" value="{{ request.get_full_path }}"><button class="boton peligro pequeno" type="submit">Eliminar</button></form>
+          {% endif %}
+        </td></tr>
+    {% empty %}<tr><td colspan="4"><div class="vacio"><strong>No hay celdas con esos filtros</strong></div></td></tr>{% endfor %}</tbody></table></div>
+    {% if pagina.has_other_pages %}<div class="paginacion" style="margin-top:10px;display:flex;gap:8px;align-items:center">
+      {% if pagina.has_previous %}<a class="boton secundario pequeno" href="?{{ consulta }}&pagina={{ pagina.previous_page_number }}">‹ Anterior</a>{% endif %}
+      <span class="diminuto">Página {{ pagina.number }} de {{ pagina.paginator.num_pages }}</span>
+      {% if pagina.has_next %}<a class="boton secundario pequeno" href="?{{ consulta }}&pagina={{ pagina.next_page_number }}">Siguiente ›</a>{% endif %}</div>{% endif %}
+  </div>
+</div>
+{% endblock %}
+{% block scripts %}<script>
+(function () {
+  var tipo = document.getElementById("tipo"), codigo = document.getElementById("codigo");
+  if (!tipo || !codigo) { return; }
+  tipo.addEventListener("change", function () { codigo.placeholder = tipo.options[tipo.selectedIndex].dataset.sugerido || ""; });
+})();
+</script>{% endblock %}

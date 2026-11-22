@@ -50,6 +50,7 @@ Iteración 1 cerrada y subida a GitHub (2026-11-15). **Iteración 2 (gestión de
 | Plan de pruebas resumido iteración 2 | docs/Plan_Pruebas_Iteracion2.md | Hecho (resultados reales: 54/54 de la iteración, 154/154 en total, 6 manuales) |
 | PDF de entrega iteración 2 | docs/latex/entrega_iteracion2.tex → entrega_iteracion2.pdf (secciones generadas con scripts/generar_entrega_it2.py) | Generado, pendiente de revisión del equipo |
 | Referencias de interfaz | docs/referencias_ui/ + docs/Analisis_Referencias_UI.md | CHG-002 **aprobado** (2026-11-15) |
+| Solicitud de cambio CHG-003 (gestión de celdas) | docs/Solicitud_Cambio_CHG003_Celdas.md + requerimientos it2 v1.5, HU it2 v1.2 (HU-033 a HU-036), modelo v1.5 (DDL 104/104), diseño it2 v1.1 (M-36, M-37, UC-41 a UC-44) | **Aprobada** (2026-11-22, recomendaciones de P-52 a P-57); implementada y probada: 263/263 pruebas |
 | Documento LaTeX | docs/latex/main.tex → main.pdf (capítulos 03, 05 y 11 generados con scripts/generar_capitulos.py) | **Completo** para las iteraciones 1 y 2 (115 páginas, incluye conclusiones de ambas) |
 
 ## Decisiones
@@ -99,6 +100,7 @@ Iteración 1 cerrada y subida a GitHub (2026-11-15). **Iteración 2 (gestión de
 - Fecha: la actual. Semestre: sexto.
 
 ## Pendientes
+- CHG-003 implementada (2026-11-22). PDF técnico actualizado (160 páginas). PDF de entrega de la iteración 2 corregido (68 páginas) y PDF de entrega de la iteración 3 (75 páginas): **no se suben a GitHub**. Pendiente: revisión del equipo y commit.
 - Revisión del equipo del PDF de entrega de la iteración 2 (en especial SD-01 a SD-11 y CMP-01). El PDF de entrega y sus archivos **no se suben a GitHub** (indicación del equipo).
 - Iteración 3 (gestión de pagos): iniciada el 2026-11-20. Requerimientos v1.2 aprobados (RN-38 a RN-47, RF-201 a RF-209). Historias HU-024 a HU-032 aprobadas. Modelo de datos v1.4 aprobado. Diseño v1 aprobado. Plan de implementación aprobado. **Implementación terminada y verificada** (240/240 pruebas). PDF técnico actualizado con la iteración 3 (150 páginas). Pendiente: revisión del equipo y commit.
 - Revisión del primer PDF LaTeX.

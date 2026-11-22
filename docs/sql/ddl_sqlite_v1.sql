@@ -2,6 +2,7 @@
 -- Parqueadero "Autos Colombia" - Modelo físico v1 (SQLite 3)
 -- Estado: v1.3 APROBADO el 2026-11-15 (iteración 2: bitácora, horarios, autorizaciones, cambio de propietario).
 -- v1.4 APROBADO el 2026-11-20 (iteración 3: pagos, descuentos, corrección, motivo de inactivación).
+-- v1.5 del 2026-11-22 (CHG-003: gestión de celdas por el administrador).
 --
 -- Este script documenta y valida el diseño. En la implementación, las
 -- tablas las crean las migraciones de Django a partir de los modelos, que
@@ -129,11 +130,19 @@ CREATE TABLE usuarios_celdas_solicitudcambiopropietario (
 CREATE UNIQUE INDEX uq_solicitud_pendiente
     ON usuarios_celdas_solicitudcambiopropietario (vehiculo_id) WHERE estado = 'PENDIENTE';
 
+-- Celdas (RF-103, RF-104). v1.5 / CHG-003: las crea y administra el administrador (RN-48 a RN-53).
 CREATE TABLE usuarios_celdas_celda (
-    id              INTEGER      PRIMARY KEY AUTOINCREMENT,
-    codigo          VARCHAR(10)  NOT NULL UNIQUE,         -- p. ej. C-001, M-001
-    tipo            VARCHAR(15)  NOT NULL CHECK (tipo IN ('MOTO', 'CARRO_CAMIONETA')),
-    activa          BOOLEAN      NOT NULL DEFAULT 1
+    id                   INTEGER      PRIMARY KEY AUTOINCREMENT,
+    codigo               VARCHAR(10)  NOT NULL UNIQUE,         -- A-001..A-999 o M-01..M-99 (RN-49)
+    tipo                 VARCHAR(15)  NOT NULL CHECK (tipo IN ('MOTO', 'CARRO_CAMIONETA')),
+    activa               BOOLEAN      NOT NULL DEFAULT 1,
+    motivo_inactivacion  VARCHAR(100) NULL,                    -- RN-51
+    -- RN-49: el formato del código depende del tipo
+    CHECK ((tipo = 'CARRO_CAMIONETA' AND codigo GLOB 'A-[0-9][0-9][0-9]' AND codigo <> 'A-000')
+        OR (tipo = 'MOTO' AND codigo GLOB 'M-[0-9][0-9]' AND codigo <> 'M-00')),
+    -- RN-51: una celda inactiva tiene motivo; una activa no
+    CHECK ((activa = 1) = (motivo_inactivacion IS NULL)),
+    CHECK (motivo_inactivacion IS NULL OR length(trim(motivo_inactivacion)) > 0)
 );
 CREATE INDEX idx_celda_tipo ON usuarios_celdas_celda (tipo, activa);
 
@@ -296,11 +305,13 @@ CREATE TABLE bitacora_registrooperacion (
                      'SOLICITAR_CAMBIO', 'APROBAR_CAMBIO', 'RECHAZAR_CAMBIO',
                      'RESTABLECER_CLAVE', 'ASIGNAR_HORARIO', 'QUITAR_HORARIO',
                      'AUTORIZAR_FUERA_TURNO',
-                     'CORREGIR_PAGO', 'HABILITAR', 'DESHABILITAR')),     -- v1.4
+                     'CORREGIR_PAGO', 'HABILITAR', 'DESHABILITAR',      -- v1.4
+                     'ELIMINAR')),                                       -- v1.5 (solo celdas sin historial)
     entidad      VARCHAR(20)  NOT NULL CHECK (entidad IN (
                      'PROPIETARIO', 'VEHICULO', 'OPERADOR', 'HORARIO',
                      'AUTORIZACION', 'SOLICITUD_CAMBIO',
-                     'PAGO', 'TARIFA', 'DESCUENTO')),                     -- v1.4
+                     'PAGO', 'TARIFA', 'DESCUENTO',                       -- v1.4
+                     'CELDA')),                                           -- v1.5
     entidad_id   INTEGER      NOT NULL,
     descripcion  VARCHAR(255) NOT NULL,
     detalle      TEXT         NULL

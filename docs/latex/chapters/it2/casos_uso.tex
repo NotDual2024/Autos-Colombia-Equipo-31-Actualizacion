@@ -40,3 +40,25 @@
 
 
 
+
+\subsection{CHG-003: gestión de celdas (casos de uso)}
+Solicitud de cambio aprobada el 2026-11-22, a partir de la observación del profesor.
+
+\paragraph{Casos de uso}
+
+UC-02 (versión 2) agrega UC-41 a UC-44, todos del Administrador y con «include» a UC-29 (bitácora). UC-43 y UC-44 «extend» UC-42, porque se hacen desde la lista de celdas.
+
+
+\begin{longtable}{>{\raggedright\arraybackslash}p{1.9cm}>{\raggedright\arraybackslash}p{2.6cm}>{\raggedright\arraybackslash}p{3.7cm}>{\raggedright\arraybackslash}p{3.8cm}>{\raggedright\arraybackslash}p{2.4000000000000004cm}}
+\toprule
+\textbf{UC} & \textbf{Actor} & \textbf{Flujo principal} & \textbf{Alternativos y excepciones} & \textbf{Trazabilidad}\\
+\midrule\endhead
+\textbf{UC-41} Crear celda & Administrador & Elige el tipo $\rightarrow$ el sistema sugiere el siguiente código (o el administrador escribe uno) $\rightarrow$ valida formato y unicidad $\rightarrow$ guarda la celda activa $\rightarrow$ UC-29. & Código repetido; formato que no corresponde al tipo; no quedan códigos libres; acceso de un operador $\rightarrow$ 403. & RF-103, HU-033\\
+\textbf{UC-42} Consultar celdas y cambiar el tipo & Administrador & Filtra por tipo, estado o código $\rightarrow$ ve cada celda con su estado. Para una celda libre que nunca se usó: elige el otro tipo y un código de ese tipo $\rightarrow$ UC-29 con los valores anteriores y nuevos. & Celda ocupada; celda con historial (se debe inactivar y crear otra). & RF-103, HU-034\\
+\textbf{UC-43} Inactivar y reactivar celda & Administrador & Inactivar: escribe el motivo $\rightarrow$ la celda deja de ofrecerse al registrar entradas $\rightarrow$ UC-29. Reactivar: vuelve a estar disponible $\rightarrow$ UC-29. & Motivo vacío; celda ocupada. & RF-103, RF-104, HU-035\\
+\textbf{UC-44} Eliminar celda sin historial & Administrador & Confirma la eliminación $\rightarrow$ la celda se borra $\rightarrow$ UC-29. & Celda ocupada; celda con historial (solo se puede inactivar). & RF-103, HU-036\\
+\bottomrule
+\end{longtable}
+
+
+

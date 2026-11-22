@@ -1,5 +1,5 @@
 @startchen MER-01_Chen
-' MER-01 - Modelo Entidad-Relación (notación de Chen) - sistema completo - v1.4
+' MER-01 - Modelo Entidad-Relación (notación de Chen) - sistema completo - v1.5
 title MER - Parqueadero "Autos Colombia" (sistema completo, DEC-001)
 
 entity USUARIO {
@@ -37,6 +37,8 @@ entity CELDA {
   id <<key>>
   codigo
   tipo
+  activa
+  motivo_inactivacion
 }
 entity TARIFA {
   id <<key>>

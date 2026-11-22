@@ -114,3 +114,65 @@ RF-208 & descuento, bitacora\\
 RF-209 & pago, vehiculo\\
 \bottomrule
 \end{longtable}
+
+
+
+
+\section{Cambios del modelo v1.5 (CHG-003, gestión de celdas)}
+\textbf{Base:} solicitud de cambio CHG-003 (aprobada el 2026-11-22), RN-48 a RN-53.
+
+\textbf{Validación:} \texttt{docs/sql/validar\_ddl.py} con el DDL v1.5: \textbf{104 comprobaciones, 104 pasan}. Son las 91 anteriores más 13 nuevas.
+
+
+\subsubsection{Tablas modificadas}
+
+\begin{longtable}{>{\raggedright\arraybackslash}p{5.6000000000000005cm}>{\raggedright\arraybackslash}p{7.3cm}>{\raggedright\arraybackslash}p{1.5cm}}
+\toprule
+\textbf{Tabla} & \textbf{Cambio} & \textbf{Origen}\\
+\midrule\endhead
+Celda (\texttt{usuarios\_celdas\_celda}) & Columna nueva \texttt{motivo\_inactivacion} y validación del formato del código según el tipo & RN-49, RN-51\\
+Bitácora (\texttt{bitacora\_registrooperacion}) & Acción nueva ELIMINAR y entidad nueva CELDA & RN-53\\
+\bottomrule
+\end{longtable}
+
+
+Restricciones principales:
+
+
+\begin{itemize}
+  \item \textbf{Celda:}
+  \begin{itemize}\item el código sigue siendo único;\end{itemize}
+  \begin{itemize}\item carro/camioneta: \texttt{A-001} a \texttt{A-999}; moto: \texttt{M-01} a \texttt{M-99} (CHECK con GLOB);\end{itemize}
+  \begin{itemize}\item una celda inactiva tiene motivo y una activa no;\end{itemize}
+  \begin{itemize}\item el motivo no puede estar en blanco.\end{itemize}
+  \item \textbf{Eliminar:} la clave foránea de la estadía hacia la celda (\texttt{ON DELETE RESTRICT}) impide eliminar una celda con historial (RN-52).
+\end{itemize}
+
+\subsubsection{Decisiones de diseño del modelo}
+
+\begin{longtable}{>{\raggedright\arraybackslash}p{1.5cm}>{\raggedright\arraybackslash}p{5.3cm}>{\raggedright\arraybackslash}p{2.6cm}>{\raggedright\arraybackslash}p{5.0cm}}
+\toprule
+\textbf{ID} & \textbf{Decisión} & \textbf{Alternativa descartada} & \textbf{Por qué}\\
+\midrule\endhead
+DM-20 & Se guarda solo el \textbf{motivo} de la inactivación de la celda; quién y cuándo se leen de la bitácora. & Columnas de usuario y fecha en la celda. & Igual que DM-18 para propietarios y vehículos.\\
+DM-21 & La celda se \textbf{elimina} de verdad solo si nunca tuvo estadías; la base de datos lo garantiza con la clave foránea. & Marcarla como eliminada. & Una celda sin historial no aporta información; con historial se inactiva (RN-07).\\
+DM-22 & El formato del código depende del tipo y lo verifica la base de datos. & Validarlo solo en la aplicación. & Las 200 celdas iniciales ya cumplen el formato, y así ningún código inválido llega a la base.\\
+\bottomrule
+\end{longtable}
+
+
+\subsubsection{Migración de los datos existentes}
+
+Las 200 celdas existentes (\texttt{A-001} a \texttt{A-150} y \texttt{M-01} a \texttt{M-50}) ya cumplen el formato. Las que estuvieran inactivas reciben el motivo ``Inactiva antes de CHG-003''.
+
+
+\subsubsection{Trazabilidad}
+
+\begin{longtable}{>{\raggedright\arraybackslash}p{2.4cm}>{\raggedright\arraybackslash}p{12.0cm}}
+\toprule
+\textbf{RF} & \textbf{Tablas}\\
+\midrule\endhead
+RF-103 & celda, estadia (para saber si está ocupada o tiene historial), bitacora\\
+RF-104 & celda, estadia\\
+\bottomrule
+\end{longtable}

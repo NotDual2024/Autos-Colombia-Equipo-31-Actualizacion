@@ -12,3 +12,17 @@
 \end{itemize}
 
 
+
+\subsection{CHG-003: gestión de celdas (paquetes y secuencias)}
+Solicitud de cambio aprobada el 2026-11-22, a partir de la observación del profesor.
+
+\paragraph{Paquetes y secuencias}
+
+\begin{itemize}
+  \item \textbf{Sin módulos nuevos.} La gestión de celdas va en \texttt{usuarios\_celdas}. Para saber si una celda está ocupada o tiene historial usa la relación inversa \texttt{estadias}, igual que el mapa, sin importar \texttt{entradas\_salidas}. Así no se forma un ciclo.
+  \item \textbf{Validación de ocupación:} el servicio consulta si la celda tiene una estadía abierta antes de inactivarla, cambiarle el tipo o eliminarla. Además, la clave foránea de la estadía impide en la base de datos eliminar una celda con historial.
+  \item \textbf{Validación de código:} la aplicación valida el formato y la unicidad para dar un mensaje claro. La base de datos lo repite con un CHECK y la restricción única.
+  \item \textbf{Secuencias:} SD-12 (crear celda) y SD-13 (inactivar celda) se agregaron al proyecto StarUML de la entrega.
+\end{itemize}
+
+

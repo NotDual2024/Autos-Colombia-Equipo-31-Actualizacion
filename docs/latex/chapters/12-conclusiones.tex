@@ -79,6 +79,13 @@ Arquitectura & Sin módulos nuevos. El correo de confirmación quedó en \texttt
   \item[Las pruebas también revisan la base de datos] Las pruebas del modelo detectaron que en SQLite una restricción sobre un valor vacío (NULL) se da por cumplida, lo que habría permitido un pago corregido sin motivo. El script DDL aprobado ya lo evitaba; el error estaba solo en la traducción al ORM.
 \end{description}
 
+\section{Corrección de la gestión de celdas (CHG-003)}
+El profesor observó que la iteración 2 limitaba las celdas a un inventario fijo y a la consulta del mapa. Con la solicitud de cambio CHG-003, el administrador ahora crea celdas con un código sugerido y validado según su tipo, las consulta con su estado, cambia el tipo de una celda nueva, las inactiva con motivo, las reactiva y elimina las que nunca se usaron. Una celda ocupada no se puede inactivar, cambiar ni eliminar, y una celda con historial solo se inactiva. Las 263 pruebas automatizadas pasan, incluidas 23 nuevas para estas reglas.
+
+\begin{description}[style=nextline]
+  \item[Aprendizaje] Una respuesta temprana del equipo (P-28: ``las celdas son fijas'') dejó fuera un requisito del enunciado. Contrastar cada respuesta con el enunciado antes de cerrar el alcance habría evitado la corrección. El proceso de cambios (análisis de impacto, preguntas y aprobación) permitió incorporarla sin romper lo ya entregado.
+\end{description}
+
 \section{Trabajo futuro}
 \begin{description}[style=nextline]
   \item[Mejoras posibles] Correo real, una pantalla para consultar los correos de confirmación, adjuntos en las novedades (RN-18), facturación electrónica real si el parqueadero la necesitara y un servidor de aplicaciones para un despliegue fuera del entorno local.

@@ -1,15 +1,16 @@
 # Historias de usuario — Iteración 2: Gestión de usuarios y gestión de celdas
 
 **Proyecto:** Parqueadero "Autos Colombia"
-**Versión:** 1.1
+**Versión:** 1.2
 **Fecha:** 2026-11-15
 **Base:** Requerimientos de la iteración 2 v1.3 (aprobados el 2026-11-15) y DEC-013 a DEC-015.
-**Estado:** **Aprobado** por el equipo del proyecto el 2026-11-15.
+**Estado:** **Aprobado** por el equipo del proyecto el 2026-11-15. Versión 1.2 por la solicitud de cambio CHG-003, aprobada el 2026-11-22.
 
 | Versión | Cambios |
 |---|---|
 | 1 | Borrador inicial. |
 | 1.1 | Respuestas a los 3 puntos de revisión: se rechazan las franjas que se cruzan; el encabezado muestra las horas del turno, sin nombre; nuevo escenario de registro en curso sin actividad (RN-35). |
+| 1.2 | **CHG-003:** historias nuevas HU-033 a HU-036 (gestión de celdas por el administrador); HU-018 sin el escenario "Las celdas son fijas" y con las celdas inactivas. |
 
 La numeración continúa la de la iteración 1 (HU-001 a HU-011).
 
@@ -29,6 +30,10 @@ La numeración continúa la de la iteración 1 (HU-001 a HU-011).
 | HU-021 | Trabajar solo dentro de mi turno | Operador | RF-107 | Must |
 | HU-022 | Autorizar un ingreso fuera de turno | Administrador | RF-110 | Must |
 | HU-023 | Consultar la bitácora de operaciones | Administrador | RF-111 | Must |
+| HU-033 | Crear una celda | Administrador | RF-103 | Must |
+| HU-034 | Consultar y cambiar el tipo de las celdas | Administrador | RF-103 | Must |
+| HU-035 | Inactivar y reactivar una celda | Administrador | RF-103 | Must |
+| HU-036 | Eliminar una celda que nunca se usó | Administrador | RF-103 | Must |
 
 ---
 
@@ -201,17 +206,19 @@ Escenario: Solo el administrador resuelve
 
 **Historia:** Como **operador**, quiero ver todas las celdas de cada zona con su estado, para saber de un vistazo dónde hay espacio.
 
-**Requerimientos:** RF-104 · **Reglas:** RN-08, RN-20, RN-27 · **Prioridad:** Must
+**Requerimientos:** RF-104 · **Reglas:** RN-08, RN-20, RN-51 · **Prioridad:** Must
 
 ```gherkin
 Escenario: Mapa por zonas
   Cuando el operador abre el mapa de celdas
-  Entonces ve la zona A (150 celdas de carro/camioneta) y la zona M (50 celdas de moto)
+  Entonces ve la zona A (celdas de carro/camioneta) y la zona M (celdas de moto) con el inventario actual
   Y cada celda aparece como libre u ocupada, con la placa del vehículo si está ocupada
   Y ve los contadores de libres y ocupadas por zona
 
-Escenario: Las celdas son fijas
-  Entonces no hay opciones para agregar, borrar ni cambiar el tipo de una celda
+Escenario: Celdas inactivas en el mapa
+  Dado que la celda "A-010" está inactiva por "Mantenimiento"
+  Cuando el operador abre el mapa de la zona A
+  Entonces "A-010" aparece marcada como inactiva y no cuenta como libre
 ```
 
 ## HU-019 — Editar operadores y restablecer contraseñas
@@ -360,13 +367,121 @@ Escenario: El operador solo ve la bitácora en las fichas
 
 ---
 
+## HU-033 — Crear una celda
+
+**Historia:** Como **administrador**, quiero crear celdas nuevas indicando su tipo, para ampliar el inventario del parqueadero.
+
+**Requerimientos:** RF-103 · **Reglas:** RN-48, RN-49, RN-53 · **Prioridad:** Must
+
+```gherkin
+Escenario: Crear una celda con el código sugerido
+  Dado que la última celda de carro/camioneta es "A-150"
+  Cuando el administrador elige el tipo carro/camioneta
+  Entonces el sistema sugiere el código "A-151"
+  Y al guardar, la celda "A-151" queda activa y libre
+  Y la bitácora muestra que el administrador la creó
+
+Escenario: Código repetido
+  Dado que ya existe la celda "M-05"
+  Cuando el administrador intenta crear otra celda "m-05"
+  Entonces el sistema la rechaza con "Ya existe una celda con el código M-05"
+
+Escenario: Código con formato inválido
+  Cuando el administrador crea una celda de moto con el código "A-200" o "M-5"
+  Entonces el sistema la rechaza con "El código de una celda de moto debe tener el formato M-01 a M-99"
+
+Escenario: Solo el administrador
+  Cuando un operador intenta abrir la gestión de celdas
+  Entonces el sistema responde "acceso denegado"
+```
+
+## HU-034 — Consultar y cambiar el tipo de las celdas
+
+**Historia:** Como **administrador**, quiero ver todas las celdas con su estado y corregir el tipo de una celda nueva, para mantener el inventario al día.
+
+**Requerimientos:** RF-103 · **Reglas:** RN-49, RN-50, RN-52, RN-53 · **Prioridad:** Must
+
+```gherkin
+Escenario: Lista de celdas
+  Cuando el administrador abre "Celdas"
+  Entonces ve cada celda con su código, tipo y estado (libre, ocupada con la placa, o inactiva con el motivo)
+  Y puede filtrar por tipo y estado y buscar por código
+
+Escenario: Cambiar el tipo de una celda nueva
+  Dado que la celda "A-151" nunca se ha usado y está libre
+  Cuando el administrador la cambia a moto
+  Entonces el sistema le pide un código de moto, por ejemplo "M-51"
+  Y la celda queda como "M-51" de moto
+  Y la bitácora registra el tipo y el código anteriores y los nuevos
+
+Escenario: Celda ocupada
+  Dado que la celda "A-003" tiene un vehículo dentro
+  Cuando el administrador intenta cambiar su tipo
+  Entonces el sistema lo rechaza con "La celda está ocupada"
+
+Escenario: Celda con historial
+  Dado que la celda "A-004" ya tuvo estadías
+  Cuando el administrador intenta cambiar su tipo
+  Entonces el sistema lo rechaza con "La celda ya se usó; inactívala y crea una nueva"
+```
+
+## HU-035 — Inactivar y reactivar una celda
+
+**Historia:** Como **administrador**, quiero sacar de servicio una celda (por ejemplo, por mantenimiento) y volver a habilitarla, para que no se asigne mientras no se pueda usar.
+
+**Requerimientos:** RF-103, RF-104 · **Reglas:** RN-50, RN-51, RN-53 · **Prioridad:** Must
+
+```gherkin
+Escenario: Inactivar con motivo
+  Dado que la celda "A-010" está libre
+  Cuando el administrador la inactiva con el motivo "Mantenimiento"
+  Entonces la celda queda inactiva con ese motivo
+  Y al registrar una entrada, "A-010" no se ofrece
+
+Escenario: Motivo obligatorio
+  Cuando el administrador intenta inactivar una celda sin motivo
+  Entonces el sistema no guarda e indica el campo con error
+
+Escenario: Celda ocupada
+  Dado que la celda "A-003" tiene un vehículo dentro
+  Cuando el administrador intenta inactivarla
+  Entonces el sistema lo rechaza con "La celda está ocupada"
+
+Escenario: Reactivar
+  Dado que la celda "A-010" está inactiva
+  Cuando el administrador la reactiva
+  Entonces vuelve a estar disponible para las entradas
+```
+
+## HU-036 — Eliminar una celda que nunca se usó
+
+**Historia:** Como **administrador**, quiero eliminar una celda creada por error, sin perder el historial de las celdas que sí se usaron.
+
+**Requerimientos:** RF-103 · **Reglas:** RN-07, RN-52, RN-53 · **Prioridad:** Must
+
+```gherkin
+Escenario: Eliminar una celda sin historial
+  Dado que la celda "A-151" nunca se ha usado
+  Cuando el administrador la elimina y confirma
+  Entonces la celda deja de existir
+  Y la bitácora registra la eliminación
+
+Escenario: Celda con historial
+  Dado que la celda "A-004" ya tuvo estadías
+  Cuando el administrador intenta eliminarla
+  Entonces el sistema lo rechaza con "La celda tiene historial; solo se puede inactivar"
+```
+
+---
+
 ## Matriz de trazabilidad RF → HU (iteración 2)
 
 | RF | HU |
 |---|---|
 | RF-101 Registrar propietario | HU-012 |
 | RF-102 Registrar vehículo | HU-013 |
-| RF-104 Mapa de celdas | HU-018 |
+| RF-103 Gestionar celdas (CHG-003) | HU-033 a HU-036 |
+| RF-104 Mapa de celdas | HU-018, HU-035 |
 | RF-105 Modificar, activar e inactivar | HU-015 |
 | RF-106 Gestionar operadores (completar) | HU-019 |
 | RF-107 Horarios de operador | HU-020, HU-021 |
@@ -375,7 +490,7 @@ Escenario: El operador solo ve la bitácora en las fichas
 | RF-110 Autorización fuera de turno | HU-022 |
 | RF-111 Bitácora | HU-023 |
 
-Los 10 RF de la iteración 2 tienen al menos una historia. RF-103 no tiene historia porque quedó como *Won't*.
+Los 11 RF de la iteración 2 tienen al menos una historia. RF-103 se incorporó con la solicitud de cambio CHG-003.
 
 ## Puntos revisados (2026-11-15)
 
